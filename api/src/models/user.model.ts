@@ -1,10 +1,15 @@
+import { Express } from "express";
 import mongoose, { Schema } from "mongoose";
 
-export interface IUser {
+export interface ChangeUserIntrf {
+    currentUserId: string;
+    selectedImage: Express.Multer.File | undefined;
+    username: string;
+}
+
+export interface UserIntrf {
     email: string;
     password: string;
-    role: string;
-    username: string;
     profile_picture: {
         filename: string;
         filetype: string;
@@ -12,13 +17,12 @@ export interface IUser {
         resource_type: string;
         url: string;
     }
+    username: string;
 }
 
-const userSchema = new Schema<IUser>({
+const userSchema = new Schema<UserIntrf>({
     email: { type: String, required: true },
     password: { type: String, required: true },
-    role: { type: String, required: true },
-    username: { type: String, required: true },
     profile_picture: {
         filename: { type: String },
         filetype: { type: String },
@@ -26,6 +30,7 @@ const userSchema = new Schema<IUser>({
         resource_type: { type: String },
         url: { type: String }
     },
+    username: { type: String, required: true },
 }, {
     timestamps: {
         createdAt: 'created_at',
@@ -33,4 +38,4 @@ const userSchema = new Schema<IUser>({
     }
 });
 
-export const Users = mongoose.model<IUser>("users", userSchema, "users");
+export const Users = mongoose.model<UserIntrf>("users", userSchema, "users");

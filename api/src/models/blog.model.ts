@@ -14,7 +14,7 @@ export interface IBlog {
     role: string;
 }
 
-const userSchema = new Schema<IBlog>({
+const blogSchema = new Schema<IBlog>({
     blog_owner_id: { type: Schema.Types.ObjectId, required: true },
     blog_owner: { type: String, required: true },
     content: { type: String, required: true },
@@ -33,4 +33,4 @@ const userSchema = new Schema<IBlog>({
     }
 });
 
-export const Users = mongoose.model<IBlog>("users", userSchema, "users");
+export const Blogs = mongoose.model<IBlog>("blogs", blogSchema, "blogs");
