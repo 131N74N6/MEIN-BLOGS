@@ -3,41 +3,28 @@ import { Blogs, NewBlogIntrf, ShowAllBlogsIntrf, ShowAllUserBlogsIntrf } from ".
 import { uploadToCloudinary } from "../services/cloudinary.service";
 import { generateBlogContent } from "../services/ai.service";
 import { Users } from "../models/user.model";
+import { Comments } from "../models/comment.model";
 
 class BlogRepository {
     async createNewBlogRepository(props: NewBlogIntrf) {
-        try {
-            const allowedMedia = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-            if (!props.content && !props.media && !props.title) throw new Error("all fields are required");
-            if (!props.content) throw new Error("pleasa provide content");
-            if (!props.media) throw new Error("pleasa provide media");
-            if (!props.title) throw new Error("pleasa provide title");
-            if (!allowedMedia.includes(props.media.mimetype)) {
-                throw new Error("only images are allowed such as .jpg, .jpeg, .png, .webp, and .avif");
-            }
+        const user = await Users.find({ _id: props.current_user_id }).lean();
 
-            const user = await Users.findOne({ _id: props.current_user_id }).lean();
-            if (!user) throw new Error("user not found");
+        const blogMedia = await uploadToCloudinary({
+            file_buffer: props.media?.buffer!,
+            foldername: "blogs_media",
+            mimetype: props.media?.mimetype!,
+            original_name: props.media?.originalname!,
+        });
 
-            const blogMedia = await uploadToCloudinary({
-                file_buffer: props.media.buffer,
-                foldername: "blogs_media",
-                mimetype: props.media.mimetype,
-                original_name: props.media.originalname,
-            });
+        const newBlog = new Blogs({
+            blog_owner: user[0].username,
+            blog_owner_id: user[0]._id,
+            content: props.content,
+            media: blogMedia,
+            title: props.title
+        });
 
-            const newBlog = new Blogs({
-                blog_owner: user.username,
-                blog_owner_id: user._id,
-                content: props.content,
-                media: blogMedia,
-                title: props.title
-            });
-
-            await newBlog.save();
-        } catch (error) {
-            throw error;
-        }
+        await newBlog.save();
     }
 
     async deleteAllBlogsRepository(currentUserId: string) {
@@ -45,6 +32,7 @@ class BlogRepository {
             const blogs = await Blogs.find({ blog_owner_id: currentUserId });
             if (blogs.length === 0) throw new Error("blogs not found");
 
+            const blogsIds = blogs.map(blog => blog._id);
             const blogsMedia = blogs.map(blog => blog.media);
             
             const deleteFromCloudinary = blogsMedia.map(blogMedia => {
@@ -53,6 +41,7 @@ class BlogRepository {
 
             await Promise.all([
                 ...deleteFromCloudinary,
+                Comments.deleteMany({ blog_id: { $in: blogsIds } }),
                 Blogs.deleteMany({ blog_owner_id: currentUserId })
             ]);
         } catch (error) {
@@ -76,17 +65,10 @@ class BlogRepository {
 
     async generateNewBlogRepository(props: Pick<NewBlogIntrf, 'language' | 'media' | 'title'>) {
         try {
-            const allowedMedia = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-            if (!props.media && !props.title) throw new Error("please provide image and title");
-            if (!props.title) throw new Error("pleasa provide title");
-            if (!props.media) throw new Error("pleasa provide media");
-            if (!allowedMedia.includes(props.media.mimetype)) {
-                throw new Error("only images are allowed such as .jpg, .jpeg, .png, .webp, and .avif");
-            }
             const generatedContent = await generateBlogContent({
-                imageBuffer: props.media.buffer,
+                imageBuffer: props.media?.buffer!,
                 language: props.language,
-                mimeType: props.media.mimetype,
+                mimeType: props.media?.mimetype!,
                 title: props.title,
             });
 

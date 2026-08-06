@@ -14,6 +14,12 @@ export interface IComment {
     }
 }
 
+export interface ShowCommentIntrf {
+    blog_id: string;
+    limit: number;
+    skip: number;
+}
+
 const commentSchema = new Schema<IComment>({
     blog_id: { type: Schema.Types.ObjectId, required: true },
     profile_picture: {

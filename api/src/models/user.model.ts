@@ -15,7 +15,7 @@ export interface UserIntrf {
         public_id: string;
         resource_type: string;
         url: string;
-    }
+    } | null;
     username: string;
 }
 

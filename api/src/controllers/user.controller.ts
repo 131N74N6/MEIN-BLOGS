@@ -10,18 +10,11 @@ class UserController {
 
             if (!currentUserId) return res.json({ message: "user not found" });
 
-            if (newProfileImage) {
-                await userService.changeUserService({
-                    currentUserId: currentUserId,
-                    username: req.body.username as string,
-                    selectedImage: newProfileImage
-                });
-            } else {
-                await userService.changeUserService({
-                    currentUserId: currentUserId,
-                    username: req.body.username as string
-                });
-            }
+            await userService.changeUserService({
+                currentUserId: currentUserId,
+                username: req.body.username as string,
+                selectedImage: newProfileImage
+            });
 
             res.json({ message: "this user profile has changed" });
         } catch (error) {
@@ -32,7 +25,7 @@ class UserController {
     async deleteOldProfileController(req: AuthRequest, res: Response) {
         try {
             const currentUserId = req.user?.user_id;
-            if (currentUserId) await userService.deleteOldProfileService(currentUserId);
+            if (currentUserId) await userService.deleteCurrentUserOldProfile(currentUserId);
 
             res.json({ message: "successfully delete old image profile" });
         } catch (error) {
