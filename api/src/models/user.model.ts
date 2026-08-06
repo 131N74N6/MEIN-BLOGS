@@ -1,9 +1,8 @@
-import { Express } from "express";
 import mongoose, { Schema } from "mongoose";
 
 export interface ChangeUserIntrf {
     currentUserId: string;
-    selectedImage: Express.Multer.File | undefined;
+    selectedImage?: Express.Multer.File;
     username: string;
 }
 

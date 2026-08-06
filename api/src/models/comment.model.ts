@@ -2,7 +2,6 @@ import mongoose, { Schema, Types } from "mongoose";
 
 export interface IComment {
     blog_id: Types.ObjectId;
-    reaction: string;
     text: string;
     user_id: Types.ObjectId;
     username: string;
@@ -24,7 +23,6 @@ const commentSchema = new Schema<IComment>({
         resource_type: { type: String },
         url: { type: String }
     },
-    reaction: { type: String },
     text: { type: String },
     user_id: { type: Schema.Types.ObjectId, required: true },
     username: { type: String, required: true },

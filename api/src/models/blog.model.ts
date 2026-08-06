@@ -1,9 +1,10 @@
 import mongoose, { Schema, Types } from "mongoose";
 
-export interface IBlog {
+export interface BlogIntrf {
     blog_owner_id: Types.ObjectId;
     blog_owner: string;
     content: string;
+    language: string;
     media: {
         filename: string;
         filetype: string;
@@ -11,13 +12,32 @@ export interface IBlog {
         resource_type: string;
         url: string;
     }
-    role: string;
+    title: string;
 }
 
-const blogSchema = new Schema<IBlog>({
+export interface NewBlogIntrf {
+    current_user_id: string;
+    content: string;
+    language: string;
+    media: Express.Multer.File | undefined;
+    title: string;
+}
+
+export interface ShowAllBlogsIntrf {
+    limit: number;
+    page: number;
+    skip: number;
+}
+
+export interface ShowAllUserBlogsIntrf extends ShowAllBlogsIntrf {
+    current_user_id: string;
+}
+
+const blogSchema = new Schema<BlogIntrf>({
     blog_owner_id: { type: Schema.Types.ObjectId, required: true },
     blog_owner: { type: String, required: true },
     content: { type: String, required: true },
+    language: { type: String },
     media: {
         filename: { type: String },
         filetype: { type: String },
@@ -25,7 +45,7 @@ const blogSchema = new Schema<IBlog>({
         resource_type: { type: String },
         url: { type: String }
     },
-    role: { type: String, required: true },
+    title: { type: String, required: true }
 }, {
     timestamps: {
         createdAt: 'created_at',
@@ -33,4 +53,4 @@ const blogSchema = new Schema<IBlog>({
     }
 });
 
-export const Blogs = mongoose.model<IBlog>("blogs", blogSchema, "blogs");
+export const Blogs = mongoose.model<BlogIntrf>("blogs", blogSchema, "blogs");

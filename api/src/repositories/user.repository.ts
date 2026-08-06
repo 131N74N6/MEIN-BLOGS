@@ -3,9 +3,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Blogs } from "../models/blog.model";
 import { v2 } from "cloudinary";
+import { uploadToCloudinary } from "../services/cloudinary.service";
 
-class AuthRepository {
-    async changeUser(props: ChangeUserIntrf) {
+class UserRepository {
+    async changeUserRepository(props: ChangeUserIntrf) {
         try {
             const user = await Users.findOne({ _id: props.currentUserId });
             if (!user) throw new Error("user not found");
@@ -14,17 +15,30 @@ class AuthRepository {
                 await v2.uploader.destroy(user.profile_picture.public_id, { 
                     resource_type: user.profile_picture.resource_type 
                 });
-            }
 
-            await Users.updateOne({ _id: user._id }, {
-                username: props.username || user.username
-            });
+                const newProfileImage = await uploadToCloudinary({
+                    file_buffer: props.selectedImage.buffer,
+                    foldername: "user_profile",
+                    mimetype: props.selectedImage.mimetype,
+                    original_name: props.selectedImage.originalname
+                });
+
+                await Users.updateOne({ _id: user._id }, {
+                    profile_picture: newProfileImage,
+                    username: props.username || user.username
+                });
+            } else {
+                await Users.updateOne({ _id: user._id }, {
+                    profile_picture: user.profile_picture,
+                    username: props.username || user.username
+                });
+            }
         } catch (error) {
             throw error;
         }
     }
 
-    async deleteUser(currentUserId: string) {
+    async deleteUserRepository(currentUserId: string) {
         try {
             const mediaDeleteOperations = [];
 
@@ -67,7 +81,21 @@ class AuthRepository {
         }
     }
 
-    async signIn(props: Pick<UserIntrf, "password" | "username">) {
+    async deleteOldProfileRepository(id: string) {
+        const user = await Users.findOne({ _id: id }).lean();
+        if (!user) throw new Error("user not found");
+
+        await Promise.all([
+            v2.uploader.destroy(user.profile_picture.public_id, {
+                resource_type: user.profile_picture.resource_type
+            }),
+            Users.updateOne({ _id: user._id }, {
+                $set: { profile_picture: null }
+            })
+        ]);
+    }
+
+    async signInRepository(props: Pick<UserIntrf, "password" | "username">) {
         try {
             if (!props.username && !props.password) throw new Error("all fields are required");
             if (!props.password) throw new Error("please provide password");
@@ -91,7 +119,7 @@ class AuthRepository {
         }
     }
     
-    async signUp(props: UserIntrf) {
+    async signUpRepository(props: Omit<UserIntrf, "profile_picture">) {
         try {
             if (!props.username && !props.password && !props.email) throw new Error("all fields are required");
             if (!props.email) throw new Error("please provide email");
@@ -127,7 +155,7 @@ class AuthRepository {
         }
     }
 
-    async showProfile(currentUserId: string) {
+    async showProfileRepository(currentUserId: string) {
         try {
             const user = await Users.findOne({ _id: currentUserId }, { password: 0 }).lean();
             if (!user) throw new Error("user not found");
@@ -139,6 +167,6 @@ class AuthRepository {
     }
 }
 
-const authRepository = new AuthRepository();
+const userRepository = new UserRepository();
 
-export default authRepository;
+export default userRepository;
