@@ -1,17 +1,41 @@
 import { create } from "zustand";
+import type { StateCreator } from "zustand";
+import { persist } from "zustand/middleware";
 
-export interface UserState {
+export interface UserInfoState {
     email: string;
     setEmail: (email: string) => void;
+
+    password: string;
+    setPassword: (password: string) => void;
+
+    resetUserInfoState: () => void;
+
+    username: string;
+    setUsername: (username: string) => void;
+}
+
+export interface UserProfileState {
+    deleteProfilePcture: {
+        filename: string;
+        filetype: string;
+        public_id: string;
+        resource_type: string;
+        url: string;
+    } | null;
+    setDeleteProfilePcture: (deleteProfilePcture: {
+        filename: string;
+        filetype: string;
+        public_id: string;
+        resource_type: string;
+        url: string;
+    } | null) => void;
 
     newProfilePcture: File | null;
     setNewProfilePcture: (newProfilePcture: File | null) => void;
 
     newProfilePctureUrl: string | null;
     setNewProfilePctureUrl: (newProfilePctureUrl: string | null) => void;
-
-    password: string;
-    setPassword: (password: string) => void;
 
     oldProfilePcture: {
         filename: string;
@@ -28,25 +52,51 @@ export interface UserState {
         url: string;
     } | null) => void;
 
-    resetUserState: () => void;
-
-    username: string;
-    setUsername: (username: string) => void;
+    resetUserProfileState: () => void;
 }
 
-export const useUserStore = create<UserState>((set) => ({
+interface UserWindowState {
+    currentUserId: string | undefined;
+    setCurrentUserId: (currentUserId: string | undefined) => void;
+
+    resetUserWindowState: () => void;
+}
+
+type UserStoreIntrf = UserInfoState & UserProfileState & UserWindowState;
+
+const useUserInfoSlice: StateCreator<UserInfoState> = (set) => ({
     email: "",
     setEmail: (email: string) => set({ email }),
-    
+
+    password: "",
+    setPassword: (password: string) => set({ password }),
+
+    resetUserInfoState: () => set({
+        email: "",
+        password: "",
+        username: ""
+    }),
+
+    username: "",
+    setUsername: (username: string) => set({ username }),
+});
+
+const useUserProfileSlice: StateCreator<UserProfileState> = (set) => ({
+    deleteProfilePcture: null,
+    setDeleteProfilePcture: (deleteProfilePcture: { 
+        filename: string; 
+        filetype: string; 
+        public_id: string; 
+        resource_type: string; 
+        url: string; } | null
+    ) => set({ deleteProfilePcture }),
+
     newProfilePcture: null,
     setNewProfilePcture: (newProfilePcture: File | null) => set({ newProfilePcture }),
     
     newProfilePctureUrl: null,
     setNewProfilePctureUrl: (newProfilePctureUrl: string | null) => set({ newProfilePctureUrl }),
-    
-    password: "",
-    setPassword: (password: string) => set({ password }),
-    
+
     oldProfilePcture: null,
     setOldProfilePcture: (oldProfilePcture: {
         filename: string;
@@ -56,15 +106,30 @@ export const useUserStore = create<UserState>((set) => ({
         url: string;
     } | null) => set({ oldProfilePcture }),
 
-    resetUserState: () => set({
-        email: "",
-        password: "",
+    resetUserProfileState: () => set({
+        deleteProfilePcture: null,
         newProfilePcture: null,
         newProfilePctureUrl: null,
-        oldProfilePcture: null,
-        username: ""
+        oldProfilePcture: null
     }),
-    
-    username: "",
-    setUsername: (username: string) => set({ username }),
-}));
+});
+
+const useUserWindowSlice: StateCreator<UserWindowState> = (set) => ({
+    currentUserId: undefined,
+    setCurrentUserId: (currentUserId) => set({ currentUserId }),
+
+    resetUserWindowState: () => set({
+        currentUserId: undefined
+    })
+});
+
+export const useUserStore = create<UserStoreIntrf>()(persist(
+    (...x) => ({
+        ...useUserInfoSlice(...x),
+        ...useUserProfileSlice(...x),
+        ...useUserWindowSlice(...x)
+    }), {
+        name: "current_user_id",
+        partialize: (state) => state.currentUserId
+    })
+);

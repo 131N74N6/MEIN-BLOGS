@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { verifyToken } from "../middlewares/auth.middleware";
 import blogController from "../controllers/blog.controller";
+import { uploadFile } from "../middlewares/upload.middleware";
 
 const blogRouters = Router();
 
@@ -14,7 +15,7 @@ blogRouters.get("/show", verifyToken, blogController.getAllUserBlogsController);
 
 blogRouters.get("/content/:blog_id", verifyToken, blogController.getBlogContentByIdController);
 
-blogRouters.post("/create", verifyToken, blogController.createNewBlogController);
+blogRouters.post("/create", verifyToken, uploadFile, blogController.createNewBlogController);
 
 blogRouters.post("/ai-created", verifyToken, blogController.generateNewBlogController);
 

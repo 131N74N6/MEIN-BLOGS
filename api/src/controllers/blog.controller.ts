@@ -18,7 +18,7 @@ class BlogController {
 
             res.json({ message: "blog created" });
         } catch (error) {
-            res.json({ message: error });
+            res.json({ message: error || "something went wrong" });
         }
     }
 
@@ -29,7 +29,7 @@ class BlogController {
 
             res.json({ message: "all blogs deleted" });
         } catch (error) {
-            res.json({ message: error });
+            res.json({ message: error || "something went wrong" });
         }
     }
 
@@ -41,7 +41,7 @@ class BlogController {
             await blogService.deleteOneBlogService(blogId);
             res.json({ message: "blog deleted" });
         } catch (error) {
-            res.json({ message: error });
+            res.json({ message: error || "something went wrong" });
         }
     }
 
@@ -104,7 +104,7 @@ class BlogController {
             
             res.json(blogContent);
         } catch (error) {
-            res.json({ message: error });
+            res.json({ message: error || "something went wrong" });
         }
     }
 }

@@ -1,6 +1,7 @@
+import userService from "../services/user.service";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { Request, Response } from "express";
-import userService from "../services/user.service";
+import { ProfilePictureIntrf } from "../models/user.model";
 
 class UserController {
     async changeUserController(req: AuthRequest, res: Response) {
@@ -18,18 +19,22 @@ class UserController {
 
             res.json({ message: "this user profile has changed" });
         } catch (error) {
-            res.json({ message: error });
+            res.json({ message: error || "something went wrong" });
         }
     }
 
     async deleteOldProfileController(req: AuthRequest, res: Response) {
         try {
-            const currentUserId = req.user?.user_id;
-            if (currentUserId) await userService.deleteCurrentUserOldProfile(currentUserId);
+            const userId = req.user?.user_id;
+            const profilePicture = req.body.profilePicture as ProfilePictureIntrf;
+
+            if (userId) {
+                await userService.deleteCurrentUserOldProfile(userId, profilePicture);
+            }
 
             res.json({ message: "successfully delete old image profile" });
         } catch (error) {
-            res.json({ message: error });
+            res.json({ message: error || "something went wrong" });
         }
     }
 
@@ -40,7 +45,7 @@ class UserController {
 
             res.json({ message: "successfully delete user" });
         } catch (error) {
-            res.json({ message: error });
+            res.json({ message: error || "something went wrong" });
         }
     }
 
@@ -60,7 +65,7 @@ class UserController {
 
             res.json({ message: "sign in confirmed" });
         } catch (error) {
-            res.json({ message: error });
+            res.json({ message: error || "something went wrong" });
         }
     }
 
@@ -74,7 +79,7 @@ class UserController {
 
             res.json({ message: "user sign out successfully" });
         } catch (error) {
-            res.json({ message: "failed to sign out" });
+            res.json({ message: error || "something went wrong" });
         }
     }
 
@@ -95,7 +100,7 @@ class UserController {
 
             res.json({ message: "sign up confirmed" });
         } catch (error) {
-            res.json({ message: error });
+            res.json({ message: error || "something went wrong" });
         }
     }
 
@@ -112,7 +117,7 @@ class UserController {
                 profile_picture: user.profile_picture
             });
         } catch (error: any) {
-            res.json({ message: error });
+            res.json({ message: error || "something went wrong" });
         }
     }
 }

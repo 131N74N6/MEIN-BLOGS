@@ -1,5 +1,13 @@
 import mongoose, { Schema } from "mongoose";
 
+export interface ProfilePictureIntrf {
+    filename: string;
+    filetype: string;
+    public_id: string;
+    resource_type: string;
+    url: string;
+}
+
 export interface ChangeUserIntrf {
     currentUserId: string;
     selectedImage?: Express.Multer.File;

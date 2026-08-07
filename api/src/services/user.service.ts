@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import userRepository from "../repositories/user.repository";
-import { ChangeUserIntrf, UserIntrf } from "../models/user.model";
+import { ChangeUserIntrf, ProfilePictureIntrf, UserIntrf } from "../models/user.model";
 import { uploadToCloudinary } from "./cloudinary.service";
 import { v2 } from "cloudinary";
 
@@ -76,21 +76,13 @@ class UserService {
         }
     }
 
-    async deleteCurrentUserOldProfile(id: string) {
-        try {
-            const user = await userRepository.getCurrentUser(id);
-            if (!user) throw new Error("user not found");
-
-            if (user.profile_picture !== null && user.profile_picture.public_id) {
-                await v2.uploader.destroy(user.profile_picture.public_id, {
-                    resource_type: user.profile_picture.resource_type
-                });
-            }
-
-            await userRepository.deleteCurrentUserOldProfile(id);
-        } catch (error) {
-            throw error;
-        }
+    async deleteCurrentUserOldProfile(id: string, profile_picture: ProfilePictureIntrf) {
+        await Promise.all([
+            v2.uploader.destroy(profile_picture.public_id, {
+                resource_type: profile_picture.resource_type
+            }),
+            userRepository.deleteUserOldProfile(id)
+        ]);
     }
 
     async signInService(props: Pick<UserIntrf, "password" | "username">) {

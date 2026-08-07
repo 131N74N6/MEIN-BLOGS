@@ -17,7 +17,7 @@ class CommentController {
 
             res.json({ message: "new comment added" });
         } catch (error) {
-            res.json({ message: error });
+            res.json({ message: error || "something went wrong" });
         }
     }
 
@@ -36,7 +36,7 @@ class CommentController {
 
             res.json(comments);
         } catch (error) {
-            res.json({ message: "something went wrong" });
+            res.json({ message: error || "something went wrong" });
         }
     }
 
@@ -48,7 +48,7 @@ class CommentController {
             const total = await commentService.getCommentsTotalInOneBlog(stringBlogId);
             res.json(total);
         } catch (error) {
-            res.json({ message: "something went wrong" });
+            res.json({ message: error || "something went wrong" });
         }
     }
 }

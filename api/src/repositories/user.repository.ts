@@ -24,6 +24,10 @@ class UserRepository {
         return await Blogs.deleteMany({ blog_owner_id: userId });
     }
 
+    async deleteUserOldProfile(id: string) {
+        return await Users.updateOne({ _id: id }, { $set: { profile_picture: null } });
+    }
+
     async deleteCommentsInUserBlogs(blogsIds: string[]) {
         return await Comments.deleteMany({ _id: { $in: blogsIds }});
     }
