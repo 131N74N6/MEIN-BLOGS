@@ -1,9 +1,9 @@
-import { Comments, IComment, ShowCommentIntrf } from "../models/comment.model";
+import { Comments, NewCommentIntrf, ShowCommentIntrf } from "../models/comment.model";
 import { Users } from "../models/user.model";
 
 class CommentRepository {
-    async sendCommentRepository(props: Pick<IComment, "blog_id" | "text" | "user_id">) {
-        const user = await Users.find({ _id: props.user_id }).lean();
+    async createComment(props: NewCommentIntrf) {
+        const user = await Users.find({ _id: props.current_user_id }).lean();
 
         const newComment = new Comments({
             blog_id: props.blog_id,
@@ -16,7 +16,7 @@ class CommentRepository {
         await newComment.save();
     }
 
-    async showAllCommentsRepository(props: ShowCommentIntrf) {
+    async getAllCommentsInOneBlog(props: ShowCommentIntrf) {
         const comments = await Comments.find({ blog_id: props.blog_id })
         .limit(props.limit)
         .skip(props.skip)
@@ -25,7 +25,7 @@ class CommentRepository {
         return comments;
     }
 
-    async showCommentsTotalRepository(blogId: string) {
+    async getCommentsTotalInOneBlog(blogId: string) {
         const comments = await Comments.find({ blog_id: blogId }).lean().countDocuments();
         return comments;
     }

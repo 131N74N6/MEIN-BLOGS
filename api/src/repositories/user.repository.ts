@@ -1,7 +1,6 @@
 import { UserIntrf, Users } from "../models/user.model";
 import { Blogs } from "../models/blog.model";
 import { Comments } from "../models/comment.model";
-import { Types } from "mongoose";
 
 class UserRepository {
     async changeUser(id: string, userData: Partial<UserIntrf>) {

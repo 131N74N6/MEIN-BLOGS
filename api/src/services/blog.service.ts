@@ -1,5 +1,5 @@
 import blogRepository from "../repositories/blog.repository";
-import { generateBlogContent } from "../services/ai.service";
+import { generateBlogContent } from "./ai.service";
 import { NewBlogIntrf, ShowAllBlogsIntrf, ShowAllUserBlogsIntrf } from "../models/blog.model";
 import { v2 } from "cloudinary";
 

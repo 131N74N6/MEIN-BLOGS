@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import userRepository from "../repositories/user.repository";
 import { ChangeUserIntrf, UserIntrf } from "../models/user.model";
-import { uploadToCloudinary } from "../services/cloudinary.service";
+import { uploadToCloudinary } from "./cloudinary.service";
 import { v2 } from "cloudinary";
 
 class UserService {

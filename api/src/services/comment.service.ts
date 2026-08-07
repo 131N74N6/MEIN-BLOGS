@@ -1,22 +1,22 @@
-import { IComment, ShowCommentIntrf } from "../models/comment.model";
+import { NewCommentIntrf, ShowCommentIntrf } from "../models/comment.model";
 import commentRepository from "../repositories/comment.repository";
 
 class CommentService {
-    async sendCommentService(props: Pick<IComment, "blog_id" | "text" | "user_id">) {
+    async sendCommentService(props: NewCommentIntrf) {
         try {
-            if (!props.text) throw new Error("all fields are required");
-            await commentRepository.sendCommentRepository(props);
+            if (!props.text) throw new Error("please fill this input");
+            await commentRepository.createComment(props);
         } catch (error) {
             throw error;
         }
     }
 
-    async showAllCommentsService(props: ShowCommentIntrf) {
-        return await commentRepository.showAllCommentsRepository(props);
+    async getAllCommentsInOneBlog(props: ShowCommentIntrf) {
+        return await commentRepository.getAllCommentsInOneBlog(props);
     }
 
-    async showCommentsTotalService(blogId: string) {
-        return await commentRepository.showCommentsTotalRepository(blogId);
+    async getCommentsTotalInOneBlog(blogId: string) {
+        return await commentRepository.getCommentsTotalInOneBlog(blogId);
     }
 }
 

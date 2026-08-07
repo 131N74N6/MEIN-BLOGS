@@ -1,22 +1,18 @@
+import commentService from "../services/comment.service";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { Request, Response } from "express";
-import commentService from "../services/comment.service";
-import mongoose from "mongoose";
 
 class CommentController {
     async sendCommentController(req: AuthRequest, res: Response) {
         try {
             const currentUserId = req.user?.user_id;
             const blogIdParam = req.params.blog_id;
-            const stringBlogId = Array.isArray(blogIdParam) ? blogIdParam[0] : blogIdParam;
-
-            const current_user_id = new mongoose.Types.ObjectId(currentUserId!);
-            const blog_id = new mongoose.Types.ObjectId(stringBlogId);
+            const blogId = Array.isArray(blogIdParam) ? blogIdParam[0] : blogIdParam;
 
             await commentService.sendCommentService({
-                blog_id: blog_id,
-                text: req.body.text as string,
-                user_id: current_user_id
+                blog_id: blogId,
+                current_user_id: currentUserId!,
+                text: req.body.text as string
             });
 
             res.json({ message: "new comment added" });
@@ -34,7 +30,7 @@ class CommentController {
             const limit = parseInt(req.query.limit as string) || 16;
             const skip = (page - 1) * limit;
 
-            const comments = await commentService.showAllCommentsService({
+            const comments = await commentService.getAllCommentsInOneBlog({
                 blog_id: stringBlogId, limit: limit, skip: skip
             });
 
@@ -49,7 +45,7 @@ class CommentController {
             const blogIdParam = req.params.blog_id;
             const stringBlogId = Array.isArray(blogIdParam) ? blogIdParam[0] : blogIdParam;
 
-            const total = await commentService.showCommentsTotalService(stringBlogId);
+            const total = await commentService.getCommentsTotalInOneBlog(stringBlogId);
             res.json(total);
         } catch (error) {
             res.json({ message: "something went wrong" });

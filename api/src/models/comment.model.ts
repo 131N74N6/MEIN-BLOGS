@@ -14,6 +14,12 @@ export interface IComment {
     }
 }
 
+export interface NewCommentIntrf {
+    blog_id: string;
+    current_user_id: string;
+    text: string;
+}
+
 export interface ShowCommentIntrf {
     blog_id: string;
     limit: number;
