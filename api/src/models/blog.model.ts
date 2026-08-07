@@ -25,7 +25,6 @@ export interface NewBlogIntrf {
 
 export interface ShowAllBlogsIntrf {
     limit: number;
-    page: number;
     skip: number;
 }
 

@@ -6,14 +6,16 @@ const blogRouters = Router();
 
 blogRouters.delete("/rm-all", verifyToken, blogController.deleteAllBlogsController);
 
-blogRouters.delete("/rm:blog_id", verifyToken, blogController.deleteBlogController);
+blogRouters.delete("/rm:blog_id", verifyToken, blogController.deleteOneBlogController);
 
-blogRouters.get("/show-all", verifyToken, blogController.showAllBlogsController);
+blogRouters.get("/show-all", verifyToken, blogController.getAllBlogsController);
 
-blogRouters.get("/show", verifyToken, blogController.showAllUserBlogsController);
+blogRouters.get("/show", verifyToken, blogController.getAllUserBlogsController);
+
+blogRouters.get("/content/:blog_id", verifyToken, blogController.getBlogContentByIdController);
 
 blogRouters.post("/create", verifyToken, blogController.createNewBlogController);
 
-blogRouters.post("/show-all", verifyToken, blogController.generateNewBlogController);
+blogRouters.post("/ai-created", verifyToken, blogController.generateNewBlogController);
 
 export default blogRouters;

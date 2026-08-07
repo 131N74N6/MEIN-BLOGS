@@ -33,12 +33,12 @@ class BlogController {
         }
     }
 
-    async deleteBlogController(req: Request, res: Response) {
+    async deleteOneBlogController(req: Request, res: Response) {
         try {
             const blogIdParams = req.params.blog_id;
             const blogId = Array.isArray(blogIdParams) ? blogIdParams[0] : blogIdParams;
 
-            await blogService.deleteBlogService(blogId);
+            await blogService.deleteOneBlogService(blogId);
             res.json({ message: "blog deleted" });
         } catch (error) {
             res.json({ message: error });
@@ -61,14 +61,14 @@ class BlogController {
         }
     }
 
-    async showAllBlogsController(req: Request, res: Response) {
+    async getAllBlogsController(req: Request, res: Response) {
         try {
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 16;
             const skip = (page - 1) * limit;
 
-            const blogs = await blogService.showAllBlogsService({
-                limit: limit, page: page, skip: skip
+            const blogs = await blogService.getAllBlogsService({
+                limit: limit, skip: skip
             });
 
             res.json(blogs);
@@ -77,20 +77,34 @@ class BlogController {
         }
     }
 
-    async showAllUserBlogsController(req: AuthRequest, res: Response) {
+    async getAllUserBlogsController(req: AuthRequest, res: Response) {
         try {
             const currentUserId = req.user?.user_id;
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 16;
             const skip = (page - 1) * limit;
 
-            const blogs = await blogService.showAllUserBlogsService({
-                current_user_id: currentUserId!, limit: limit, page: page, skip: skip
+            const blogs = await blogService.getAllCurrentUserBlogsService({
+                current_user_id: currentUserId!, limit: limit, skip: skip
             });
 
             res.json(blogs);
         } catch (error) {
             res.json({ message: "something went wrong" });
+        }
+    }
+
+    async getBlogContentByIdController(req: Request, res: Response) {
+        try {
+            const blogIdParam = req.params.blog_id;
+            const blogId = Array.isArray(blogIdParam) ? blogIdParam[0] : blogIdParam;
+
+            const blogContent = await blogService.getBlogContentByIdService(blogId);
+            if (!blogContent) throw new Error("blog not found");
+            
+            res.json(blogContent);
+        } catch (error) {
+            res.json({ message: error });
         }
     }
 }

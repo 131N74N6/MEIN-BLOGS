@@ -25,7 +25,7 @@ class UserRepository {
         return await Blogs.deleteMany({ blog_owner_id: userId });
     }
 
-    async deleteCommentsInUserBlogs(blogsIds: Types.ObjectId[]) {
+    async deleteCommentsInUserBlogs(blogsIds: string[]) {
         return await Comments.deleteMany({ _id: { $in: blogsIds }});
     }
 

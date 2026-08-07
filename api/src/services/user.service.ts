@@ -44,7 +44,7 @@ class UserService {
             
             const operations = [];
             const userBlogs = await userRepository.getCurrentUserBlogs(currentUserId);
-            const userBlogsIds = userBlogs.map(userBlog => userBlog._id);
+            const userBlogsIds = userBlogs.map(userBlog => userBlog._id.toString());
             const userBlogsMedia = userBlogs.map(userBlog => userBlog.media || []);
 
             if (userBlogsMedia.length > 0) {

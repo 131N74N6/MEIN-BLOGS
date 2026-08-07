@@ -1,13 +1,14 @@
-import { v2 } from "cloudinary";
 import { Blogs, NewBlogIntrf, ShowAllBlogsIntrf, ShowAllUserBlogsIntrf } from "../models/blog.model";
 import { uploadToCloudinary } from "../services/cloudinary.service";
-import { generateBlogContent } from "../services/ai.service";
 import { Users } from "../models/user.model";
 import { Comments } from "../models/comment.model";
 
 class BlogRepository {
-    async createNewBlogRepository(props: NewBlogIntrf) {
-        const user = await Users.find({ _id: props.current_user_id }).lean();
+    async createNewBlog(props: NewBlogIntrf) {
+        const user = await Users.find(
+            { _id: props.current_user_id }, 
+            { password: 0, profile_picture: 0 }
+        ).lean();
 
         const blogMedia = await uploadToCloudinary({
             file_buffer: props.media?.buffer!,
@@ -24,61 +25,39 @@ class BlogRepository {
             title: props.title
         });
 
-        await newBlog.save();
+        return await newBlog.save();
     }
 
-    async deleteAllBlogsRepository(currentUserId: string) {
-        try {
-            const blogs = await Blogs.find({ blog_owner_id: currentUserId });
-            if (blogs.length === 0) throw new Error("blogs not found");
-
-            const blogsIds = blogs.map(blog => blog._id);
-            const blogsMedia = blogs.map(blog => blog.media);
-            
-            const deleteFromCloudinary = blogsMedia.map(blogMedia => {
-                return v2.uploader.destroy(blogMedia.public_id, { resource_type: blogMedia.resource_type });
-            });
-
-            await Promise.all([
-                ...deleteFromCloudinary,
-                Comments.deleteMany({ blog_id: { $in: blogsIds } }),
-                Blogs.deleteMany({ blog_owner_id: currentUserId })
-            ]);
-        } catch (error) {
-            throw error;
-        }
+    async deleteAllBlogs(currentUserId: string) {
+        return await Blogs.deleteMany({ blog_owner_id: currentUserId });
     }
 
-    async deleteBlogRepository(id: string) {
-        try {
-            const blog = await Blogs.findOne({ _id: id });
-            if (!blog) throw new Error("blog not found");
-
-            await Promise.all([
-                v2.uploader.destroy(blog.media.public_id, { resource_type: blog.media.resource_type }),
-                Blogs.deleteMany({ _id: blog._id })
-            ]);
-        } catch (error) {
-            throw error;
-        }
+    async deleteAllComments(blogsIds: string[]) {
+        return await Comments.deleteMany({ blog_id: { $in: blogsIds } });
     }
 
-    async generateNewBlogRepository(props: Pick<NewBlogIntrf, 'language' | 'media' | 'title'>) {
-        try {
-            const generatedContent = await generateBlogContent({
-                imageBuffer: props.media?.buffer!,
-                language: props.language,
-                mimeType: props.media?.mimetype!,
-                title: props.title,
-            });
-
-            return generatedContent;
-        } catch (error) {
-            throw error;    
-        }
+    async deleteAllCommentsInOneBlog(blogId: string) {
+        return await Comments.deleteMany({ blog_id: blogId });
     }
 
-    async showAllBlogsRepository(props: ShowAllBlogsIntrf) {
+    async deleteOneBlog(id: string) {
+        return await Blogs.deleteOne({ _id: id });
+    }
+
+    async getAllCurrentUserBlogs(currentUserId: string) {
+        return await Blogs.find({ blog_owner_id: currentUserId }).lean();
+    }
+
+    async getAllCurrentUserBlogsWithPagination(props: ShowAllUserBlogsIntrf) {
+        const blogs = await Blogs.find({ blog_owner_id: props.current_user_id })
+        .limit(props.limit)
+        .skip(props.skip)
+        .lean();
+
+        return blogs;
+    }
+
+    async getAllBlogsWithPagination(props: ShowAllBlogsIntrf) {
         const blogs = await Blogs.find()
         .limit(props.limit)
         .skip(props.skip)
@@ -87,13 +66,8 @@ class BlogRepository {
         return blogs;
     }
 
-    async showAllUserBlogsRepository(props: ShowAllUserBlogsIntrf) {
-        const blogs = await Blogs.find({ blog_owner_id: props.current_user_id })
-        .limit(props.limit)
-        .skip(props.skip)
-        .lean();
-
-        return blogs;
+    async getBlogById(id: string) {
+        return await Blogs.findOne({ _id: id }).lean();
     }
 }
 
