@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import type { StateCreator } from "zustand";
-import { persist } from "zustand/middleware";
 
 export interface UserInfoState {
     email: string;
@@ -123,13 +122,8 @@ const useUserWindowSlice: StateCreator<UserWindowState> = (set) => ({
     })
 });
 
-export const useUserStore = create<UserStoreIntrf>()(persist(
-    (...x) => ({
-        ...useUserInfoSlice(...x),
-        ...useUserProfileSlice(...x),
-        ...useUserWindowSlice(...x)
-    }), {
-        name: "current_user_id",
-        partialize: (state) => state.currentUserId
-    })
-);
+export const useUserStore = create<UserStoreIntrf>()((...x) => ({
+    ...useUserInfoSlice(...x),
+    ...useUserProfileSlice(...x),
+    ...useUserWindowSlice(...x)
+}));

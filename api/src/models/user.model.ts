@@ -28,8 +28,17 @@ export interface UserIntrf {
 }
 
 const userSchema = new Schema<UserIntrf>({
-    email: { type: String, required: true },
-    password: { type: String, required: true },
+    email: { 
+        lowercase: true,
+        trim: true,
+        type: String, 
+        required: true, 
+        unique: true
+    },
+    password: { 
+        type: String, 
+        required: true 
+    },
     profile_picture: {
         filename: { type: String },
         filetype: { type: String },
@@ -37,7 +46,12 @@ const userSchema = new Schema<UserIntrf>({
         resource_type: { type: String },
         url: { type: String }
     },
-    username: { type: String, required: true },
+    username: { 
+        trim: true,
+        type: String, 
+        required: true, 
+        unique: true
+    },
 }, {
     timestamps: {
         createdAt: 'created_at',
