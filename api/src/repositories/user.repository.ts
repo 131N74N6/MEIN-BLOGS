@@ -33,7 +33,7 @@ class UserRepository {
     }
 
     async getCurrentUser(currentUserId: string) {
-        const user = await Users.findOne({ _id: currentUserId }).select("-password").lean();
+        const user = await Users.findOne({ _id: currentUserId }, { password: 0 }).lean();
         return user;
     }
 
@@ -42,12 +42,12 @@ class UserRepository {
     }
 
     async getCurrentUserByEmail(email: string) {
-        const currentEmail = await Users.findOne({ email: email }).lean();
+        const currentEmail = await Users.findOne({ email: { $eq: email } }).lean();
         return currentEmail;
     }
 
     async getCurrentUserByUsername(username: string) {
-        const currentUsername = await Users.findOne({ username: username }).lean();
+        const currentUsername = await Users.findOne({ username: { $eq: username } }).lean();
         return currentUsername;
     }
 

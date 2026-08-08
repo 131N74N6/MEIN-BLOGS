@@ -11,7 +11,7 @@ export interface ProfilePictureIntrf {
 export interface ChangeUserIntrf {
     currentUserId: string;
     selectedImage?: Express.Multer.File;
-    username: string;
+    username?: string;
 }
 
 export interface UserIntrf {

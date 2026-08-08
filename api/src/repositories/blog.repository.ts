@@ -1,5 +1,5 @@
 import { Blogs, NewBlogIntrf, ShowAllBlogsIntrf, ShowAllUserBlogsIntrf } from "../models/blog.model";
-import { uploadToCloudinary } from "../services/cloudinary.service";
+import { uploadToCloudinary } from "../utils/cloudinary.utility";
 import { Users } from "../models/user.model";
 import { Comments } from "../models/comment.model";
 

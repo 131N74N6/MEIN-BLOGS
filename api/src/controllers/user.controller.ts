@@ -1,71 +1,81 @@
 import userService from "../services/user.service";
+import { errorHandling } from "../errors/api.error";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import { changeUserSchema, signInSchema, signUpSchema } from "../validations/user.validation";
 import { Request, Response } from "express";
-import { ProfilePictureIntrf } from "../models/user.model";
 
 class UserController {
     async changeUserController(req: AuthRequest, res: Response) {
         try {
             const currentUserId = req.user?.user_id;
+            if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
+
+            const parsed = changeUserSchema.safeParse(req.body ?? {});
+            if (!parsed.success) return res.status(400).json({ message: "invalid input" });
+
+            const username = parsed.data.username;
             const newProfileImage: Express.Multer.File | undefined = req.file;
 
-            if (!currentUserId) return res.json({ message: "user not found" });
+            if (!username && !newProfileImage) {
+                return res.status(400).json({ message: "no profile data to update" });
+            }
 
             await userService.changeUserService({
                 currentUserId: currentUserId,
-                username: req.body.username as string,
+                username: username,
                 selectedImage: newProfileImage
             });
 
-            res.json({ message: "this user profile has changed" });
+            res.status(200).json({ message: "this user profile has changed" });
         } catch (error) {
-            res.json({ message: error || "something went wrong" });
+            return errorHandling(res, error);
         }
     }
 
     async deleteOldProfileController(req: AuthRequest, res: Response) {
         try {
-            const userId = req.user?.user_id;
-            const profilePicture = req.body.profilePicture as ProfilePictureIntrf;
+            const currentUserId = req.user?.user_id;
+            if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
 
-            if (userId) {
-                await userService.deleteCurrentUserOldProfile(userId, profilePicture);
-            }
+            await userService.deleteCurrentUserOldProfile(currentUserId);
 
-            res.json({ message: "successfully delete old image profile" });
+            res.json({ message: "successfully delete old profile picture" });
         } catch (error) {
-            res.json({ message: error || "something went wrong" });
+            return errorHandling(res, error);
         }
     }
 
     async deleteUserController(req: AuthRequest, res: Response) {
         try {
             const currentUserId = req.user?.user_id;
-            if (currentUserId) await userService.deleteUserService(currentUserId);
+            if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
+            
+            await userService.deleteUserService(currentUserId);
 
             res.json({ message: "successfully delete user" });
         } catch (error) {
-            res.json({ message: error || "something went wrong" });
+            return errorHandling(res, error);
         }
     }
 
     async signInController(req: Request, res: Response) {
         try {
-            const token = await userService.signInService({
-                password: req.body.password as string,
-                username: req.body.username as string
-            });
+            const parsed = signInSchema.safeParse(req.body ?? {});
+            if (!parsed.success) return res.status(400).json({ message: "invalid input" });
+
+            const token = await userService.signInService(parsed.data);
 
             res.cookie("token", token, {
                 httpOnly: true,
                 maxAge: 86400000,
+                path: "/",
                 sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
                 secure: process.env.NODE_ENV === "production"
             });
 
             res.json({ message: "sign in confirmed" });
         } catch (error) {
-            res.json({ message: error || "something went wrong" });
+            return errorHandling(res, error);
         }
     }
 
@@ -73,51 +83,52 @@ class UserController {
         try {
             res.clearCookie("token", {
                 httpOnly: true,
+                path: "/",
                 sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
                 secure: process.env.NODE_ENV === "production"
             });
 
             res.json({ message: "user sign out successfully" });
         } catch (error) {
-            res.json({ message: error || "something went wrong" });
+            return errorHandling(res, error);
         }
     }
 
     async signUpController(req: Request, res: Response) {
         try {
-            const token = await userService.signUpService({
-                email: req.body.email as string,
-                password: req.body.password as string,
-                username: req.body.username as string,
-            });
+            const parsed = signUpSchema.safeParse(req.body ?? {});
+            if (!parsed.success) return res.status(400).json({ message: "invalid input" });
+
+            const token = await userService.signUpService(parsed.data);
 
             res.cookie("token", token, {
                 httpOnly: true,
                 maxAge: 86400000,
+                path: "/",
                 sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
                 secure: process.env.NODE_ENV === "production"
             });
 
             res.json({ message: "sign up confirmed" });
         } catch (error) {
-            res.json({ message: error || "something went wrong" });
+            return errorHandling(res, error);
         }
     }
 
     async showProfileController(req: AuthRequest, res: Response) {
         try {
             const currentUserId = req.user?.user_id;
-            if (!currentUserId) throw new Error("user not found");
+            if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
 
             const user = await userService.showProfileService(currentUserId);
 
-            res.json({
+            res.status(200).json({
                 user_id: user._id,
                 username: user.username,
                 profile_picture: user.profile_picture
             });
         } catch (error: any) {
-            res.json({ message: error || "something went wrong" });
+            return errorHandling(res, error);
         }
     }
 }

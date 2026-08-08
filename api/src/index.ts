@@ -5,10 +5,12 @@ import cookieParser from "cookie-parser";
 import userRouters from "./routers/user.router";
 import blogRouters from "./routers/blog.router";
 import commentRouters from "./routers/comment.router";
+import helmet from "helmet";
 
 const port = process.env.PORT || 5172;
 const app = express();
 
+app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({

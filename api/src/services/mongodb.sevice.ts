@@ -8,6 +8,8 @@ if (process.env.NODE_ENV !== "production") {
     console.log("using dns server 1.1.1.1 and 8.8.8.8....");
 }
 
+mongoose.set("sanitizeFilter", true);
+
 export const db = mongoose.connect(`${process.env.MONGODB_URL}`)
 .then(res => {if (res) console.log("database connected")})
 .catch(error => console.log(`database connection failed: ${error}`));

@@ -1,61 +1,80 @@
 import { AuthRequest } from "../middlewares/auth.middleware";
+import { errorHandling } from "../errors/api.error";
 import { Request, Response } from "express";
+import {
+    blogPaginationSchema,
+    blogIdParamSchema,
+    createBlogSchema,
+    generateBlogSchema
+} from "../validations/blog.validation";
 import blogService from "../services/blog.service";
 
 class BlogController {
     async createNewBlogController(req: AuthRequest, res: Response) {
         try {
-            const currentUserId = req.user?.user_id;
             const blogImage: Express.Multer.File | undefined = req.file;
+            const currentUserId = req.user?.user_id;
+            if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
+
+            const parsed = createBlogSchema.safeParse(req.body ?? {});
+            if (!parsed.success) return res.status(400).json({ message: "invali input" });
 
             await blogService.createNewBlogService({
-                content: req.body.content as string,
-                current_user_id: currentUserId!,
-                language: req.body.language as string,
+                content: parsed.data.content,
+                current_user_id: currentUserId,
+                language: parsed.data.language,
                 media: blogImage,
-                title: req.body.title as string
+                title: parsed.data.title
             });
 
-            res.json({ message: "blog created" });
+            res.status(200).json({ message: "new blog created" });
         } catch (error) {
-            res.json({ message: error || "something went wrong" });
+            return errorHandling(res, error);
         }
     }
 
     async deleteAllBlogsController(req: AuthRequest, res: Response) {
         try {
             const currentUserId = req.user?.user_id;
-            if (currentUserId) await blogService.deleteAllBlogsService(currentUserId);
+            if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
+            
+            await blogService.deleteAllBlogsService(currentUserId);
 
-            res.json({ message: "all blogs deleted" });
+            res.status(200).json({ message: "all of your blogs has been deleted" });
         } catch (error) {
-            res.json({ message: error || "something went wrong" });
+            return errorHandling(res, error);
         }
     }
 
-    async deleteOneBlogController(req: Request, res: Response) {
+    async deleteOneBlogController(req: AuthRequest, res: Response) {
         try {
-            const blogIdParams = req.params.blog_id;
-            const blogId = Array.isArray(blogIdParams) ? blogIdParams[0] : blogIdParams;
+            const parsed = blogIdParamSchema.safeParse(req.params ?? {});
+            if (!parsed.success) return res.status(400).json({ message: "invalid blog id" });
 
-            await blogService.deleteOneBlogService(blogId);
-            res.json({ message: "blog deleted" });
+            const currentUserId = req.user?.user_id;
+            if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
+
+            await blogService.deleteOneBlogService(currentUserId, parsed.data.blog_id);
+            res.status(200).json({ message: "blog deleted" });
         } catch (error) {
-            res.json({ message: error || "something went wrong" });
+            return errorHandling(res, error);
         }
     }
 
     async generateNewBlogController(req: Request, res: Response) {
         try {
+            const parsed = generateBlogSchema.safeParse(req.body ?? {});
             const blogImage: Express.Multer.File | undefined = req.file;
+
+            if (!parsed.success) return res.status(400).json({ message: "invalid input" });
 
             const generatedBlog = await blogService.generateNewBlogService({
                 media: blogImage,
-                language: req.body.language as string,
-                title: req.body.title as string
+                language: parsed.data.language,
+                title: parsed.data.title
             });
 
-            res.json({ message: generatedBlog.contents });
+            res.status(200).json({ message: generatedBlog.contents });
         } catch (error) {
             res.json({ message: error })
         }
@@ -63,15 +82,14 @@ class BlogController {
 
     async getAllBlogsController(req: Request, res: Response) {
         try {
-            const page = parseInt(req.query.page as string) || 1;
-            const limit = parseInt(req.query.limit as string) || 16;
-            const skip = (page - 1) * limit;
+            const parsed = blogPaginationSchema.safeParse(req.query ?? {});
+            if (!parsed.success) return res.status(400).json({ message: "invalid pagination" });
 
             const blogs = await blogService.getAllBlogsService({
-                limit: limit, skip: skip
+                limit: parsed.data.limit, skip: parsed.data.skip
             });
 
-            res.json(blogs);
+            res.status(200).json(blogs);
         } catch (error) {
             res.json({ message: "something went wrong" });
         }
@@ -80,15 +98,16 @@ class BlogController {
     async getAllUserBlogsController(req: AuthRequest, res: Response) {
         try {
             const currentUserId = req.user?.user_id;
-            const page = parseInt(req.query.page as string) || 1;
-            const limit = parseInt(req.query.limit as string) || 16;
-            const skip = (page - 1) * limit;
+            if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
+
+            const parsed = blogPaginationSchema.safeParse(req.query ?? {});
+            if (!parsed.success) return res.status(400).json({ message: "invalid pagination" });
 
             const blogs = await blogService.getAllCurrentUserBlogsService({
-                current_user_id: currentUserId!, limit: limit, skip: skip
+                current_user_id: currentUserId, limit: parsed.data.limit, skip: parsed.data.skip
             });
 
-            res.json(blogs);
+            res.status(200).json(blogs);
         } catch (error) {
             res.json({ message: "something went wrong" });
         }
@@ -96,15 +115,15 @@ class BlogController {
 
     async getBlogContentByIdController(req: Request, res: Response) {
         try {
-            const blogIdParam = req.params.blog_id;
-            const blogId = Array.isArray(blogIdParam) ? blogIdParam[0] : blogIdParam;
+            const parsed = blogIdParamSchema.safeParse(req.params ?? {});
+            if (!parsed.success) return res.status(400).json({ message: "invalid blog id" });
 
-            const blogContent = await blogService.getBlogContentByIdService(blogId);
+            const blogContent = await blogService.getBlogContentByIdService(parsed.data.blog_id);
             if (!blogContent) throw new Error("blog not found");
             
-            res.json(blogContent);
+            res.status(200).json(blogContent);
         } catch (error) {
-            res.json({ message: error || "something went wrong" });
+            return errorHandling(res, error);
         }
     }
 }

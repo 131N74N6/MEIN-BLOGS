@@ -15,9 +15,11 @@ export interface CustomJwtPayload extends JwtPayload {
 }
 
 export const authRateLimiter = rateLimit({
+    legacyHeaders: false,
+    limit: 20,
+    message: { message: "too many authentication attempts, please try again later" },
+    standardHeaders: true,
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // limit each IP to 5 requests per windowMs
-    message: { error: 'Too many login/register request from this IP.' },
 });
 
 export function verifyToken(req: AuthRequest, res: Response, next: NextFunction) {
