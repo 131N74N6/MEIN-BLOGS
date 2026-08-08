@@ -1,21 +1,28 @@
 import commentService from "../services/comment.service";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { Request, Response } from "express";
+import { commentSchema, commentPaginationSchema } from "../validations/comment.validation";
+import { blogIdParamSchema } from "../validations/blog.validation";
 
 class CommentController {
     async sendCommentController(req: AuthRequest, res: Response) {
         try {
             const currentUserId = req.user?.user_id;
-            const blogIdParam = req.params.blog_id;
-            const blogId = Array.isArray(blogIdParam) ? blogIdParam[0] : blogIdParam;
+            if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
+
+            const parsedBlog = blogIdParamSchema.safeParse(req.params);
+            if (!parsedBlog.success) return res.status(400).json({ message: "invalid blog id" });
+
+            const parsedComment = commentSchema.safeParse(req.body ?? {});
+            if (!parsedComment.success) return res.status(400).json({ message: "invalid input" });
 
             await commentService.sendCommentService({
-                blog_id: blogId,
-                current_user_id: currentUserId!,
-                text: req.body.text as string
+                blog_id: parsedBlog.data.blog_id,
+                current_user_id: currentUserId,
+                text: parsedComment.data
             });
 
-            res.json({ message: "new comment added" });
+            res.status(200).json({ message: "new comment added" });
         } catch (error) {
             res.json({ message: error || "something went wrong" });
         }
@@ -23,18 +30,19 @@ class CommentController {
 
     async showAllCommentsController(req: Request, res: Response) {
         try {
-            const blogIdParam = req.params.blog_id;
-            const stringBlogId = Array.isArray(blogIdParam) ? blogIdParam[0] : blogIdParam;
+            const parsedBlog = blogIdParamSchema.safeParse(req.params);
+            if (!parsedBlog.success) return res.status(400).json({ message: "invalid blog id" });
 
-            const page = parseInt(req.query.page as string) || 1;
-            const limit = parseInt(req.query.limit as string) || 16;
-            const skip = (page - 1) * limit;
+            const parsedPagination = commentPaginationSchema.safeParse(req.query ?? {});
+            if (!parsedPagination.success) return res.status(400).json({ message: "invalid pagination" });
 
             const comments = await commentService.getAllCommentsInOneBlog({
-                blog_id: stringBlogId, limit: limit, skip: skip
+                blog_id: parsedBlog.data.blog_id, 
+                limit: parsedPagination.data.limit, 
+                skip: parsedPagination.data.skip
             });
 
-            res.json(comments);
+            res.status(200).json(comments);
         } catch (error) {
             res.json({ message: error || "something went wrong" });
         }
@@ -42,11 +50,11 @@ class CommentController {
 
     async showCommentsTotalController(req: Request, res: Response) {
         try {
-            const blogIdParam = req.params.blog_id;
-            const stringBlogId = Array.isArray(blogIdParam) ? blogIdParam[0] : blogIdParam;
+            const parsedBlog = blogIdParamSchema.safeParse(req.params);
+            if (!parsedBlog.success) return res.status(400).json({ message: "invalid blog id" });
 
-            const total = await commentService.getCommentsTotalInOneBlog(stringBlogId);
-            res.json(total);
+            const total = await commentService.getCommentsTotalInOneBlog(parsedBlog.data.blog_id);
+            res.status(200).json(total);
         } catch (error) {
             res.json({ message: error || "something went wrong" });
         }

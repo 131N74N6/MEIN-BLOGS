@@ -7,7 +7,8 @@ import { ChangeUserIntrf, UserIntrf } from "../models/user.model";
 import { uploadToCloudinary } from "../utils/cloudinary.utility";
 import { v2 } from "cloudinary";
 
-const allowedFile = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+const maxFileSize = 5 * 1024 * 1024;
 
 class UserService {
     private assertUserId(id: unknown): string {
@@ -18,43 +19,36 @@ class UserService {
         return id;
     }
 
-    private assertEmail(value: unknown): string {
-        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-        if (typeof value !== "string" || value === undefined || value === "" || value === null) {
+    private assertEmail(email: unknown): string {
+        if (typeof email !== "string" || email === undefined || email === "" || email === null) {
             throw new ApiError(400, "invalid email");
         }
 
-        const trimmed = value.trim();
-
+        const trimmed = email.trim();
         if (trimmed.length > 254) throw new ApiError(400, "invalid email");
-        if (!regex.test(trimmed)) throw new ApiError(400, "invalid email");
 
         return trimmed;
     }
 
-    private assertPassword(password: unknown, min: number, max: number): string {
-        if (typeof password !== "string" || password === undefined || password === "" || password === null) {
-            throw new ApiError(400, "invalid password");
+    private assertProfilePicture(file: Express.Multer.File | undefined): Express.Multer.File {
+        if (!file) throw new ApiError(400, "image is required");
+
+        if (!allowedFileType.includes(file.mimetype)) {
+            throw new ApiError(400, "this file is not allowed");
         }
 
-        const trimmed = password.trim();
-        if (trimmed.length < min || trimmed.length > max) throw new ApiError(400, "invalid password");
+        if (file.size > maxFileSize) throw new ApiError(400, "file size is too large");
 
-        return trimmed;
+        return file;
     }
 
-    private assertUsername(username: unknown, min: number, max: number): string {
-        const regex = /^[a-zA-Z0-9_]+$/;
-
-        if (typeof username !== "string" || username === undefined || username === "" || username === null) {
-            throw new ApiError(400, "invalid username");
+    private assertString(value: unknown, fieldName: string, min: number, max: number): string {
+        if (typeof value !== "string" || value === undefined || value === "" || value === null) {
+            throw new ApiError(400, `invalid ${fieldName}`);
         }
 
-        const trimmed = username.trim();
-
-        if (!regex.test(trimmed)) throw new ApiError(400, "invalid username");
-        if (trimmed.length < min || trimmed.length > max) throw new ApiError(400, "invalid username");
+        const trimmed = value.trim();
+        if (trimmed.length < min || trimmed.length > max) throw new ApiError(400, `invalid ${fieldName}`);
 
         return trimmed;
     }
@@ -72,38 +66,28 @@ class UserService {
     
     async changeUserService(props: ChangeUserIntrf) {
         const currentUserId = this.assertUserId(props.currentUserId);
-
-        if (props.username !== undefined && typeof props.username !== "string") {
-            throw new ApiError(400, "invalid username");
-        }
+        const username = this.assertString(props.username, "username", 3, 30);
+        const newProfilePicture = this.assertProfilePicture(props.selectedImage);
 
         const user = await userRepository.getCurrentUser(currentUserId);
         if (!user) throw new ApiError(404, "user not found");
 
-        let newProfileImage = user.profile_picture;
-
-        if (props.selectedImage) {
-            if (!allowedFile.includes(props.selectedImage.mimetype)) {
-                throw new ApiError(400, "this file type is not allowed");
-            }
-
-            if (user.profile_picture && user.profile_picture.public_id) {
-                await v2.uploader.destroy(user.profile_picture.public_id, { 
-                    resource_type: user.profile_picture.resource_type 
-                });
-            }
-
-            newProfileImage = await uploadToCloudinary({
-                file_buffer: props.selectedImage.buffer,
-                foldername: "user_profile",
-                mimetype: props.selectedImage.mimetype,
-                original_name: props.selectedImage.originalname
+        if (user.profile_picture && user.profile_picture.public_id) {
+            await v2.uploader.destroy(user.profile_picture.public_id, { 
+                resource_type: user.profile_picture.resource_type 
             });
         }
 
+        const newProfileImage = await uploadToCloudinary({
+            file_buffer: newProfilePicture.buffer,
+            foldername: "user_profile",
+            mimetype: newProfilePicture.mimetype,
+            original_name: newProfilePicture.originalname
+        });
+
         await userRepository.changeUser(user._id.toString(), {
             profile_picture: newProfileImage,
-            username: props.username?.trim() || user.username
+            username: username.trim() || user.username
         });
     }
 
@@ -124,6 +108,7 @@ class UserService {
                     resource_type: media.resource_type 
                 });
             });
+            
             operations.push(...deleteFromCloudinary);
         }
 
@@ -161,8 +146,8 @@ class UserService {
     }
 
     async signInService(props: Pick<UserIntrf, "password" | "username">) {
-        const password = this.assertPassword(props.password, 8, 72);
-        const username = this.assertUsername(props.username, 3, 30);
+        const password = this.assertString(props.password, "password", 8, 72);
+        const username = this.assertString(props.username, "username", 3, 30);
 
         const user = await userRepository.getCurrentUserByUsername(username);
         if (!user) throw new ApiError(401, "invalid credentials");
@@ -174,8 +159,8 @@ class UserService {
     }
 
     async signUpService(props: Omit<UserIntrf, "profile_picture">) {
-        const password = this.assertPassword(props.password, 8, 72);
-        const username = this.assertUsername(props.username, 3, 30);
+        const password = this.assertString(props.password, "password", 8, 72);
+        const username = this.assertString(props.username, "username", 3, 30);
         const email = this.assertEmail(props.email);
 
         const [isUsernameExist, isEmailExist] = await Promise.all([

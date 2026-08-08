@@ -14,10 +14,7 @@ class BlogService {
         if (!file) throw new ApiError(400, "image file is required");
 
         if (!allowedFileType.includes(file.mimetype)) {
-            throw new ApiError(
-                400,
-                "only images are allowed such as .jpg, .jpeg, .png, .webp, and .avif"
-            );
+            throw new ApiError(400, "this file is not allowed");
         }
 
         if (file.size > maxFileSize) throw new ApiError(400, "file size is too large");
@@ -26,7 +23,7 @@ class BlogService {
     }
 
     private assertLanguage(language: unknown): string {
-        if (language === undefined || language === null || language === "") return "invalid language";
+        if (language === undefined || language === null || language === "") throw new ApiError(400, "invalid language");
         if (typeof language !== "string") throw new ApiError(400, "invalid language");
 
         const trimmed = language.trim();
