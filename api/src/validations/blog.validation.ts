@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-export const language = ["id", "en", "jp", "de"] as const;
-
 export const objectIdSchema = z
 .string()
 .regex(/^[0-9a-fA-F]{24}$/, "invalid object id");
@@ -19,7 +17,8 @@ export const contentSchema = z
 .max(30000, "blog content is too long");
 
 export const languageSchema = z
-.enum(language);
+.string()
+.min(1, "please select the language");
 
 export const createBlogSchema = z.object({
     content: contentSchema,
