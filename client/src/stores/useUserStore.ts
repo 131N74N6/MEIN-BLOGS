@@ -55,8 +55,8 @@ export interface UserProfileState {
 }
 
 interface UserWindowState {
-    currentUserId: string | undefined;
-    setCurrentUserId: (currentUserId: string | undefined) => void;
+    currentUserId: string;
+    setCurrentUserId: (currentUserId: string) => void;
 
     resetUserWindowState: () => void;
 }
@@ -114,11 +114,11 @@ const useUserProfileSlice: StateCreator<UserProfileState> = (set) => ({
 });
 
 const useUserWindowSlice: StateCreator<UserWindowState> = (set) => ({
-    currentUserId: undefined,
+    currentUserId: "",
     setCurrentUserId: (currentUserId) => set({ currentUserId }),
 
     resetUserWindowState: () => set({
-        currentUserId: undefined
+        currentUserId: ""
     })
 });
 

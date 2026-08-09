@@ -18,7 +18,8 @@ class BlogRepository {
         });
 
         const newBlog = new Blogs({
-            blog_owner: user[0].username,
+            blog_owner_name: user[0].username,
+            blog_owner_profile_picture: user[0].profile_picture,
             blog_owner_id: user[0]._id,
             content: props.content,
             media: blogMedia,
@@ -45,25 +46,30 @@ class BlogRepository {
     }
 
     async getAllCurrentUserBlogs(currentUserId: string) {
-        return await Blogs.find({ blog_owner_id: currentUserId }).lean();
+        return await Blogs.find(
+            { blog_owner_id: currentUserId },
+            { blog_owner_id: 0, blog_owner_profile_picture: 0 }
+        ).lean();
     }
 
     async getAllCurrentUserBlogsWithPagination(props: ShowAllUserBlogsIntrf) {
-        const blogs = await Blogs.find({ blog_owner_id: props.current_user_id })
+        return await Blogs.find(
+            { blog_owner_id: props.current_user_id },
+            { blog_owner_id: 0, blog_owner_profile_picture: 0 }
+        )
         .limit(props.limit)
         .skip(props.skip)
         .lean();
-
-        return blogs;
     }
 
     async getAllBlogsWithPagination(props: ShowAllBlogsIntrf) {
-        const blogs = await Blogs.find()
+        return await Blogs.find(
+            {},
+            { blog_owner_id: 0, blog_owner_profile_picture: 0 }
+        )
         .limit(props.limit)
         .skip(props.skip)
         .lean();
-        
-        return blogs;
     }
 
     async getBlogById(id: string) {

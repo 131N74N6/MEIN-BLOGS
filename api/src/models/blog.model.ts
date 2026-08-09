@@ -2,7 +2,14 @@ import mongoose, { Schema, Types } from "mongoose";
 
 export interface BlogIntrf {
     blog_owner_id: Types.ObjectId;
-    blog_owner: string;
+    blog_owner_profile_picture: {
+        filename: string;
+        filetype: string;
+        public_id: string;
+        resource_type: string;
+        url: string;
+    }
+    blog_owner_name: string;
     content: string;
     language: string;
     media: {
@@ -34,7 +41,14 @@ export interface ShowAllUserBlogsIntrf extends ShowAllBlogsIntrf {
 
 const blogSchema = new Schema<BlogIntrf>({
     blog_owner_id: { type: Schema.Types.ObjectId, required: true },
-    blog_owner: { type: String, required: true },
+    blog_owner_profile_picture: {
+        filename: { type: String },
+        filetype: { type: String },
+        public_id: { type: String },
+        resource_type: { type: String },
+        url: { type: String }
+    },
+    blog_owner_name: { type: String, required: true },
     content: { type: String, required: true },
     language: { type: String },
     media: {

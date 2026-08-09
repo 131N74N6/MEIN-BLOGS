@@ -13,7 +13,7 @@ userRouters.get("/show", verifyToken, userController.showProfileController);
 
 userRouters.post("/sign-in", authRateLimiter, userController.signInController);
 
-userRouters.post("/sign-out", userController.signOutController);
+userRouters.post("/sign-out", verifyToken, userController.signOutController);
 
 userRouters.post("/sign-up", authRateLimiter, userController.signUpController);
 

@@ -99,7 +99,6 @@ class UserService {
         
         const operations: Promise<unknown>[] = [];
         const userBlogs = await userRepository.getCurrentUserBlogs(currentUserId);
-        const userBlogsIds = userBlogs.map(userBlog => userBlog._id.toString());
         const userBlogsMedia = userBlogs.map(userBlog => userBlog.media);
 
         if (userBlogsMedia.length > 0) {
@@ -122,11 +121,7 @@ class UserService {
 
         if (operations.length > 0) await Promise.all(operations);
 
-        await Promise.all([
-            userRepository.deleteCommentsInUserBlogs(userBlogsIds),
-            userRepository.deleteUserBlogs(user._id.toString()),
-            userRepository.deleteUser(user._id.toString())
-        ]);
+        await userRepository.deleteUser(user._id.toString());
     }
 
     async deleteCurrentUserOldProfile(current_user_id: string) {
@@ -141,7 +136,7 @@ class UserService {
             v2.uploader.destroy(user.profile_picture.public_id, {
                 resource_type: user.profile_picture.resource_type
             }),
-            userRepository.deleteUserOldProfile(currentUserId)
+            userRepository.deleteCurrentUserOldProfile(currentUserId)
         ]);
     }
 

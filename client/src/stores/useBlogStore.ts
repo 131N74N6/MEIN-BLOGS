@@ -9,6 +9,12 @@ export interface BlogInfoState {
     media: File | null;
     setMedia: (media: File | null) => void;
 
+    mediaUrl: string | null;
+    setMediaUrl: (mediaUrl: string | null) => void;
+
+    language: string;
+    setLanguage: (language: string) => void;
+
     resetBlogInfoState: () => void;
 
     title: string;
@@ -28,9 +34,17 @@ const useBlogInfoSlice: StateCreator<BlogInfoState> = (set) => ({
     media: null,
     setMedia: (media: File | null) => set({ media }),
 
+    mediaUrl: null,
+    setMediaUrl: (mediaUrl: string | null) => set({ mediaUrl }),
+
+    language: "",
+    setLanguage: (language: string) => set({ language }),
+
     resetBlogInfoState: () => set({
         content: "",
         media: null,
+        mediaUrl: null,
+        language: "",
         title: ""
     }),
 

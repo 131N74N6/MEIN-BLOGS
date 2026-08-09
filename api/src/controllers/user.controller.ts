@@ -39,7 +39,7 @@ class UserController {
 
             await userService.deleteCurrentUserOldProfile(currentUserId);
 
-            res.json({ message: "successfully delete old profile picture" });
+            res.status(200).json({ message: "successfully delete old profile picture" });
         } catch (error) {
             return errorHandling(res, error);
         }
@@ -52,7 +52,7 @@ class UserController {
             
             await userService.deleteUserService(currentUserId);
 
-            res.json({ message: "successfully delete user" });
+            res.status(200).json({ message: "successfully delete user" });
         } catch (error) {
             return errorHandling(res, error);
         }
@@ -63,9 +63,9 @@ class UserController {
             const parsed = signInSchema.safeParse(req.body ?? {});
             if (!parsed.success) return res.status(400).json({ message: "invalid input" });
 
-            const token = await userService.signInService(parsed.data);
+            const signInToken = await userService.signInService(parsed.data);
 
-            res.cookie("token", token, {
+            res.cookie("token", signInToken, {
                 httpOnly: true,
                 maxAge: 86400000,
                 path: "/",
@@ -73,7 +73,7 @@ class UserController {
                 secure: process.env.NODE_ENV === "production"
             });
 
-            res.json({ message: "sign in confirmed" });
+            res.status(200).json({ message: "sign in success" });
         } catch (error) {
             return errorHandling(res, error);
         }
@@ -88,7 +88,7 @@ class UserController {
                 secure: process.env.NODE_ENV === "production"
             });
 
-            res.json({ message: "user sign out successfully" });
+            res.status(200).json({ message: "user sign out successfully" });
         } catch (error) {
             return errorHandling(res, error);
         }
@@ -109,7 +109,7 @@ class UserController {
                 secure: process.env.NODE_ENV === "production"
             });
 
-            res.json({ message: "sign up confirmed" });
+            res.status(200).json({ message: "sign up confirmed" });
         } catch (error) {
             return errorHandling(res, error);
         }

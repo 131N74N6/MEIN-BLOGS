@@ -1,4 +1,4 @@
-import { db } from "./services/mongodb.sevice";
+import { db } from "./utils/mongodb.utility";
 import cors from "cors";
 import express from "express";
 import cookieParser from "cookie-parser";

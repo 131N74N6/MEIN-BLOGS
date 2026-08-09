@@ -4,7 +4,21 @@ import { Comments } from "../models/comment.model";
 
 class UserRepository {
     async changeUser(id: string, userData: Partial<UserIntrf>) {
-        return await Users.updateOne({ _id: id }, { $set: userData });
+        return await Promise.all([
+            Blogs.updateMany({ blog_owner_id: id }, {
+                $set: { 
+                    blog_owner_profile_picture: userData.profile_picture,
+                    blog_owner_name: userData.username 
+                }
+            }),
+            Comments.updateMany({ user_id: id }, { 
+                $set: { 
+                    profile_picture: userData.profile_picture,
+                    username: userData.username
+                } 
+            }),
+            Users.updateOne({ _id: id }, { $set: userData })
+        ]);
     }
 
     async createNewUser(userData: Partial<UserIntrf>) {
@@ -13,23 +27,19 @@ class UserRepository {
     }
 
     async deleteCurrentUserOldProfile(id: string) {
-        return await Users.updateOne({ _id: id }, { $set: { profile_picture: null } });
+        return await Promise.all([
+            Blogs.updateMany({ blog_owner_id: id }, { $set: { blog_owner_profile_picture: null } }),
+            Comments.updateMany({ user_id: id }, { $set: { profile_picture: null } }),
+            Users.updateOne({ _id: id }, { $set: { profile_picture: null } })
+        ]);
     }
 
     async deleteUser(id: string) {
-        return await Users.deleteOne({ _id: id });
-    }
-
-    async deleteUserBlogs(userId: string) {
-        return await Blogs.deleteMany({ blog_owner_id: userId });
-    }
-
-    async deleteUserOldProfile(id: string) {
-        return await Users.updateOne({ _id: id }, { $set: { profile_picture: null } });
-    }
-
-    async deleteCommentsInUserBlogs(blogsIds: string[]) {
-        return await Comments.deleteMany({ _id: { $in: blogsIds }});
+        return await Promise.all([
+            Blogs.deleteMany({ blog_owner_id: id }),
+            Comments.deleteMany({ user_id: id }),
+            Users.deleteOne({ _id: id })
+        ]);
     }
 
     async getCurrentUser(currentUserId: string) {
@@ -49,12 +59,6 @@ class UserRepository {
     async getCurrentUserByUsername(username: string) {
         const currentUsername = await Users.findOne({ username: { $eq: username } }).lean();
         return currentUsername;
-    }
-
-    async getCurrentUserWithPasword(currentUserId: string) {
-        const user = await Users.findOne({ _id: currentUserId }).lean();
-        if (!user) throw new Error("user not found");
-        return user;
     }
 }
 
