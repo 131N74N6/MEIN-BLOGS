@@ -192,7 +192,7 @@ export default function useBlogService() {
         queryKey: [`user-blogs-${currentUserId}`],
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
             try {
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/blogs/show?page=${pageParam}&limit=${16}`, {
+                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/blogs/mine/show-all?page=${pageParam}&limit=${16}`, {
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     method: "GET"
@@ -212,7 +212,7 @@ export default function useBlogService() {
         queryKey: [`blog-content-${blogId}`],
         queryFn: async () => {
             try {
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/blogs/detail/${blogId}`, {
+                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/blogs/show/${blogId}`, {
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     method: "GET"

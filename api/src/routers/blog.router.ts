@@ -5,18 +5,22 @@ import { uploadFile } from "../middlewares/upload.middleware";
 
 const blogRouters = Router();
 
-blogRouters.delete("/rm-all", verifyToken, blogController.deleteAllBlogsController);
+blogRouters.delete("/rm-all", verifyToken, blogController.deleteAllBlogs);
 
-blogRouters.delete("/rm/:blog_id", verifyToken, blogController.deleteOneBlogController);
+blogRouters.delete("/rm/:blog_id", verifyToken, blogController.deleteOneBlog);
 
-blogRouters.get("/show-all", verifyToken, blogController.getAllBlogsController);
+blogRouters.get("/show-all", verifyToken, blogController.getAllBlogs);
 
-blogRouters.get("/show", verifyToken, blogController.getAllUserBlogsController);
+blogRouters.get("/mine/show-all", verifyToken, blogController.getAllUserBlogs);
 
-blogRouters.get("/detail/:blog_id", verifyToken, blogController.getBlogContentByIdController);
+blogRouters.get("/viewers/:blog_id", verifyToken, blogController.getBlogViewerByPagination);
 
-blogRouters.post("/create", verifyToken, uploadFile, blogController.createNewBlogController);
+blogRouters.get("/viewers/total/:blog_id", verifyToken, blogController.getBlogViewerTotal);
 
-blogRouters.post("/generate", verifyToken, blogController.generateNewBlogController);
+blogRouters.get("/show/:blog_id", verifyToken, blogController.getBlogContentById);
+
+blogRouters.post("/create", verifyToken, uploadFile, blogController.createNewBlog);
+
+blogRouters.post("/generate", verifyToken, blogController.generateNewBlog);
 
 export default blogRouters;

@@ -8,7 +8,13 @@ class UserRepository {
             Blogs.updateMany({ blog_owner_id: id }, {
                 $set: { 
                     blog_owner_profile_picture: userData.profile_picture,
-                    blog_owner_name: userData.username 
+                    blog_owner_name: userData.username
+                }
+            }),
+            Blogs.updateMany({ "viewers.user_id": id }, {
+                $set: { 
+                    "viewers.$.profile_picture": userData.profile_picture,
+                    "viewers.$.username": userData.username
                 }
             }),
             Comments.updateMany({ user_id: id }, { 
@@ -28,6 +34,7 @@ class UserRepository {
 
     async deleteCurrentUserOldProfile(id: string) {
         return await Promise.all([
+            Blogs.updateMany({ "viewers.user_id": id }, { $set: { "viewers.$.profile_picture": null } }),
             Blogs.updateMany({ blog_owner_id: id }, { $set: { blog_owner_profile_picture: null } }),
             Comments.updateMany({ user_id: id }, { $set: { profile_picture: null } }),
             Users.updateOne({ _id: id }, { $set: { profile_picture: null } })
@@ -36,6 +43,9 @@ class UserRepository {
 
     async deleteUser(id: string) {
         return await Promise.all([
+            Blogs.updateMany({ "viewers.user_id": id }, {
+                $pull: { viewers: { user_id: id } }
+            }),
             Blogs.deleteMany({ blog_owner_id: id }),
             Comments.deleteMany({ user_id: id }),
             Users.deleteOne({ _id: id })

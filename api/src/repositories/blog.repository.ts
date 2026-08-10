@@ -1,4 +1,4 @@
-import { Blogs, NewBlogIntrf, ShowAllBlogsIntrf, ShowAllUserBlogsIntrf } from "../models/blog.model";
+import { Blogs, BlogViewerIntrf, NewBlogIntrf, ShowAllBlogsIntrf, ShowAllUserBlogsIntrf } from "../models/blog.model";
 import { uploadToCloudinary } from "../utils/cloudinary.utility";
 import { Users } from "../models/user.model";
 import { Comments } from "../models/comment.model";
@@ -23,39 +23,48 @@ class BlogRepository {
             blog_owner_id: user[0]._id,
             content: props.content,
             media: blogMedia,
-            title: props.title
+            title: props.title,
         });
 
-        return await newBlog.save();
+        return await Promise.all([
+            newBlog.save(),
+            Blogs.updateOne({ _id: newBlog._id }, {
+                $addToSet: {
+                    viewers: {
+                        user_id: user[0]._id,
+                        username: user[0].username,
+                        profile_picture: user[0].profile_picture,
+                    }
+                }
+            })
+        ]);
     }
 
-    async deleteAllBlogs(currentUserId: string) {
-        return await Blogs.deleteMany({ blog_owner_id: currentUserId });
+    async deleteAllBlogs(blogId: string[], currentUserId: string) {
+        return await Promise.all([
+            Comments.deleteMany({ blog_id: { $in: blogId } }),
+            Blogs.deleteMany({ blog_owner_id: currentUserId })
+        ]);
     }
 
-    async deleteAllComments(blogsIds: string[]) {
-        return await Comments.deleteMany({ blog_id: { $in: blogsIds } });
-    }
-
-    async deleteAllCommentsInOneBlog(blogId: string) {
-        return await Comments.deleteMany({ blog_id: blogId });
-    }
-
-    async deleteOneBlog(id: string) {
-        return await Blogs.deleteOne({ _id: id });
+    async deleteOneBlog(blogId: string) {
+        return await Promise.all([
+            Comments.deleteMany({ blog_id: blogId }),
+            Blogs.deleteOne({ _id: blogId })
+        ]);
     }
 
     async getAllCurrentUserBlogs(currentUserId: string) {
         return await Blogs.find(
             { blog_owner_id: currentUserId },
-            { blog_owner_id: 0, blog_owner_profile_picture: 0 }
+            { blog_owner_id: 0, blog_owner_profile_picture: 0, viewers: 0 }
         ).lean();
     }
 
     async getAllCurrentUserBlogsWithPagination(props: ShowAllUserBlogsIntrf) {
         return await Blogs.find(
             { blog_owner_id: props.current_user_id },
-            { blog_owner_id: 0, blog_owner_profile_picture: 0 }
+            { blog_owner_id: 0, blog_owner_profile_picture: 0, viewers: 0 }
         )
         .limit(props.limit)
         .skip(props.skip)
@@ -65,15 +74,47 @@ class BlogRepository {
     async getAllBlogsWithPagination(props: ShowAllBlogsIntrf) {
         return await Blogs.find(
             {},
-            { blog_owner_id: 0, blog_owner_profile_picture: 0 }
+            { blog_owner_id: 0, blog_owner_profile_picture: 0, viewers: 0 }
         )
         .limit(props.limit)
         .skip(props.skip)
         .lean();
     }
 
-    async getBlogById(id: string) {
-        return await Blogs.findOne({ _id: id }).lean();
+    async getBlogById(blogId: string) {
+        return await Blogs.findOne({ _id: blogId }).lean();
+    }
+
+    async getBlogViewerWithPagination(props: BlogViewerIntrf) {
+        return await Blogs.find({ _id: props.blog_id }, { viewers: 1 })
+        .limit(props.limit)
+        .skip(props.skip)
+        .lean();
+    }
+
+    async getBlogViewerTotal(blogId: string) {
+        return await Blogs.aggregate([
+            { $match: { _id: blogId } },
+            { $project: {
+                viewers: 1,
+                viewers_total: { $size: "$viewers" }
+            }}
+        ]);
+    }
+
+    async updateBlogViewer(blogId: string, currentUserId: string) {
+        const blog = await Blogs.find({ _id: blogId }, { _id: 1 });
+        const user = await Users.find({ _id: currentUserId }, { email: 0, password: 0 });
+
+        return await Blogs.updateOne({ _id: blog[0]._id }, {
+            $addToSet: { 
+                viewers: {
+                    user_id: user[0]._id,
+                    username: user[0].username,
+                    profile_picture: user[0].profile_picture,
+                }
+            }
+        });
     }
 }
 

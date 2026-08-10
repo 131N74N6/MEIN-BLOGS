@@ -2,7 +2,7 @@ import blogRepository from "../repositories/blog.repository";
 import mongoose from "mongoose";
 import { ApiError } from "../errors/api.error";
 import { generateBlogContent } from "../utils/ai.utility";
-import { NewBlogIntrf, ShowAllBlogsIntrf, ShowAllUserBlogsIntrf } from "../models/blog.model";
+import { BlogViewerIntrf, NewBlogIntrf, ShowAllBlogsIntrf, ShowAllUserBlogsIntrf } from "../models/blog.model";
 import { v2 } from "cloudinary";
 
 const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
@@ -23,7 +23,10 @@ class BlogService {
     }
 
     private assertLanguage(language: unknown): string {
-        if (language === undefined || language === null || language === "") throw new ApiError(400, "invalid language");
+        if (language === undefined || language === null || language === "") {
+            throw new ApiError(400, "invalid language");
+        }
+        
         if (typeof language !== "string") throw new ApiError(400, "invalid language");
 
         const trimmed = language.trim();
@@ -51,7 +54,7 @@ class BlogService {
         return trimmed;
     }
 
-    async createNewBlogService(props: NewBlogIntrf) {
+    async createNewBlog(props: NewBlogIntrf) {
         const blogContent = this.assertString(props.content, "content", 1, 30000);
         const blogMedia = this.assertBlogMedia(props.media);
         const currentUserId = this.assertObjectId(props.current_user_id, "current user id");
@@ -67,7 +70,7 @@ class BlogService {
         });
     }
 
-    async deleteAllBlogsService(currentUserId: string) {
+    async deleteAllBlogs(currentUserId: string) {
         const operation = [];
         const blogs = await blogRepository.getAllCurrentUserBlogs(currentUserId);
         if (blogs.length === 0) throw new ApiError(404, "blogs not found");
@@ -87,13 +90,10 @@ class BlogService {
 
         if (operation.length > 0) await Promise.all(operation);
         
-        await Promise.all([
-            blogRepository.deleteAllComments(blogsIds),
-            blogRepository.deleteAllBlogs(currentUserId)
-        ]);
+        await blogRepository.deleteAllBlogs(blogsIds, currentUserId);
     }
 
-    async deleteOneBlogService(current_user_id: string, id: string) {
+    async deleteOneBlog(current_user_id: string, id: string) {
         const currentUserId = this.assertObjectId(current_user_id, "current user id");
         const blog = await blogRepository.getBlogById(id);
 
@@ -107,12 +107,11 @@ class BlogService {
             v2.uploader.destroy(blog.media.public_id, { 
                 resource_type: blog.media.resource_type 
             }),
-            blogRepository.deleteAllCommentsInOneBlog(id),
             blogRepository.deleteOneBlog(id)
         ]);
     }
 
-    async generateNewBlogService(props: Pick<NewBlogIntrf, 'language' | 'media' | 'title'>) {
+    async generateNewBlog(props: Pick<NewBlogIntrf, 'language' | 'media' | 'title'>) {
         const blogMedia = this.assertBlogMedia(props.media);
         const blogLanguage = this.assertLanguage(props.language);
         const blogTitle = this.assertString(props.title, "title", 3, 180);
@@ -127,11 +126,11 @@ class BlogService {
         return generatedContent;
     }
 
-    async getAllBlogsService(props: ShowAllBlogsIntrf) {
+    async getAllBlogs(props: ShowAllBlogsIntrf) {
         return await blogRepository.getAllBlogsWithPagination(props);
     }
 
-    async getAllCurrentUserBlogsService(props: ShowAllUserBlogsIntrf) {
+    async getAllCurrentUserBlogs(props: ShowAllUserBlogsIntrf) {
         const currentUserId = this.assertObjectId(props.current_user_id, "current user id");
 
         return await blogRepository.getAllCurrentUserBlogsWithPagination({
@@ -141,13 +140,34 @@ class BlogService {
         });
     }
 
-    async getBlogContentByIdService(id: string) {
+    async getBlogContentById(id: string) {
         const blogId = this.assertObjectId(id, "blog id");
         const blogContent = await blogRepository.getBlogById(blogId);
 
         if (!blogContent) throw new ApiError(404, "blog not found");
         
         return blogContent;
+    }
+
+    async getBlogViewerWithPagination(props: BlogViewerIntrf) {
+        const blogId = this.assertObjectId(props.blog_id, "blog id");
+        
+        return await blogRepository.getBlogViewerWithPagination({
+            blog_id: blogId, limit: props.limit, skip: props.skip
+        });
+    }
+
+    async getBlogViewerTotal(blog_id: string) {
+        const blogId = this.assertObjectId(blog_id, "blog id");
+        
+        return await blogRepository.getBlogViewerTotal(blogId);
+    }
+
+    async updateBlogView(blog_id: string, current_user_id: string) {
+        const currentUserId = this.assertObjectId(current_user_id, "current user id");
+        const blogId = this.assertObjectId(blog_id, "blog id");
+
+        await blogRepository.updateBlogViewer(blogId, currentUserId);
     }
 }
 
