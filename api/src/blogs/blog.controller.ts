@@ -6,8 +6,8 @@ import {
     blogIdParamSchema,
     createBlogSchema,
     generateBlogSchema
-} from "../validations/blog.validation";
-import blogService from "../services/blog.service";
+} from "../blogs/blog.validation";
+import blogService from "./blog.service";
 
 class BlogController {
     async createNewBlog(req: AuthRequest, res: Response) {

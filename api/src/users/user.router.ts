@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authRateLimiter, verifyToken } from "../middlewares/auth.middleware";
-import userController from "../controllers/user.controller";
+import userController from "./user.controller";
 import { uploadFile } from "../middlewares/upload.middleware";
 
 const userRouters = Router();

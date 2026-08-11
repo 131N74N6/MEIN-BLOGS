@@ -1,6 +1,6 @@
-import commentRepository from "../repositories/comment.repository";
+import commentRepository from "./comment.repository";
 import mongoose from "mongoose";
-import { NewCommentIntrf, ShowCommentIntrf } from "../models/comment.model";
+import { NewCommentIntrf, ShowCommentIntrf } from "./comment.model";
 import { ApiError } from "../errors/api.error";
 
 class CommentService {

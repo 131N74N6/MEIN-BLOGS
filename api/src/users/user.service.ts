@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
-import userRepository from "../repositories/user.repository";
+import userRepository from "./user.repository";
 import { ApiError } from "../errors/api.error";
-import { ChangeUserIntrf, UserIntrf } from "../models/user.model";
+import { ChangeUserIntrf, UserIntrf } from "./user.model";
 import { uploadToCloudinary } from "../utils/cloudinary.utility";
 import { v2 } from "cloudinary";
 
@@ -12,9 +12,10 @@ const maxFileSize = 5 * 1024 * 1024;
 
 class UserService {
     private assertUserId(id: unknown): string {
-        if (typeof id !== "string" || !mongoose.isValidObjectId(id)) {
-            throw new ApiError(401, "unauthorized");
-        }
+        const isValid = typeof id !== "string" || typeof id === "undefined" || id === undefined || 
+        id === null || id === "" || !mongoose.isValidObjectId(id);
+
+        if (isValid) throw new ApiError(401, "unauthorized");
 
         return id;
     }

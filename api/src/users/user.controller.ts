@@ -1,7 +1,7 @@
-import userService from "../services/user.service";
+import userService from "./user.service";
 import { errorHandling } from "../errors/api.error";
 import { AuthRequest } from "../middlewares/auth.middleware";
-import { changeUserSchema, signInSchema, signUpSchema } from "../validations/user.validation";
+import { changeUserSchema, signInSchema, signUpSchema } from "./user.validation";
 import { Request, Response } from "express";
 
 class UserController {

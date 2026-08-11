@@ -1,10 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import SignUp from "./pages/SignUp";
-import SignIn from "./pages/SignIn";
-import User from "./pages/User";
-import Blogs from "./pages/Blogs";
-import MakeBlog from "./pages/MakeBlog";
+import SignUp from "./signup/page";
+import SignIn from "./signin/page";
+import User from "./users/page";
+import Blogs from "./blogs/page";
+import MakeBlog from "./blogs/create/page";
 
 const queryClient = new QueryClient({
     defaultOptions: {

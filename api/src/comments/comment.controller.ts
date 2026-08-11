@@ -1,8 +1,8 @@
-import commentService from "../services/comment.service";
+import commentService from "./comment.service";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { Request, Response } from "express";
-import { commentSchema, commentPaginationSchema } from "../validations/comment.validation";
-import { blogIdParamSchema } from "../validations/blog.validation";
+import { commentSchema, commentPaginationSchema } from "./comment.validation";
+import { blogIdParamSchema } from "../blogs/blog.validation";
 
 class CommentController {
     async sendCommentController(req: AuthRequest, res: Response) {

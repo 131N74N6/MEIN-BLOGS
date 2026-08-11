@@ -1,6 +1,6 @@
-import { UserIntrf, Users } from "../models/user.model";
-import { Blogs } from "../models/blog.model";
-import { Comments } from "../models/comment.model";
+import { UserIntrf, Users } from "./user.model";
+import { Blogs } from "../blogs/blog.model";
+import { Comments } from "../comments/comment.model";
 
 class UserRepository {
     async changeUser(id: string, userData: Partial<UserIntrf>) {

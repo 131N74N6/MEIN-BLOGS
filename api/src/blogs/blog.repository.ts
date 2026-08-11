@@ -1,7 +1,7 @@
-import { Blogs, BlogViewerIntrf, NewBlogIntrf, ShowAllBlogsIntrf, ShowAllUserBlogsIntrf } from "../models/blog.model";
+import { Blogs, BlogViewerIntrf, NewBlogIntrf, ShowAllBlogsIntrf, ShowAllUserBlogsIntrf } from "./blog.model";
 import { uploadToCloudinary } from "../utils/cloudinary.utility";
-import { Users } from "../models/user.model";
-import { Comments } from "../models/comment.model";
+import { Users } from "../users/user.model";
+import { Comments } from "../comments/comment.model";
 
 class BlogRepository {
     async createNewBlog(props: NewBlogIntrf) {

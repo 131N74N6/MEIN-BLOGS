@@ -1,8 +1,8 @@
-import blogRepository from "../repositories/blog.repository";
+import blogRepository from "./blog.repository";
 import mongoose from "mongoose";
 import { ApiError } from "../errors/api.error";
 import { generateBlogContent } from "../utils/ai.utility";
-import { BlogViewerIntrf, NewBlogIntrf, ShowAllBlogsIntrf, ShowAllUserBlogsIntrf } from "../models/blog.model";
+import { BlogViewerIntrf, NewBlogIntrf, ShowAllBlogsIntrf, ShowAllUserBlogsIntrf } from "./blog.model";
 import { v2 } from "cloudinary";
 
 const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];

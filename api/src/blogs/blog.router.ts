@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyToken } from "../middlewares/auth.middleware";
-import blogController from "../controllers/blog.controller";
+import blogController from "./blog.controller";
 import { uploadFile } from "../middlewares/upload.middleware";
 
 const blogRouters = Router();

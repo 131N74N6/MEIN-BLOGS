@@ -1,5 +1,5 @@
-import { Comments, NewCommentIntrf, ShowCommentIntrf } from "../models/comment.model";
-import { Users } from "../models/user.model";
+import { Comments, NewCommentIntrf, ShowCommentIntrf } from "./comment.model";
+import { Users } from "../users/user.model";
 
 class CommentRepository {
     async createComment(props: NewCommentIntrf) {
