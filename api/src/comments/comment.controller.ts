@@ -10,16 +10,16 @@ class CommentController {
             const currentUserId = req.user?.user_id;
             if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
 
-            const parsedBlog = blogIdParamSchema.safeParse(req.params);
-            if (!parsedBlog.success) return res.status(400).json({ message: "invalid blog id" });
+            const blogId = blogIdParamSchema.safeParse(req.params);
+            if (!blogId.success) return res.status(400).json({ message: "invalid blog id" });
 
-            const parsedComment = commentSchema.safeParse(req.body ?? {});
-            if (!parsedComment.success) return res.status(400).json({ message: "invalid input" });
+            const newComment = commentSchema.safeParse(req.body ?? {});
+            if (!newComment.success) return res.status(400).json({ message: "invalid input" });
 
             await commentService.sendCommentService({
-                blog_id: parsedBlog.data.blog_id,
+                blog_id: blogId.data,
                 current_user_id: currentUserId,
-                text: parsedComment.data
+                text: newComment.data
             });
 
             res.status(200).json({ message: "new comment added" });
@@ -30,16 +30,16 @@ class CommentController {
 
     async showAllCommentsController(req: Request, res: Response) {
         try {
-            const parsedBlog = blogIdParamSchema.safeParse(req.params);
-            if (!parsedBlog.success) return res.status(400).json({ message: "invalid blog id" });
+            const blogId = blogIdParamSchema.safeParse(req.params);
+            if (!blogId.success) return res.status(400).json({ message: "invalid blog id" });
 
-            const parsedPagination = commentPaginationSchema.safeParse(req.query ?? {});
-            if (!parsedPagination.success) return res.status(400).json({ message: "invalid pagination" });
+            const commentPagination = commentPaginationSchema.safeParse(req.query ?? {});
+            if (!commentPagination.success) return res.status(400).json({ message: "invalid pagination" });
 
             const comments = await commentService.getAllCommentsInOneBlog({
-                blog_id: parsedBlog.data.blog_id, 
-                limit: parsedPagination.data.limit, 
-                skip: parsedPagination.data.skip
+                blog_id: blogId.data, 
+                limit: commentPagination.data.limit, 
+                skip: commentPagination.data.skip
             });
 
             res.status(200).json(comments);
@@ -50,10 +50,10 @@ class CommentController {
 
     async showCommentsTotalController(req: Request, res: Response) {
         try {
-            const parsedBlog = blogIdParamSchema.safeParse(req.params);
-            if (!parsedBlog.success) return res.status(400).json({ message: "invalid blog id" });
+            const blogId = blogIdParamSchema.safeParse(req.params);
+            if (!blogId.success) return res.status(400).json({ message: "invalid blog id" });
 
-            const total = await commentService.getCommentsTotalInOneBlog(parsedBlog.data.blog_id);
+            const total = await commentService.getCommentsTotalInOneBlog(blogId.data);
             res.status(200).json(total);
         } catch (error) {
             res.json({ message: error || "something went wrong" });

@@ -4,12 +4,13 @@ import { NewCommentIntrf, ShowCommentIntrf } from "./comment.model";
 import { ApiError } from "../errors/api.error";
 
 class CommentService {
-    private assertObjectId(id: unknown, fieldName: string): string {
-        if (typeof id !== "string" || !mongoose.isValidObjectId(id)) {
-            throw new ApiError(400, `invalid ${fieldName}`);
-        }
+    private assertObjectId(value: unknown, fieldName: string): string {
+        const isNotValid = value === undefined || value === null || value === "" || 
+        typeof value === "undefined" || typeof value !== "string" || !mongoose.isValidObjectId(value);
 
-        return id;
+        if (isNotValid) throw new ApiError(400, `invalid ${fieldName}`);
+
+        return value;
     }
 
     private assertText(value: unknown, min: number): string {

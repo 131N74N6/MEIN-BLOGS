@@ -1,6 +1,6 @@
 import mongoose, { Schema, Types } from "mongoose";
 
-export interface FollowersIntrf {
+export interface RelationshipIntrf {
     user_id: Types.ObjectId;
     username: string;
     profile_picture: {
@@ -13,14 +13,14 @@ export interface FollowersIntrf {
     followed_user_id: Types.ObjectId;
 }
 
-export interface FollowersUserIntrf {
+export interface UserRelationshipIntrf {
     current_user_id: string;
     followed_user_id: string;
     limit: number;
     skip: number;
 }
 
-const followersSchema = new Schema<FollowersIntrf>({
+const relationshipsSchema = new Schema<RelationshipIntrf>({
     user_id: { required: true },
     username: { type: String, required: true },
     profile_picture: {
@@ -38,4 +38,4 @@ const followersSchema = new Schema<FollowersIntrf>({
     }
 });
 
-export const Followers = mongoose.model("followers", followersSchema, "followers");
+export const Relationships = mongoose.model("relationships", relationshipsSchema, "relationships");

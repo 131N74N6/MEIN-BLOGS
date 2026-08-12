@@ -31,9 +31,7 @@ export const generateBlogSchema = z.object({
     title: titleSchema
 });
 
-export const blogIdParamSchema = z.object({
-    blog_id: objectIdSchema
-});
+export const blogIdParamSchema = objectIdSchema;
 
 export const blogPaginationSchema = z.object({
     page: z.coerce.number().int().min(1).default(1),

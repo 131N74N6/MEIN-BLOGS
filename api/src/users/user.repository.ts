@@ -1,20 +1,28 @@
 import { UserIntrf, Users } from "./user.model";
 import { Blogs } from "../blogs/blog.model";
 import { Comments } from "../comments/comment.model";
+import { Viewers } from "../viewers/viewer.model";
+import { Relationships } from "../relationships/relationship.model";
 
 class UserRepository {
     async changeUser(id: string, userData: Partial<UserIntrf>) {
         return await Promise.all([
-            Blogs.updateMany({ blog_owner_id: id }, {
-                $set: { 
-                    blog_owner_profile_picture: userData.profile_picture,
-                    blog_owner_name: userData.username
+            Viewers.updateMany({ user_id: id }, {
+                $set: {
+                    username: userData.username,
+                    profile_picture: userData.profile_picture
                 }
             }),
-            Blogs.updateMany({ "viewers.user_id": id }, {
+            Relationships.updateMany({ user_id: id }, {
                 $set: { 
-                    "viewers.$.profile_picture": userData.profile_picture,
-                    "viewers.$.username": userData.username
+                    profile_picture: userData.profile_picture,
+                    username: userData.username
+                }
+            }),
+            Relationships.updateMany({ followed_user_id: id }, {
+                $set: { 
+                    profile_picture: userData.profile_picture,
+                    username: userData.username
                 }
             }),
             Comments.updateMany({ user_id: id }, { 
@@ -22,6 +30,12 @@ class UserRepository {
                     profile_picture: userData.profile_picture,
                     username: userData.username
                 } 
+            }),
+            Blogs.updateMany({ blog_owner_id: id }, {
+                $set: { 
+                    blog_owner_profile_picture: userData.profile_picture,
+                    blog_owner_name: userData.username
+                }
             }),
             Users.updateOne({ _id: id }, { $set: userData })
         ]);
@@ -34,20 +48,22 @@ class UserRepository {
 
     async deleteCurrentUserOldProfile(id: string) {
         return await Promise.all([
-            Blogs.updateMany({ "viewers.user_id": id }, { $set: { "viewers.$.profile_picture": null } }),
-            Blogs.updateMany({ blog_owner_id: id }, { $set: { blog_owner_profile_picture: null } }),
+            Viewers.updateMany({ user_id: id }, { $set: { profile_picture: null } }),
+            Relationships.updateMany({ user_id: id }, { $set: { profile_picture: null } }),
+            Relationships.updateMany({ followed_user_id: id }, { $set: { profile_picture: null } }),
             Comments.updateMany({ user_id: id }, { $set: { profile_picture: null } }),
+            Blogs.updateMany({ blog_owner_id: id }, { $set: { blog_owner_profile_picture: null } }),
             Users.updateOne({ _id: id }, { $set: { profile_picture: null } })
         ]);
     }
 
     async deleteUser(id: string) {
         return await Promise.all([
-            Blogs.updateMany({ "viewers.user_id": id }, {
-                $pull: { viewers: { user_id: id } }
-            }),
-            Blogs.deleteMany({ blog_owner_id: id }),
+            Viewers.deleteMany({ user_id: id }),
+            Relationships.deleteMany({ user_id: id }),
+            Relationships.deleteMany({ followed_user_id: id }),
             Comments.deleteMany({ user_id: id }),
+            Blogs.deleteMany({ blog_owner_id: id }),
             Users.deleteOne({ _id: id })
         ]);
     }
