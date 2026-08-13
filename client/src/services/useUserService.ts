@@ -45,7 +45,7 @@ export default function useUserService() {
             try {
                 const changeUserForm = new FormData();
                 changeUserForm.append("username", username.trim());
-                if (newProfilePcture) changeUserForm.append("file", newProfilePcture);
+                if (newProfilePcture) changeUserForm.append("media", newProfilePcture);
 
                 const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/remake`, {
                     body: changeUserForm,

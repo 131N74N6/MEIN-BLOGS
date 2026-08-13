@@ -13,6 +13,3 @@ export const commentPaginationSchema = z.object({
     limit: data.limit,
     skip: (data.page - 1) * data.limit
 }));
-
-export type CreateNewComment = z.infer<typeof commentSchema>;
-export type CommentPaginationIntrf = z.infer<typeof commentPaginationSchema>;

@@ -20,40 +20,28 @@ export interface BlogIntrf {
         url: string;
     }
     title: string;
-    viewers: {
-        user_id: Types.ObjectId;
-        username: string;
-        profile_picture: {
-            filename: string;
-            filetype: string;
-            public_id: string;
-            resource_type: string;
-            url: string;
-        } | null;
-        blog_id: Types.ObjectId;
-        blog_title: string;
-    }[];
 }
 
 export interface NewBlogIntrf {
     current_user_id: string;
     content: string;
     language: string;
-    media: Express.Multer.File | undefined;
+    media: {
+        filename: string;
+        filetype: string;
+        public_id: string;
+        resource_type: string;
+        url: string;
+    };
     title: string;
 }
 
-export interface ShowAllBlogsIntrf {
-    limit: number;
-    skip: number;
-}
-
-export interface ShowAllUserBlogsIntrf extends ShowAllBlogsIntrf {
+export interface NewBlogReqIntrf {
     current_user_id: string;
-}
-
-export interface BlogViewerIntrf extends ShowAllBlogsIntrf {
-    blog_id: string;
+    content: string;
+    language: string;
+    media: Express.Multer.File | undefined;
+    title: string;
 }
 
 const blogSchema = new Schema<BlogIntrf>({
@@ -75,18 +63,7 @@ const blogSchema = new Schema<BlogIntrf>({
         resource_type: { type: String },
         url: { type: String }
     },
-    blog_owner_name: { type: String, required: true },
-    viewers: [{
-        user_id: { type: Schema.Types.ObjectId },
-        username: { type: String },
-        profile_picture: {
-            filename: { type: String },
-            filetype: { type: String },
-            public_id: { type: String },
-            resource_type: { type: String },
-            url: { type: String }
-        }
-    }]
+    blog_owner_name: { type: String, required: true }
 }, {
     timestamps: {
         createdAt: 'created_at',

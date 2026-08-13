@@ -13,10 +13,6 @@ blogRouters.get("/show-all", verifyToken, blogController.getAllBlogs);
 
 blogRouters.get("/mine/show-all", verifyToken, blogController.getAllUserBlogs);
 
-blogRouters.get("/viewers/:blog_id", verifyToken, blogController.getBlogViewerByPagination);
-
-blogRouters.get("/viewers/total/:blog_id", verifyToken, blogController.getBlogViewerTotal);
-
 blogRouters.get("/show/:blog_id", verifyToken, blogController.getBlogContentById);
 
 blogRouters.post("/create", verifyToken, uploadFile, blogController.createNewBlog);

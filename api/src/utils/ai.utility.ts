@@ -9,15 +9,12 @@ export interface GeneratedResultIntrf {
 }
 
 export interface BlogGeneratorIntrf {
-    imageBuffer: Buffer;
     language: string;
-    mimeType: string;
     title: string;
 }
 
 export async function generateBlogContent(props: BlogGeneratorIntrf): Promise<GeneratedResultIntrf> {
     try {
-        const base64Image = props.imageBuffer.toString("base64");
         const response: GenerateContentResponse = await ai.models.generateContent({
             model: aiModel,
             contents: [{
@@ -25,16 +22,12 @@ export async function generateBlogContent(props: BlogGeneratorIntrf): Promise<Ge
                 parts: [
                     { 
                         text: `
-                            Buatkan sebuah blog menggunakan bahasa ${props.language} dari 
-                            gambar serta judul "${props.title} ini dengan istilah yang mudah 
-                            dipahami sehingga dapat dibaca oleh semua kalangan".
+                            Buatkan sebuah blog menggunakan bahasa ${props.language} 
+                            dengan judul "${props.title} memakai istilah yang mudah 
+                            dipahami sehingga dapat dibaca dan dipahami oleh semua kalangan".
+                            Pastikan tidak menyampaikan informasi yang bersifat spam atau menyesatkan 
+                            serta fakta yang disampaikan harus berasal dari sumber terpercaya.
                         ` 
-                    }, 
-                    { 
-                        inlineData: {
-                            data: base64Image,
-                            mimeType: props.mimeType
-                        }
                     }
                 ]
             }]
@@ -65,7 +58,7 @@ export async function generateBlogContent(props: BlogGeneratorIntrf): Promise<Ge
         }
 
         if (error.message?.includes('SAFETY') || error.message?.includes('blocked')) {
-            throw new Error('AI analysis blocked due to safety concerns. Try a different image.');
+            throw new Error('AI analysis blocked due to safety concerns.');
         }
 
         if (error.message?.includes('timeout') || error.message?.includes('ETIMEDOUT')) {

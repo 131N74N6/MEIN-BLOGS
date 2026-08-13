@@ -3,9 +3,10 @@ import { AuthRequest } from "../middlewares/auth.middleware";
 import { Request, Response } from "express";
 import { commentSchema, commentPaginationSchema } from "./comment.validation";
 import { blogIdParamSchema } from "../blogs/blog.validation";
+import { errorHandling } from "../errors/api.error";
 
 class CommentController {
-    async sendCommentController(req: AuthRequest, res: Response) {
+    async sendComment(req: AuthRequest, res: Response) {
         try {
             const currentUserId = req.user?.user_id;
             if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
@@ -16,19 +17,19 @@ class CommentController {
             const newComment = commentSchema.safeParse(req.body ?? {});
             if (!newComment.success) return res.status(400).json({ message: "invalid input" });
 
-            await commentService.sendCommentService({
+            await commentService.sendComment({
                 blog_id: blogId.data,
                 current_user_id: currentUserId,
                 text: newComment.data
             });
 
-            res.status(200).json({ message: "new comment added" });
+            return res.status(200).json({ message: "new comment added" });
         } catch (error) {
-            res.json({ message: error || "something went wrong" });
+            return errorHandling(res, error);
         }
     }
 
-    async showAllCommentsController(req: Request, res: Response) {
+    async showAllComments(req: Request, res: Response) {
         try {
             const blogId = blogIdParamSchema.safeParse(req.params);
             if (!blogId.success) return res.status(400).json({ message: "invalid blog id" });
@@ -42,21 +43,21 @@ class CommentController {
                 skip: commentPagination.data.skip
             });
 
-            res.status(200).json(comments);
+            return res.status(200).json(comments);
         } catch (error) {
-            res.json({ message: error || "something went wrong" });
+            return errorHandling(res, error);
         }
     }
 
-    async showCommentsTotalController(req: Request, res: Response) {
+    async showCommentsTotal(req: Request, res: Response) {
         try {
             const blogId = blogIdParamSchema.safeParse(req.params);
             if (!blogId.success) return res.status(400).json({ message: "invalid blog id" });
 
             const total = await commentService.getCommentsTotalInOneBlog(blogId.data);
-            res.status(200).json(total);
+            return res.status(200).json(total);
         } catch (error) {
-            res.json({ message: error || "something went wrong" });
+            return errorHandling(res, error);
         }
     }
 }

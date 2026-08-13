@@ -11,7 +11,7 @@ const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const maxFileSize = 5 * 1024 * 1024;
 
 class UserService {
-    private assertUserId(id: unknown): string {
+    private checkIsUserIdValid(id: unknown): string {
         const isValid = typeof id !== "string" || typeof id === "undefined" || id === undefined || 
         id === null || id === "" || !mongoose.isValidObjectId(id);
 
@@ -20,7 +20,7 @@ class UserService {
         return id;
     }
 
-    private assertEmail(email: unknown): string {
+    private checkIsEmailValid(email: unknown): string {
         if (typeof email !== "string" || email === undefined || email === "" || email === null) {
             throw new ApiError(400, "invalid email");
         }
@@ -31,19 +31,7 @@ class UserService {
         return trimmed;
     }
 
-    private assertProfilePicture(file: Express.Multer.File | undefined): Express.Multer.File {
-        if (!file) throw new ApiError(400, "image is required");
-
-        if (!allowedFileType.includes(file.mimetype)) {
-            throw new ApiError(400, "this file is not allowed");
-        }
-
-        if (file.size > maxFileSize) throw new ApiError(400, "file size is too large");
-
-        return file;
-    }
-
-    private assertString(value: unknown, fieldName: string, min: number, max: number): string {
+    private checkIsInputValid(value: unknown, fieldName: string, min: number, max: number): string {
         if (typeof value !== "string" || value === undefined || value === "" || value === null) {
             throw new ApiError(400, `invalid ${fieldName}`);
         }
@@ -66,34 +54,48 @@ class UserService {
     }
     
     async changeUserService(props: ChangeUserIntrf) {
-        const currentUserId = this.assertUserId(props.currentUserId);
-        const username = this.assertString(props.username, "username", 3, 30);
-        const newProfilePicture = this.assertProfilePicture(props.selectedImage);
+        const currentUserId = this.checkIsUserIdValid(props.currentUserId);
+        const username = this.checkIsInputValid(props.username, "username", 3, 30);
 
         const user = await userRepository.getCurrentUser(currentUserId);
         if (!user) throw new ApiError(404, "user not found");
+        
+        if (props.selectedImage) {            
+            if (!allowedFileType.includes(props.selectedImage.mimetype)) {
+                throw new ApiError(400, "this file is not allowed");
+            }
 
-        if (user.profile_picture && user.profile_picture.public_id) {
-            await v2.uploader.destroy(user.profile_picture.public_id, { 
-                resource_type: user.profile_picture.resource_type 
+            if (props.selectedImage.size > maxFileSize) {
+                throw new ApiError(400, "file size is too large");
+            }
+
+            if (user.profile_picture !== null && user.profile_picture.public_id !== null) {
+                await v2.uploader.destroy(user.profile_picture.public_id, { 
+                    resource_type: user.profile_picture.resource_type 
+                });
+            }
+
+            const newProfileImage = await uploadToCloudinary({
+                file_buffer: props.selectedImage.buffer,
+                foldername: "user_profile",
+                mimetype: props.selectedImage.mimetype,
+                original_name: props.selectedImage.originalname
+            });
+    
+            await userRepository.changeUser(user._id.toString(), {
+                profile_picture: newProfileImage,
+                username: username.trim() || user.username
+            });
+        } else {
+            await userRepository.changeUser(user._id.toString(), {
+                profile_picture: user.profile_picture,
+                username: username.trim() || user.username
             });
         }
-
-        const newProfileImage = await uploadToCloudinary({
-            file_buffer: newProfilePicture.buffer,
-            foldername: "user_profile",
-            mimetype: newProfilePicture.mimetype,
-            original_name: newProfilePicture.originalname
-        });
-
-        await userRepository.changeUser(user._id.toString(), {
-            profile_picture: newProfileImage,
-            username: username.trim() || user.username
-        });
     }
 
     async deleteUserService(current_user_id: string) {
-        const currentUserId = this.assertUserId(current_user_id);
+        const currentUserId = this.checkIsUserIdValid(current_user_id);
 
         const user = await userRepository.getCurrentUser(currentUserId);
         if (!user) throw new ApiError(404, "user not found");
@@ -126,7 +128,7 @@ class UserService {
     }
 
     async deleteCurrentUserOldProfile(current_user_id: string) {
-        const currentUserId = this.assertUserId(current_user_id);
+        const currentUserId = this.checkIsUserIdValid(current_user_id);
 
         const user = await userRepository.getCurrentUser(currentUserId);
         if (!user) throw new ApiError(404, "user not found");
@@ -142,8 +144,8 @@ class UserService {
     }
 
     async signInService(props: Pick<UserIntrf, "password" | "username">) {
-        const password = this.assertString(props.password, "password", 8, 72);
-        const username = this.assertString(props.username, "username", 3, 30);
+        const password = this.checkIsInputValid(props.password, "password", 8, 72);
+        const username = this.checkIsInputValid(props.username, "username", 3, 30);
 
         const user = await userRepository.getCurrentUserByUsername(username);
         if (!user) throw new ApiError(401, "invalid credentials");
@@ -155,9 +157,9 @@ class UserService {
     }
 
     async signUpService(props: Omit<UserIntrf, "profile_picture">) {
-        const password = this.assertString(props.password, "password", 8, 72);
-        const username = this.assertString(props.username, "username", 3, 30);
-        const email = this.assertEmail(props.email);
+        const password = this.checkIsInputValid(props.password, "password", 8, 72);
+        const username = this.checkIsInputValid(props.username, "username", 3, 30);
+        const email = this.checkIsEmailValid(props.email);
 
         const [isUsernameExist, isEmailExist] = await Promise.all([
             userRepository.getCurrentUserByUsername(username),

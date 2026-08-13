@@ -2,27 +2,17 @@ import blogRepository from "./blog.repository";
 import mongoose from "mongoose";
 import { ApiError } from "../errors/api.error";
 import { generateBlogContent } from "../utils/ai.utility";
-import { BlogViewerIntrf, NewBlogIntrf, ShowAllBlogsIntrf, ShowAllUserBlogsIntrf } from "./blog.model";
 import { v2 } from "cloudinary";
+import { BlogPaginationIntrf, GenerateBlogIntrf } from "./blog.validation";
+import { uploadToCloudinary } from "../utils/cloudinary.utility";
+import { NewBlogReqIntrf } from "./blog.model";
 
 const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const allowedLanguage = ["id", "en", "jp", "de"];
 const maxFileSize = 5 * 1024 * 1024;
 
 class BlogService {
-    private assertBlogMedia(file: Express.Multer.File | undefined): Express.Multer.File {
-        if (!file) throw new ApiError(400, "image file is required");
-
-        if (!allowedFileType.includes(file.mimetype)) {
-            throw new ApiError(400, "this file is not allowed");
-        }
-
-        if (file.size > maxFileSize) throw new ApiError(400, "file size is too large");
-
-        return file;
-    }
-
-    private assertLanguage(language: unknown): string {
+    private checkIsLanguageValid(language: unknown): string {
         if (language === undefined || language === null || language === "") {
             throw new ApiError(400, "invalid language");
         }
@@ -35,7 +25,7 @@ class BlogService {
         return trimmed;
     }
 
-    private assertObjectId(value: unknown, fieldName: string): string {
+    private checkIsIdValid(value: unknown, fieldName: string): string {
         const isNotValid = value === undefined || value === null || value === "" || 
         typeof value === "undefined" || typeof value !== "string" || !mongoose.isValidObjectId(value);
 
@@ -44,7 +34,7 @@ class BlogService {
         return value;
     }
 
-    private assertString(value: unknown, fieldName: string, min: number, max: number): string {
+    private checkIsInputValid(value: unknown, fieldName: string, min: number, max: number): string {
         if (typeof value !== "string" || value === undefined || value === "" || value === null) {
             throw new ApiError(400, `invalid ${fieldName}`);
         }
@@ -55,26 +45,97 @@ class BlogService {
         return trimmed;
     }
 
-    async createNewBlog(props: NewBlogIntrf) {
-        const blogContent = this.assertString(props.content, "content", 1, 30000);
-        const blogMedia = this.assertBlogMedia(props.media);
-        const currentUserId = this.assertObjectId(props.current_user_id, "current user id");
-        const blogLanguage = this.assertLanguage(props.language);
-        const blogTitle = this.assertString(props.title, "title", 3, 180);
+    async createNewBlog(props: NewBlogReqIntrf) {
+        const blogContent = this.checkIsInputValid(props.content, "content", 1, 30000);
+        const currentUserId = this.checkIsIdValid(props.current_user_id, "current user id");
+        const blogLanguage = this.checkIsLanguageValid(props.language);
+        const blogTitle = this.checkIsInputValid(props.title, "title", 3, 180);
+
+        if (!props.media) throw new ApiError(400, "file is required to make new blog");
+
+        if (!allowedFileType.includes(props.media.mimetype)) {
+            throw new ApiError(400, "this file is not allowed");
+        }
+
+        if (props.media.size > maxFileSize) {
+            throw new ApiError(400, "file size is too large");
+        }
+
+        const newBlogMedia = await uploadToCloudinary({
+            file_buffer: props.media.buffer,
+            foldername: "blogs_media",
+            mimetype: props.media.mimetype,
+            original_name: props.media.originalname
+        });
 
         await blogRepository.createNewBlog({
             content: blogContent,
             current_user_id: currentUserId,
             language: blogLanguage,
-            media: blogMedia,
+            media: newBlogMedia,
             title: blogTitle 
         });
+    }
+
+    async changeOneBlog(blogId: string, props: NewBlogReqIntrf) {
+        const blogContent = this.checkIsInputValid(props.content, "content", 1, 30000);
+        const currentUserId = this.checkIsIdValid(props.current_user_id, "current user id");
+        const blogLanguage = this.checkIsLanguageValid(props.language);
+        const blogTitle = this.checkIsInputValid(props.title, "title", 3, 180);
+
+        const blog = await blogRepository.getBlogById(blogId);
+        if (!blog) throw new ApiError(404, "blog not found");
+
+        if (blog.blog_owner_id.toString() !== currentUserId) {
+            throw new ApiError(403, "you are not allowed to edit this blog");
+        }
+
+        if (props.media) {
+            if (!allowedFileType.includes(props.media.mimetype)) {
+                throw new ApiError(400, "this file is not allowed");
+            }
+
+            if (props.media.size > maxFileSize) {
+                throw new ApiError(400, "file size is too large");
+            }
+
+            await v2.uploader.destroy(blog.media.public_id, {
+                resource_type: blog.media.resource_type
+            });
+
+            const newBlogMedia = await uploadToCloudinary({
+                file_buffer: props.media.buffer,
+                foldername: "blogs_media",
+                mimetype: props.media.mimetype,
+                original_name: props.media.originalname
+            });
+
+            await blogRepository.changeOneBlog(blogId, {
+                content: blogContent || blog.content,
+                current_user_id: currentUserId,
+                media: newBlogMedia,
+                language: blogLanguage || blog.language,
+                title: blogTitle || blog.title
+            });
+        } else {
+            await blogRepository.changeOneBlog(blogId, {
+                content: blogContent || blog.content,
+                current_user_id: currentUserId,
+                media: blog.media,
+                language: blogLanguage || blog.language,
+                title: blogTitle || blog.title
+            });
+        }
     }
 
     async deleteAllBlogs(currentUserId: string) {
         const operation = [];
         const blogs = await blogRepository.getAllCurrentUserBlogs(currentUserId);
         if (blogs.length === 0) throw new ApiError(404, "blogs not found");
+
+        if (blogs[0].blog_owner_id.toString() !== currentUserId) {
+            throw new ApiError(403, "you are not allowed to delete these blogs");
+        }
 
         const blogsIds = blogs.map(blog => blog._id.toString());
         const blogsMedia = blogs.map(blog => blog.media);
@@ -95,7 +156,7 @@ class BlogService {
     }
 
     async deleteOneBlog(current_user_id: string, id: string) {
-        const currentUserId = this.assertObjectId(current_user_id, "current user id");
+        const currentUserId = this.checkIsIdValid(current_user_id, "current user id");
         const blog = await blogRepository.getBlogById(id);
 
         if (!blog) throw new ApiError(404, "blog not found");
@@ -112,27 +173,24 @@ class BlogService {
         ]);
     }
 
-    async generateNewBlog(props: Pick<NewBlogIntrf, 'language' | 'media' | 'title'>) {
-        const blogMedia = this.assertBlogMedia(props.media);
-        const blogLanguage = this.assertLanguage(props.language);
-        const blogTitle = this.assertString(props.title, "title", 3, 180);
+    async generateNewBlog(props: GenerateBlogIntrf) {
+        const blogLanguage = this.checkIsLanguageValid(props.language);
+        const blogTitle = this.checkIsInputValid(props.title, "title", 3, 180);
 
         const generatedContent = await generateBlogContent({
-            imageBuffer: blogMedia.buffer,
             language: blogLanguage,
-            mimeType: blogMedia.mimetype,
             title: blogTitle,
         });
 
         return generatedContent;
     }
 
-    async getAllBlogs(props: ShowAllBlogsIntrf) {
+    async getAllBlogs(props: Omit<BlogPaginationIntrf, "current_user_id" | "page">) {
         return await blogRepository.getAllBlogsWithPagination(props);
     }
 
-    async getAllCurrentUserBlogs(props: ShowAllUserBlogsIntrf) {
-        const currentUserId = this.assertObjectId(props.current_user_id, "current user id");
+    async getAllCurrentUserBlogs(props: Omit<BlogPaginationIntrf, "page">) {
+        const currentUserId = this.checkIsIdValid(props.current_user_id, "current user id");
 
         return await blogRepository.getAllCurrentUserBlogsWithPagination({
             current_user_id: currentUserId,
@@ -142,33 +200,12 @@ class BlogService {
     }
 
     async getBlogContentById(id: string) {
-        const blogId = this.assertObjectId(id, "blog id");
+        const blogId = this.checkIsIdValid(id, "blog id");
         const blogContent = await blogRepository.getBlogById(blogId);
 
         if (!blogContent) throw new ApiError(404, "blog not found");
         
         return blogContent;
-    }
-
-    async getBlogViewerWithPagination(props: BlogViewerIntrf) {
-        const blogId = this.assertObjectId(props.blog_id, "blog id");
-        
-        return await blogRepository.getBlogViewerWithPagination({
-            blog_id: blogId, limit: props.limit, skip: props.skip
-        });
-    }
-
-    async getBlogViewerTotal(blog_id: string) {
-        const blogId = this.assertObjectId(blog_id, "blog id");
-        
-        return await blogRepository.getBlogViewerTotal(blogId);
-    }
-
-    async updateBlogView(blog_id: string, current_user_id: string) {
-        const currentUserId = this.assertObjectId(current_user_id, "current user id");
-        const blogId = this.assertObjectId(blog_id, "blog id");
-
-        await blogRepository.updateBlogViewer(blogId, currentUserId);
     }
 }
 

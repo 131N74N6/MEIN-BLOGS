@@ -43,7 +43,7 @@ export default function useBlogService() {
                 newBlogForm.append("content", content);
                 newBlogForm.append("language", language);
                 newBlogForm.append("title", title);
-                if (media) newBlogForm.append("file", media);
+                if (media) newBlogForm.append("media", media);
 
                 const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/blogs/create`, {
                     body: newBlogForm,

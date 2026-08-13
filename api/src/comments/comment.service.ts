@@ -4,7 +4,7 @@ import { NewCommentIntrf, ShowCommentIntrf } from "./comment.model";
 import { ApiError } from "../errors/api.error";
 
 class CommentService {
-    private assertObjectId(value: unknown, fieldName: string): string {
+    private checkIsIdValid(value: unknown, fieldName: string): string {
         const isNotValid = value === undefined || value === null || value === "" || 
         typeof value === "undefined" || typeof value !== "string" || !mongoose.isValidObjectId(value);
 
@@ -13,7 +13,7 @@ class CommentService {
         return value;
     }
 
-    private assertText(value: unknown, min: number): string {
+    private checkIsInputValid(value: unknown, min: number): string {
         if (value === undefined || value === null || value === "" || typeof value !== "string") {
             throw new ApiError(400, "invalid text");
         }
@@ -24,10 +24,10 @@ class CommentService {
         return trimmed;
     }
 
-    async sendCommentService(props: NewCommentIntrf) {
-        const blogId = this.assertObjectId(props.blog_id, "blog id");
-        const currentUserId = this.assertObjectId(props.current_user_id, "current user id");
-        const commentText = this.assertText(props.text, 1);
+    async sendComment(props: NewCommentIntrf) {
+        const blogId = this.checkIsIdValid(props.blog_id, "blog id");
+        const currentUserId = this.checkIsIdValid(props.current_user_id, "current user id");
+        const commentText = this.checkIsInputValid(props.text, 1);
         
         await commentRepository.createComment({
             blog_id: blogId, current_user_id: currentUserId, text: commentText
@@ -35,7 +35,7 @@ class CommentService {
     }
 
     async getAllCommentsInOneBlog(props: ShowCommentIntrf) {
-        const blogId = this.assertObjectId(props.blog_id, "blog id");
+        const blogId = this.checkIsIdValid(props.blog_id, "blog id");
         
         return await commentRepository.getAllCommentsInOneBlog({
             blog_id: blogId, limit: props.limit, skip: props.skip
@@ -43,7 +43,7 @@ class CommentService {
     }
 
     async getCommentsTotalInOneBlog(blog_id: string) {
-        const blogId = this.assertObjectId(blog_id, "blog id");
+        const blogId = this.checkIsIdValid(blog_id, "blog id");
         return await commentRepository.getCommentsTotalInOneBlog(blogId);
     }
 }
