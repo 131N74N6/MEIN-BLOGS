@@ -8,7 +8,7 @@ export interface BlogIntrf {
         public_id: string;
         resource_type: string;
         url: string;
-    }
+    } | null;
     blog_owner_name: string;
     content: string;
     language: string;
@@ -18,7 +18,7 @@ export interface BlogIntrf {
         public_id: string;
         resource_type: string;
         url: string;
-    }
+    };
     title: string;
 }
 

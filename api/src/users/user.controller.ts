@@ -10,7 +10,7 @@ class UserController {
             const currentUserId = req.user?.user_id;
             if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
 
-            const parsed = changeUserSchema.safeParse(req.body ?? {});
+            const parsed = changeUserSchema.safeParse(req.body);
             if (!parsed.success) return res.status(400).json({ message: "invalid input" });
 
             const username = parsed.data.username;
@@ -60,7 +60,7 @@ class UserController {
 
     async signInController(req: Request, res: Response) {
         try {
-            const parsed = signInSchema.safeParse(req.body ?? {});
+            const parsed = signInSchema.safeParse(req.body);
             if (!parsed.success) return res.status(400).json({ message: "invalid input" });
 
             const signInToken = await userService.signInService(parsed.data);
@@ -96,7 +96,7 @@ class UserController {
 
     async signUpController(req: Request, res: Response) {
         try {
-            const parsed = signUpSchema.safeParse(req.body ?? {});
+            const parsed = signUpSchema.safeParse(req.body);
             if (!parsed.success) return res.status(400).json({ message: "invalid input" });
 
             const token = await userService.signUpService(parsed.data);

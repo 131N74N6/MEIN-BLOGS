@@ -70,7 +70,7 @@ class RelationshipController {
             const currentUserId = req.user?.user_id;
             if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
 
-            const followedUserId = followedUserIdSchema.safeParse(req.params);
+            const followedUserId = followedUserIdSchema.safeParse(req.params.followed_user_id);
             if (!followedUserId.success) return res.status(400).json({ message: "invalid followed user id" });
 
             const hasUserFollowed = await relationshipService.hasUserFollowed({
@@ -88,7 +88,7 @@ class RelationshipController {
             const currentUserId = req.user?.user_id;
             if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
 
-            const followedUserId = followedUserIdSchema.safeParse(req.params);
+            const followedUserId = followedUserIdSchema.safeParse(req.params.followed_user_id);
             if (!followedUserId.success) return res.status(400).json({ message: "invalid followed user id"});
 
             await relationshipService.startFollowedOneUser({
@@ -115,7 +115,7 @@ class RelationshipController {
 
     async stopFollowingOneUser(req: Request, res: Response) {
         try {
-            const followedUserId = followedUserIdSchema.safeParse(req.params);
+            const followedUserId = followedUserIdSchema.safeParse(req.params.followed_user_id);
             if (!followedUserId.success) return res.status(400).json({ message: "invalid followed user id"});
 
             await relationshipService.stopFollowingOneUser({ followed_user_id: followedUserId.data });

@@ -14,14 +14,6 @@ export interface CustomJwtPayload extends JwtPayload {
     username: string;
 }
 
-export const authRateLimiter = rateLimit({
-    legacyHeaders: false,
-    limit: 20,
-    message: { message: "too many authentication attempts, please try again later" },
-    standardHeaders: true,
-    windowMs: 15 * 60 * 1000, // 15 minutes
-});
-
 export function verifyToken(req: AuthRequest, res: Response, next: NextFunction) {
     const currentToken = req.cookies?.token;
     if (!currentToken) return res.status(401).json({ message: "token is required" });

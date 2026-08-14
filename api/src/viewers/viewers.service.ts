@@ -41,9 +41,15 @@ class ViewerService {
         const blogId = this.checkIsIdValid("blog id", props.blog_id);
         const currentUserId = this.checkIsIdValid("current user id", props.current_user_id);
 
-        await viewerRepository.seeOneBlog({
+        const hasSeen = await viewerRepository.hasUserSeenThisBlog({
             blog_id: blogId, current_user_id: currentUserId
         });
+        
+        if (!hasSeen) {
+            await viewerRepository.seeOneBlog({
+                blog_id: blogId, current_user_id: currentUserId
+            });
+        }
     }
 }
 

@@ -41,7 +41,7 @@ class BlogController {
             const currentUserId = req.user?.user_id;
             if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
 
-            const blogId = blogIdParamSchema.safeParse(req.params);
+            const blogId = blogIdParamSchema.safeParse(req.params.blog_id);
             if (!blogId.success) return res.status(400).json({ message: "invalid blog id" });
 
             const createBlog = createBlogSchema.safeParse(req.body);
@@ -75,7 +75,7 @@ class BlogController {
 
     async deleteOneBlog(req: AuthRequest, res: Response) {
         try {
-            const blogId = blogIdParamSchema.safeParse(req.params);
+            const blogId = blogIdParamSchema.safeParse(req.params.blog_id);
             if (!blogId.success) return res.status(400).json({ message: "invalid blog id" });
 
             const currentUserId = req.user?.user_id;
@@ -141,7 +141,7 @@ class BlogController {
 
     async getBlogContentById(req: Request, res: Response) {
         try {
-            const blogId = blogIdParamSchema.safeParse(req.params);
+            const blogId = blogIdParamSchema.safeParse(req.params.blog_id);
             if (!blogId.success) return res.status(400).json({ message: "invalid blog id" });
 
             const blogContent = await blogService.getBlogContentById(blogId.data);

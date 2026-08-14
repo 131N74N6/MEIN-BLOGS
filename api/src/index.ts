@@ -9,11 +9,13 @@ import commentRouters from "./comments/comment.router";
 import relationshipRouters from "./relationships/relationships.router";
 import viewerRouters from "./viewers/viewer.router";
 import { v2 } from "cloudinary";
+import { rateLimiter } from "./utils/rate-limit.utility";
 
 const port = process.env.PORT || 5172;
 const app = express();
 
 app.use(helmet());
+app.use(rateLimiter);
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({

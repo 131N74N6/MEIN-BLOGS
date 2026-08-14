@@ -5,15 +5,13 @@ class CommentRepository {
     async createComment(props: NewCommentIntrf) {
         const user = await Users.find({ _id: props.current_user_id }).lean();
 
-        const newComment = new Comments({
+        return await Comments.insertOne({
             blog_id: props.blog_id,
             profile_picture: user[0].profile_picture,
             user_id: user[0]._id,
             username: user[0].username,
             text: props.text,
         });
-
-        await newComment.save();
     }
 
     async getAllCommentsInOneBlog(props: ShowCommentIntrf) {

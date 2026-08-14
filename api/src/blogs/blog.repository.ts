@@ -11,7 +11,7 @@ class BlogRepository {
             { password: 0, profile_picture: 0 }
         ).lean();
 
-        const newBlog = new Blogs({
+        return await Blogs.insertOne({
             blog_owner_name: user[0].username,
             blog_owner_profile_picture: user[0].profile_picture,
             blog_owner_id: user[0]._id,
@@ -19,19 +19,6 @@ class BlogRepository {
             media: props.media,
             title: props.title,
         });
-
-        return await Promise.all([
-            newBlog.save(),
-            Blogs.updateOne({ _id: newBlog._id }, {
-                $addToSet: {
-                    viewers: {
-                        user_id: user[0]._id,
-                        username: user[0].username,
-                        profile_picture: user[0].profile_picture,
-                    }
-                }
-            })
-        ]);
     }
 
     async changeOneBlog(blogId: string, props: NewBlogIntrf) {

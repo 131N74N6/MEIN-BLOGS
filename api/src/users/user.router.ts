@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authRateLimiter, verifyToken } from "../middlewares/auth.middleware";
+import { verifyToken } from "../middlewares/auth.middleware";
 import userController from "./user.controller";
 import { uploadFile } from "../middlewares/upload.middleware";
 
@@ -11,11 +11,11 @@ userRouters.delete("/rm-picture", verifyToken, userController.deleteOldProfileCo
 
 userRouters.get("/show", verifyToken, userController.showProfileController);
 
-userRouters.post("/sign-in", authRateLimiter, userController.signInController);
+userRouters.post("/sign-in", userController.signInController);
 
 userRouters.post("/sign-out", verifyToken, userController.signOutController);
 
-userRouters.post("/sign-up", authRateLimiter, userController.signUpController);
+userRouters.post("/sign-up", userController.signUpController);
 
 userRouters.put("/remake", verifyToken, uploadFile, userController.changeUserController);
 

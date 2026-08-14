@@ -178,8 +178,7 @@ export default function useBlogService() {
             } catch (error) {
                 throw error;
             }
-        },
-        staleTime: Infinity
+        }
     });
 
     const getAllCurrentUserBlogs = useInfiniteQuery({
@@ -203,8 +202,7 @@ export default function useBlogService() {
             } catch (error) {
                 throw error;
             }
-        },
-        staleTime: Infinity
+        }
     });
 
     const getOneBlogContent = useQuery({
@@ -224,8 +222,7 @@ export default function useBlogService() {
             } catch (error) {
                 throw error;
             }
-        },
-        staleTime: Infinity
+        }
     });
 
     const processing = deleteAllCurrentUserBlogsMt.isPending || deleteOneCurrentUserBlogMt.isPending ||

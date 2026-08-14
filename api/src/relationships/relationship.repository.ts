@@ -33,14 +33,12 @@ class RelationshipRepository {
     async startFollowedOneUser(props: Pick<UserRelationshipIntrf, "current_user_id" | "followed_user_id">) {
         const user = await Users.find({ _id: props.current_user_id }, { email: 0, password: 0 });
 
-        const newFollower = new Relationships({
+        return await Relationships.insertOne({
             user_id: user[0]._id,
             followed_user_id: props.followed_user_id,
             username: user[0].username,
             profile_picture: user[0].profile_picture
         });
-
-        return newFollower.save();
     }
     
     async stopFollowingAllUser(props: Pick<UserRelationshipIntrf, "current_user_id">) {

@@ -61,13 +61,12 @@ const useBlogWindowSlice: StateCreator<BlogWindowState> = (set) => ({
     })
 });
 
-export const useBlogStore = create<BlogInfoState & BlogWindowState>()(persist(
-    (...x) => ({
-        ...useBlogInfoSlice(...x),
-        ...useBlogWindowSlice(...x)
-    }),
-    { 
-        name: "blog_id",
-        partialize: (state) => ({ blogId: state.blogId }),
-    }
+export const useBlogStore = create<BlogInfoState & BlogWindowState>()(persist((...x) => ({
+    ...useBlogInfoSlice(...x),
+    ...useBlogWindowSlice(...x)
+}),
+{ 
+    name: "blog_id",
+    partialize: (state) => ({ blogId: state.blogId }),
+}
 ));

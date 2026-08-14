@@ -6,18 +6,18 @@ const relationshipRouters = Router();
 
 relationshipRouters.get("/followers", verifyToken, relationshipController.getUserFollowers);
 
-relationshipRouters.get("/following", verifyToken, relationshipController.getFollowedUser);
+relationshipRouters.get("/followed", verifyToken, relationshipController.getFollowedUser);
 
 relationshipRouters.get("/followers/total", verifyToken, relationshipController.getFollowersTotal);
 
-relationshipRouters.get("/following/total", verifyToken, relationshipController.getFollowedUserTotal);
+relationshipRouters.get("/followed/total", verifyToken, relationshipController.getFollowedUserTotal);
 
-relationshipRouters.get("/has-followed", verifyToken, relationshipController.hasUserFollowed);
+relationshipRouters.get("/has-followed/:followed_user_id", verifyToken, relationshipController.hasUserFollowed);
 
-relationshipRouters.post("/follow", verifyToken, relationshipController.startFollowedOneUser);
+relationshipRouters.post("/follow/:followed_user_id", verifyToken, relationshipController.startFollowedOneUser);
 
 relationshipRouters.delete("/unfollow-all", verifyToken, relationshipController.stopFollowingAllUser);
 
-relationshipRouters.delete("/unfollow-one", verifyToken, relationshipController.stopFollowingOneUser);
+relationshipRouters.delete("/unfollow-one/:followed_user_id", verifyToken, relationshipController.stopFollowingOneUser);
 
 export default relationshipRouters;

@@ -42,8 +42,7 @@ class UserRepository {
     }
 
     async createNewUser(userData: Partial<UserIntrf>) {
-        const newUser = new Users(userData);
-        return await newUser.save();
+        return await Users.insertOne(userData);
     }
 
     async deleteCurrentUserOldProfile(id: string) {

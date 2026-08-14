@@ -22,15 +22,13 @@ class ViewerRepository {
         const blog = await Blogs.find({ _id: props.blog_id }, { _id: 1, title: 1 });
         const user = await Users.find({ _id: props.current_user_id }, { password: 0, email: 0 });
 
-        const newViewer = new Viewers({
+        return await Viewers.insertOne({
             blog_id: blog[0]._id, 
             blog_title: blog[0].title, 
             user_id: user[0]._id, 
             username: user[0].username,
             profile_picture: user[0].profile_picture
         });
-
-        return await newViewer.save();
     }
 }
 

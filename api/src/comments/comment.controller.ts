@@ -31,7 +31,7 @@ class CommentController {
 
     async showAllComments(req: Request, res: Response) {
         try {
-            const blogId = blogIdParamSchema.safeParse(req.params);
+            const blogId = blogIdParamSchema.safeParse(req.params.blog_id);
             if (!blogId.success) return res.status(400).json({ message: "invalid blog id" });
 
             const commentPagination = commentPaginationSchema.safeParse(req.query ?? {});
@@ -51,7 +51,7 @@ class CommentController {
 
     async showCommentsTotal(req: Request, res: Response) {
         try {
-            const blogId = blogIdParamSchema.safeParse(req.params);
+            const blogId = blogIdParamSchema.safeParse(req.params.blog_id);
             if (!blogId.success) return res.status(400).json({ message: "invalid blog id" });
 
             const total = await commentService.getCommentsTotalInOneBlog(blogId.data);

@@ -59,7 +59,7 @@ class ViewerController {
             const currentUserId = req.user?.user_id;
             if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
 
-            const blogId = blogIdParamSchema.safeParse(req.params);
+            const blogId = blogIdParamSchema.safeParse(req.params.blog_id);
             if (!blogId.success) return res.status(400).json({ message: "invalid blog id" });
 
             await viewerService.seeOneBlog({ 

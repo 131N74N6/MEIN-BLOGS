@@ -11,7 +11,7 @@ export interface IComment {
         public_id: string;
         resource_type: string;
         url: string;
-    }
+    } | null;
 }
 
 export interface NewCommentIntrf {
