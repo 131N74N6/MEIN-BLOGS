@@ -14,10 +14,10 @@ export interface RelationshipIntrf {
 }
 
 export interface UserRelationshipIntrf {
-    current_user_id: string;
     followed_user_id: string;
     limit: number;
     skip: number;
+    user_id: string;
 }
 
 const relationshipsSchema = new Schema<RelationshipIntrf>({

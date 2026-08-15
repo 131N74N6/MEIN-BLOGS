@@ -22,7 +22,7 @@ export default function useViewerService() {
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
             try {
-                const request = await fetch(`${baseUrl}/followed?page=${pageParam}&limit=${16}`, {
+                const request = await fetch(`${baseUrl}/followed/${otherUserId}?page=${pageParam}&limit=${16}`, {
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     method: "GET"
@@ -42,7 +42,7 @@ export default function useViewerService() {
         enabled: !!otherUserId,
         queryFn: async () => {
             try {
-                const request = await fetch(`${baseUrl}/followed/total`, {
+                const request = await fetch(`${baseUrl}/followed/${otherUserId}/total`, {
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     method: "GET"
@@ -67,7 +67,7 @@ export default function useViewerService() {
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
             try {
-                const request = await fetch(`${baseUrl}/followers?page=${pageParam}&limit=${16}`, {
+                const request = await fetch(`${baseUrl}/followers/${otherUserId}?page=${pageParam}&limit=${16}`, {
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     method: "GET"
@@ -87,7 +87,7 @@ export default function useViewerService() {
         enabled: !!otherUserId,
         queryFn: async () => {
             try {
-                const request = await fetch(`${baseUrl}/followers/total`, {
+                const request = await fetch(`${baseUrl}/followers/${otherUserId}/total`, {
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     method: "GET"
@@ -103,11 +103,106 @@ export default function useViewerService() {
         queryKey: [`followers-total-${otherUserId}`]
     });
 
+    
+    const getAllCurrentUserFollowed = useInfiniteQuery({
+        enabled: !!currentUserId,
+        getNextPageParam: (lastPage, allPages) => {
+            if (lastPage.length < 16) return;
+            return allPages.length + 1;
+        },
+        initialPageParam: 1,
+        queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
+            try {
+                const request = await fetch(`${baseUrl}/followed/${currentUserId}?page=${pageParam}&limit=${16}`, {
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    method: "GET"
+                });
+
+                const response = await request.json();
+                if (!request.ok) throw new Error(response.message);
+                return response;
+            } catch (error) {
+                throw error;
+            }
+        },
+        queryKey: [`followed-${currentUserId}`]
+    });
+
+    const getAllCurrentUserFollowedTotal = useQuery<number>({
+        enabled: !!currentUserId,
+        queryFn: async () => {
+            try {
+                const request = await fetch(`${baseUrl}/followed/${currentUserId}/total`, {
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    method: "GET"
+                });
+
+                const response = await request.json();
+                if (!request.ok) throw new Error(response.message);
+                return response;
+            } catch (error) {
+                throw error;
+            }
+        },
+        queryKey: [`followed-total-${currentUserId}`]
+    });
+
+    const getAllCurrentUserFollowers = useInfiniteQuery({
+        enabled: !!currentUserId,
+        getNextPageParam: (lastPage, allPages) => {
+            if (lastPage.length < 16) return;
+            return allPages.length + 1;
+        },
+        initialPageParam: 1,
+        queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
+            try {
+                const request = await fetch(`${baseUrl}/followers/${currentUserId}?page=${pageParam}&limit=${16}`, {
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    method: "GET"
+                });
+
+                const response = await request.json();
+                if (!request.ok) throw new Error(response.message);
+                return response;
+            } catch (error) {
+                throw error;
+            }
+        },
+        queryKey: [`followers-${currentUserId}`]
+    });
+
+    const getAllCurrentUserFollowersTotal = useQuery<number>({
+        enabled: !!currentUserId,
+        queryFn: async () => {
+            try {
+                const request = await fetch(`${baseUrl}/followers/${currentUserId}/total`, {
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    method: "GET"
+                });
+
+                const response = await request.json();
+                if (!request.ok) throw new Error(response.message);
+                return response;
+            } catch (error) {
+                throw error;
+            }
+        },
+        queryKey: [`followers-total-${currentUserId}`]
+    });
+
     const hasUserFollowed = useQuery<boolean>({
         enabled: !!currentUserId && !!otherUserId,
         queryFn: async () => {
             try {
-                const request = await fetch(`${baseUrl}/has-followed/${otherUserId}`, {});
+                const request = await fetch(`${baseUrl}/has-followed/${currentUserId}/${otherUserId}`, {
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    method: "GET"
+                });
 
                 const response = await request.json();
                 if (!request.ok) throw new Error(response.message);
@@ -147,10 +242,10 @@ export default function useViewerService() {
         }
     });
 
-    const stopFollowAllUserMt = useMutation({
+    const unfollowAllUserMt = useMutation({
         mutationFn: async () => {
             try {
-                const request = await fetch(`${baseUrl}/unfollow-all`, {
+                const request = await fetch(`${baseUrl}/unfollow-all/${currentUserId}`, {
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     method: "DELETE"
@@ -175,7 +270,7 @@ export default function useViewerService() {
         }
     });
 
-    const stopFollowOneUserMt = useMutation({
+    const unfollowOneUserMt = useMutation({
         mutationFn: async (followed_user_id: string) => {
             try {
                 const request = await fetch(`${baseUrl}/unfollow-one/${followed_user_id}`, {
@@ -203,11 +298,12 @@ export default function useViewerService() {
         },
     });
 
-    const relationProcess = startFollowOneUserMt.isPending || stopFollowAllUserMt.isPending || 
-    stopFollowOneUserMt.isPending;
+    const relationProcess = startFollowOneUserMt.isPending || unfollowAllUserMt.isPending || 
+    unfollowOneUserMt.isPending;
 
     return {
-        getAllFollowers, getAllFollowersTotal, getAllFollowed, getAllFollowedTotal, hasUserFollowed, 
-        relationProcess, startFollowOneUserMt, stopFollowAllUserMt, stopFollowOneUserMt
+        getAllFollowers, getAllCurrentUserFollowed, getAllCurrentUserFollowedTotal, getAllFollowersTotal, 
+        getAllCurrentUserFollowers, getAllCurrentUserFollowersTotal, getAllFollowed, getAllFollowedTotal, 
+        hasUserFollowed, relationProcess, startFollowOneUserMt, unfollowAllUserMt, unfollowOneUserMt
     }
 }

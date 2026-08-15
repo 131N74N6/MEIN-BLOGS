@@ -1,20 +1,6 @@
 import { v2 } from "cloudinary";
 import { Readable } from "stream";
-
-export interface CloudinaryUploadResult {
-    filename: string;
-    filetype: string;
-    public_id: string;
-    resource_type: string;
-    url: string;
-}
-
-export interface CloudinaryUploadOption {
-    file_buffer: Buffer;
-    foldername: string;
-    mimetype: string;
-    original_name: string;
-}
+import { CloudinaryUploadOption, CloudinaryUploadResult } from "./cloudinary.model";
 
 export async function uploadToCloudinary(props: CloudinaryUploadOption): Promise<CloudinaryUploadResult> {
     return new Promise((resolve, reject) => {

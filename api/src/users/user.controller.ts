@@ -1,6 +1,6 @@
 import userService from "./user.service";
 import { errorHandling } from "../errors/api.error";
-import { AuthRequest } from "../middlewares/auth.middleware";
+import { AuthRequest } from "./user.middleware";
 import { changeUserSchema, signInSchema, signUpSchema } from "./user.validation";
 import { Request, Response } from "express";
 
@@ -26,7 +26,7 @@ class UserController {
                 selectedImage: newProfileImage
             });
 
-            res.status(200).json({ message: "this user profile has changed" });
+            return res.status(200).json({ message: "this user profile has changed" });
         } catch (error) {
             return errorHandling(res, error);
         }
@@ -39,7 +39,7 @@ class UserController {
 
             await userService.deleteCurrentUserOldProfile(currentUserId);
 
-            res.status(200).json({ message: "successfully delete old profile picture" });
+            return res.status(200).json({ message: "successfully delete old profile picture" });
         } catch (error) {
             return errorHandling(res, error);
         }
@@ -52,7 +52,7 @@ class UserController {
             
             await userService.deleteUserService(currentUserId);
 
-            res.status(200).json({ message: "successfully delete user" });
+            return res.status(200).json({ message: "successfully delete user" });
         } catch (error) {
             return errorHandling(res, error);
         }
@@ -73,7 +73,7 @@ class UserController {
                 secure: process.env.NODE_ENV === "production"
             });
 
-            res.status(200).json({ message: "sign in success" });
+            return res.status(200).json({ message: "sign in success" });
         } catch (error) {
             return errorHandling(res, error);
         }
@@ -88,7 +88,7 @@ class UserController {
                 secure: process.env.NODE_ENV === "production"
             });
 
-            res.status(200).json({ message: "user sign out successfully" });
+            return res.status(200).json({ message: "user sign out successfully" });
         } catch (error) {
             return errorHandling(res, error);
         }
@@ -109,7 +109,7 @@ class UserController {
                 secure: process.env.NODE_ENV === "production"
             });
 
-            res.status(200).json({ message: "sign up confirmed" });
+            return res.status(200).json({ message: "sign up confirmed" });
         } catch (error) {
             return errorHandling(res, error);
         }
@@ -122,7 +122,7 @@ class UserController {
 
             const user = await userService.showProfileService(currentUserId);
 
-            res.status(200).json({
+            return res.status(200).json({
                 user_id: user._id,
                 username: user.username,
                 profile_picture: user.profile_picture

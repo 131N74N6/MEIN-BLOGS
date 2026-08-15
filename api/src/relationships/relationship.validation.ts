@@ -2,7 +2,11 @@ import { z } from "zod";
 
 export const followedUserIdSchema = z
 .string()
-.regex(/^[0-9a-fA-F]{24}$/, "invalid object id");
+.regex(/^[0-9a-fA-F]{24}$/, "invalid data");
+
+export const userIdSchema = z
+.string()
+.regex(/^[0-9a-fA-F]{24}$/, "invalid data");
 
 export const usernameSchema = z
 .string()

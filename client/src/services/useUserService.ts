@@ -1,3 +1,4 @@
+import type { UserIntrf } from "@/models/userModel";
 import { useBlogStore } from "@/stores/useBlogStore";
 import { useCommentStore } from "@/stores/useCommentStore";
 import { useMessageStore } from "@/stores/useMessageStore";
@@ -13,7 +14,6 @@ export default function useUserService() {
 
     const setMessage = useMessageStore((state) => state.setMessage);
 
-    const currentUserId = useUserStore((state) => state.currentUserId);
     const setCurrentUserId = useUserStore((state) => state.setCurrentUserId);
     
     const email = useUserStore((state) => state.email);
@@ -39,41 +39,9 @@ export default function useUserService() {
     const resetBlogWindowState = useBlogStore((state) => state.resetBlogWindowState);
 
     const resetCommentState = useCommentStore((state) => state.resetCommentState);
-    
-    const changeUserMt = useMutation({
-        mutationFn: async () => {
-            try {
-                const changeUserForm = new FormData();
-                changeUserForm.append("username", username.trim());
-                if (newProfilePcture) changeUserForm.append("media", newProfilePcture);
 
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/remake`, {
-                    body: changeUserForm,
-                    credentials: "include",
-                    method: "PUT"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
-        },
-        onError: (error) => {
-            setMessage(error.message);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`current-user-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`blog-comments-${blogId}`] });
-            resetUserProfileState();
-            setUsername("");
-            if (profilePictureRef.current) profilePictureRef.current.value = "";
-        }
-    });
-
-    const currentUser = useQuery({
-        queryKey: [`current-user-${currentUserId}`],
+    const getCurrentUser = useQuery<UserIntrf>({
+        queryKey: ["current-user"],
         queryFn: async () => {
             try {
                 const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/show`, {
@@ -94,10 +62,10 @@ export default function useUserService() {
     });
 
     useEffect(() => {
-        if (currentUser.data && currentUser.data.user_id) {
-            setCurrentUserId(currentUser.data.user_id);
+        if (getCurrentUser.data && getCurrentUser.data.user_id) {
+            setCurrentUserId(getCurrentUser.data.user_id);
         }
-    }, [currentUser.data]);
+    }, [getCurrentUser.data]);
 
     const deleteUserMt = useMutation({
         mutationFn: async () => {
@@ -158,7 +126,39 @@ export default function useUserService() {
             setMessage(error.message);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`current-user-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: ["current-user"] });
+        }
+    });
+    
+    const updateUserMt = useMutation({
+        mutationFn: async () => {
+            try {
+                const changeUserForm = new FormData();
+                changeUserForm.append("username", username.trim());
+                if (newProfilePcture) changeUserForm.append("profile_picture", newProfilePcture);
+
+                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/remake`, {
+                    body: changeUserForm,
+                    credentials: "include",
+                    method: "PUT"
+                });
+
+                const response = await request.json();
+                if (!request.ok) throw new Error(response.message);
+                return response;
+            } catch (error) {
+                throw error;
+            }
+        },
+        onError: (error) => {
+            setMessage(error.message);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["current-user"] });
+            queryClient.invalidateQueries({ queryKey: [`blog-comments-${blogId}`] });
+            resetUserProfileState();
+            setUsername("");
+            if (profilePictureRef.current) profilePictureRef.current.value = "";
         }
     });
 
@@ -186,7 +186,7 @@ export default function useUserService() {
             setMessage(error.message);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`current-user-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: ["current-user"] });
             setPassword("");
             setUsername("");
         }
@@ -249,7 +249,6 @@ export default function useUserService() {
             setMessage(error.message);
         },
         onSuccess: () => {
-            navigate("/sign-in");
             setEmail("");
             setPassword("");
             setUsername("");
@@ -257,10 +256,11 @@ export default function useUserService() {
     });
 
     const userProcessing = signInMt.isPending || signOutMt.isPending || signUpMt.isPending ||
-    deleteUserMt.isPending || removeOldProfilePictureMt.isPending;
+    deleteUserMt.isPending || removeOldProfilePictureMt.isPending || updateUserMt.isPending;
 
     return { 
-        changeUserMt, currentUser, deleteUserMt, handleUserProfilePicture, 
+        deleteUserMt, updateUserMt, getCurrentUser, 
+        handleUserProfilePicture,
         profilePictureRef, signInMt, signOutMt, signUpMt, userProcessing
     }
 }

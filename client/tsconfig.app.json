@@ -16,16 +16,11 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Alias path shadcn/ui */
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true,
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["src"]
 }

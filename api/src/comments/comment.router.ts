@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { verifyToken } from "../middlewares/auth.middleware";
+import { verifyToken } from "../users/user.middleware";
 import commentController from "./comment.controller";
 
 const commentRouters = Router();

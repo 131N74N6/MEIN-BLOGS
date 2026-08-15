@@ -13,4 +13,4 @@ function fileFilter(_: Request, file: Express.Multer.File, callback: multer.File
     }
 }
 
-export const uploadFile = multer({ storage, fileFilter }).single("media");
+export const verifyBlogFile = multer({ storage, fileFilter }).single("blog_media");

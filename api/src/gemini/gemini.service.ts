@@ -1,17 +1,9 @@
 import { GenerateContentResponse, GoogleGenAI } from "@google/genai";
+import { BlogGeneratorIntrf, GeneratedResultIntrf } from "./gemini.model";
 
 const aiApiKey = process.env.AI_API_KEY;
 const aiModel = process.env.AI_MODEL || "gemini-2.5-flash";
 const ai = new GoogleGenAI({ apiKey: aiApiKey });
-
-export interface GeneratedResultIntrf {
-    contents: string;
-}
-
-export interface BlogGeneratorIntrf {
-    language: string;
-    title: string;
-}
 
 export async function generateBlogContent(props: BlogGeneratorIntrf): Promise<GeneratedResultIntrf> {
     try {

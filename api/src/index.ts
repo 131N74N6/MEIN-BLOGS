@@ -1,4 +1,4 @@
-import { db } from "./utils/mongodb.utility";
+import { db } from "./mongodb/mongodb.service";
 import helmet from "helmet";
 import cors from "cors";
 import express from "express";
@@ -6,7 +6,7 @@ import cookieParser from "cookie-parser";
 import userRouters from "./users/user.router";
 import blogRouters from "./blogs/blog.router";
 import commentRouters from "./comments/comment.router";
-import relationshipRouters from "./relationships/relationships.router";
+import relationshipRouters from "./relationships/relationship.router";
 import viewerRouters from "./viewers/viewer.router";
 import { v2 } from "cloudinary";
 import { rateLimiter } from "./utils/rate-limit.utility";

@@ -1,7 +1,6 @@
 import { Router } from "express";
-import { verifyToken } from "../middlewares/auth.middleware";
+import { verifyProfilePicture, verifyToken } from "./user.middleware";
 import userController from "./user.controller";
-import { uploadFile } from "../middlewares/upload.middleware";
 
 const userRouters = Router();
 
@@ -17,6 +16,6 @@ userRouters.post("/sign-out", verifyToken, userController.signOutController);
 
 userRouters.post("/sign-up", userController.signUpController);
 
-userRouters.put("/remake", verifyToken, uploadFile, userController.changeUserController);
+userRouters.put("/remake", verifyToken, verifyProfilePicture, userController.changeUserController);
 
 export default userRouters;

@@ -1,5 +1,5 @@
 import commentService from "./comment.service";
-import { AuthRequest } from "../middlewares/auth.middleware";
+import { AuthRequest } from "../users/user.middleware";
 import { Request, Response } from "express";
 import { commentSchema, commentPaginationSchema } from "./comment.validation";
 import { blogIdParamSchema } from "../blogs/blog.validation";

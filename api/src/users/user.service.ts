@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import userRepository from "./user.repository";
 import { ApiError } from "../errors/api.error";
 import { ChangeUserIntrf, UserIntrf } from "./user.model";
-import { uploadToCloudinary } from "../utils/cloudinary.utility";
+import { uploadToCloudinary } from "../cloudinary/cloudinary.service";
 import { v2 } from "cloudinary";
 
 const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];

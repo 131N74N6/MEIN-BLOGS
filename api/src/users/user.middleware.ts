@@ -1,5 +1,5 @@
+import multer from "multer";
 import { NextFunction, Request, Response } from "express";
-import rateLimit from "express-rate-limit";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 export interface AuthRequest extends Request {
@@ -30,3 +30,17 @@ export function verifyToken(req: AuthRequest, res: Response, next: NextFunction)
         next();
     });
 }
+
+const storage = multer.memoryStorage();
+
+function fileFilter(_: Request, file: Express.Multer.File, callback: multer.FileFilterCallback) {
+    const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+
+    if (!allowedFileType.includes(file.mimetype)) {
+        callback(new Error("only .jpg, .png, .avif, and .webp image file are allowed"));
+    } else {
+        callback(null, true);
+    }
+}
+
+export const verifyProfilePicture = multer({ storage, fileFilter }).single("profile_picture");

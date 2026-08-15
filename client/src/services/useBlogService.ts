@@ -5,6 +5,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tansta
 import { useRef } from "react";
 
 export default function useBlogService() {
+    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/blogs`;
     const queryClient = useQueryClient();
     const blogMediaRef = useRef<HTMLInputElement>(null);
 
@@ -41,11 +42,11 @@ export default function useBlogService() {
             try {
                 const newBlogForm = new FormData();
                 newBlogForm.append("content", content);
-                newBlogForm.append("language", language);
-                newBlogForm.append("title", title);
-                if (media) newBlogForm.append("media", media);
+                newBlogForm.append("language", language.trim());
+                newBlogForm.append("title", title.trim());
+                if (media) newBlogForm.append("blog_media", media);
 
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/blogs/create`, {
+                const request = await fetch(`${baseUrl}/create`, {
                     body: newBlogForm,
                     credentials: "include",
                     method: "POST"
@@ -74,7 +75,7 @@ export default function useBlogService() {
     const deleteAllCurrentUserBlogsMt = useMutation({
         mutationFn: async () => {
             try {
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/blogs/rm-all`, {
+                const request = await fetch(`${baseUrl}/rm-all`, {
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     method: "DELETE"
@@ -104,7 +105,7 @@ export default function useBlogService() {
     const deleteOneCurrentUserBlogMt = useMutation({
         mutationFn: async (id: string) => {
             try {
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/blogs/rm/${id}`, {
+                const request = await fetch(`${baseUrl}/rm/${id}`, {
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     method: "DELETE"
@@ -139,7 +140,7 @@ export default function useBlogService() {
                 newBlogForm.append("title", title);
                 if (media) newBlogForm.append("file", media);
 
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/blogs/generate`, {
+                const request = await fetch(`${baseUrl}/generate`, {
                     body: newBlogForm,
                     credentials: "include",
                     method: "POST"
@@ -167,7 +168,7 @@ export default function useBlogService() {
         queryKey: ["all-blogs"],
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
             try {
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/blogs/show-all?page=${pageParam}&limit=${16}`, {
+                const request = await fetch(`/show-all?page=${pageParam}&limit=${16}`, {
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     method: "GET"
@@ -191,7 +192,7 @@ export default function useBlogService() {
         queryKey: [`user-blogs-${currentUserId}`],
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
             try {
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/blogs/mine/show-all?page=${pageParam}&limit=${16}`, {
+                const request = await fetch(`${baseUrl}/mine/show-all?page=${pageParam}&limit=${16}`, {
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     method: "GET"
@@ -210,7 +211,7 @@ export default function useBlogService() {
         queryKey: [`blog-content-${blogId}`],
         queryFn: async () => {
             try {
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/blogs/show/${blogId}`, {
+                const request = await fetch(`${baseUrl}/show/${blogId}`, {
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     method: "GET"
@@ -225,8 +226,40 @@ export default function useBlogService() {
         }
     });
 
+    const updateOneBlogMt = useMutation({
+        mutationFn: async (id: string) => {
+            try {
+                const updateBlogForm = new FormData();
+                updateBlogForm.append("content", content);
+                updateBlogForm.append("language", language.trim());
+                updateBlogForm.append("title", title.trim());
+                if (media) updateBlogForm.append("blog_media", media);
+
+                const request = await fetch(`${baseUrl}/remake/${id}`, {
+                    body: updateBlogForm,
+                    credentials: "include",
+                    method: "PUT"
+                });
+
+                const response = await request.json();
+                if (!request.ok) throw new Error(response.message);
+                return response;
+            } catch (error) {
+                throw error;
+            }
+        },
+        onError: (error) => {
+            setMessage(error.message);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`blog-content-${blogId}`] });
+            queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
+        }
+    });
+
     const processing = deleteAllCurrentUserBlogsMt.isPending || deleteOneCurrentUserBlogMt.isPending ||
-    createNewBlogMt.isPending || generateNewBlogMt.isPending;
+    createNewBlogMt.isPending || generateNewBlogMt.isPending || updateOneBlogMt.isPending;
 
     return {
         blogMediaPrefiew,
@@ -237,6 +270,7 @@ export default function useBlogService() {
         getAllBlogs,
         getAllCurrentUserBlogs,
         getOneBlogContent,
-        processing
+        processing,
+        updateOneBlogMt,
     }
 }

@@ -1,32 +1,26 @@
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import BlogTableRow from "@/components/BlogTableRow";
+import Navbar from "@/components/ui/navbar";
+import useBlogService from "@/services/useBlogService";
 
 export default function Blogs() {
+    const blogs = useBlogService();
+
     return (
-        <div className="h-screen">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Blog Title</TableHead>
-                        <TableHead>Action</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {invoices.map((invoice) => (
-                        <TableRow key={invoice.invoice}>
-                            <TableCell className="font-medium">{invoice.invoice}</TableCell>
-                            <TableCell>{invoice.paymentStatus}</TableCell>
-                            <TableCell>{invoice.paymentMethod}</TableCell>
-                            <TableCell className="text-right">{invoice.totalAmount}</TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-                <TableFooter>
-                    <TableRow>
-                        <TableCell colSpan={3}>Total</TableCell>
-                        <TableCell className="text-right">$2,500.00</TableCell>
-                    </TableRow>
-                </TableFooter>
-            </Table>
-        </div>
+        <section className="md:flex-row flex flex-col h-dvh">
+            <Navbar/>
+            <div className="md:w-4/5 h-full flex flex-col border-l border-gray-500">
+                <BlogTableRow 
+                    blogs={
+                        blogs.getAllCurrentUserBlogs.data ? 
+                        blogs.getAllCurrentUserBlogs.data.pages.flat() : []
+                    }
+                    fetch_next_page={blogs.getAllCurrentUserBlogs.fetchNextPage}
+                    has_next_page={blogs.getAllCurrentUserBlogs.hasNextPage}
+                    is_processing={blogs.processing}
+                    is_fetching_next_page={blogs.getAllCurrentUserBlogs.isFetchingNextPage}
+                    on_delete={blogs.deleteOneCurrentUserBlogMt}
+                />
+            </div>
+        </section>
     );
 }

@@ -1,7 +1,7 @@
-import { Router } from "express";
-import { verifyToken } from "../middlewares/auth.middleware";
 import blogController from "./blog.controller";
-import { uploadFile } from "../middlewares/upload.middleware";
+import { Router } from "express";
+import { verifyToken } from "../users/user.middleware";
+import { verifyBlogFile } from "./blog.middleware";
 
 const blogRouters = Router();
 
@@ -9,14 +9,16 @@ blogRouters.delete("/rm-all", verifyToken, blogController.deleteAllBlogs);
 
 blogRouters.delete("/rm/:blog_id", verifyToken, blogController.deleteOneBlog);
 
-blogRouters.get("/show-all", verifyToken, blogController.getAllBlogs);
+blogRouters.get("/show-all", blogController.getAllBlogs);
 
 blogRouters.get("/mine/show-all", verifyToken, blogController.getAllUserBlogs);
 
-blogRouters.get("/show/:blog_id", verifyToken, blogController.getBlogContentById);
+blogRouters.get("/show/:blog_id", blogController.getBlogContentById);
 
-blogRouters.post("/create", verifyToken, uploadFile, blogController.createNewBlog);
+blogRouters.post("/create", verifyToken, verifyBlogFile, blogController.createNewBlog);
 
 blogRouters.post("/generate", verifyToken, blogController.generateNewBlog);
+
+blogRouters.put("/remake/:blog_id", verifyToken, blogController.changeOneBlog);
 
 export default blogRouters;

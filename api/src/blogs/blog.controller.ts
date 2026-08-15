@@ -1,4 +1,4 @@
-import { AuthRequest } from "../middlewares/auth.middleware";
+import { AuthRequest } from "../users/user.middleware";
 import { errorHandling } from "../errors/api.error";
 import { Request, Response } from "express";
 import {

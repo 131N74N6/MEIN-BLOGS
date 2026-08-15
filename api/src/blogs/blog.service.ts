@@ -1,10 +1,10 @@
 import blogRepository from "./blog.repository";
 import mongoose from "mongoose";
 import { ApiError } from "../errors/api.error";
-import { generateBlogContent } from "../utils/ai.utility";
+import { generateBlogContent } from "../gemini/gemini.service";
 import { v2 } from "cloudinary";
 import { BlogPaginationIntrf, GenerateBlogIntrf } from "./blog.validation";
-import { uploadToCloudinary } from "../utils/cloudinary.utility";
+import { uploadToCloudinary } from "../cloudinary/cloudinary.service";
 import { NewBlogReqIntrf } from "./blog.model";
 
 const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
