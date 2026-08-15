@@ -1,5 +1,5 @@
-import useUserService from "@/services/useUserService"
-import Loading from "./ui/loading";
+import useUserService from "../services/useUserService"
+import Loading from "./Loading";
 import { Navigate } from "react-router-dom";
 
 interface RouteProtectionIntrf {

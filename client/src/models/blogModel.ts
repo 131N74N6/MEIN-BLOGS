@@ -24,6 +24,21 @@ export interface BlogIntrf {
     title: string;
 }
 
+export interface BlogListIntrf {
+    blogs: BlogIntrf[];
+    fetch_next_page: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>;
+    has_next_page: boolean;
+    is_processing: boolean;
+    is_fetching_next_page: boolean;
+    on_delete: UseMutationResult<any, Error, string, unknown>;
+}
+
+export interface BlogCardIntrf {
+    blog: BlogIntrf;
+    is_processing: boolean;
+    on_delete: UseMutationResult<any, Error, string, unknown>;
+}
+
 export interface BlogTableRowIntrf {
     blogs: Pick<BlogIntrf, "_id" | "title" | "created_at">[];
     fetch_next_page: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>;

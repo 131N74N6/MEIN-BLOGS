@@ -1,5 +1,5 @@
-import { useBlogStore } from "@/stores/useBlogStore";
-import { useMessageStore } from "@/stores/useMessageStore";
+import { useBlogStore } from "../stores/useBlogStore";
+import { useMessageStore } from "../stores/useMessageStore";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 export default function useViewerService() {

@@ -3,5 +3,5 @@ export default function BlogViewers() {
         <div>
         
         </div>
-    )
+    );
 }

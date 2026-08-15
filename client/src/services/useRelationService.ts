@@ -1,6 +1,6 @@
-import { useMessageStore } from "@/stores/useMessageStore";
-import { useReltionshipStore } from "@/stores/useReltionshipStore";
-import { useUserStore } from "@/stores/useUserStore";
+import { useMessageStore } from "../stores/useMessageStore";
+import { useReltionshipStore } from "../stores/useReltionshipStore";
+import { useUserStore } from "../stores/useUserStore";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function useViewerService() {

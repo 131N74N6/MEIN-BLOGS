@@ -1,54 +1,41 @@
-import type { BlogTableRowIntrf } from "@/models/blogModel";
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "./ui/table";
-import BlogTable from "./BlogTable";
-import { Button } from "./ui/button";
-import Loading from "./ui/loading";
+import type { BlogTableRowIntrf } from "../models/blogModel";
+import { Eraser, Pencil } from "lucide-react";
 
 export default function BlogTableRow(props: BlogTableRowIntrf) {
     return (
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead>Blog Title</TableHead>
-                    <TableHead>Action</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {props.blogs.map((blog) => (
-                    <BlogTable 
-                        blog={blog} 
-                        is_processing={props.is_processing} 
-                        on_delete={props.on_delete} 
-                    />
-                ))}
-            </TableBody>
-            <TableFooter>
-                {props.blogs.length <= 16 ? null : props.has_next_page ? (
-                    <TableRow>
-                        <TableCell className="flex justify-center" colSpan={3}>
-                            <Button 
-                                disabled={props.is_processing}
-                                onClick={() => props.fetch_next_page()}
-                                type="button" 
-                            >
-                                Load More...
-                            </Button>
-                        </TableCell>
-                    </TableRow>
-                ) : props.is_fetching_next_page ? (
-                    <TableRow>
-                        <TableCell className="flex justify-center" colSpan={3}>
-                            <Loading/>
-                        </TableCell>
-                    </TableRow>
-                ) : (
-                    <TableRow>
-                        <TableCell className="flex justify-center" colSpan={3}>
-                            <div className="text-center">No more blogs to show</div>
-                        </TableCell>
-                    </TableRow>
-                )}
-            </TableFooter>
-        </Table>
+        <div className="flex flex-col">
+            <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+                    <div className="overflow-hidden">
+                        <table className="min-w-full text-left text-sm font-light">
+                            <thead className="border-b font-medium dark:border-neutral-500">
+                                <tr>
+                                    <th scope="col" className="px-6 py-4">Created At</th>
+                                    <th scope="col" className="px-6 py-4">Blog Title</th>
+                                    <th scope="col" className="px-6 py-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {props.blogs.map((blog) => (
+                                    <tr className="border-b transition duration-300 ease-in-out hover:bg-neutral-100 dark:border-neutral-500 dark:hover:bg-neutral-600">
+                                        <td className="whitespace-nowrap px-6 py-4 font-medium">{new Date(blog.created_at).toLocaleString()}</td>
+                                        <td className="whitespace-nowrap px-6 py-4">{blog.title}</td>
+                                        <td className="whitespace-nowrap px-6 py-4">
+                                            <button className="">
+                                                <Eraser size={22}/>
+                                            </button>
+                                            <button className="">
+                                                <Pencil size={22}/>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                            <tfoot></tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }

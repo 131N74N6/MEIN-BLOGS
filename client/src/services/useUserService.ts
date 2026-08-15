@@ -1,8 +1,8 @@
-import type { UserIntrf } from "@/models/userModel";
-import { useBlogStore } from "@/stores/useBlogStore";
-import { useCommentStore } from "@/stores/useCommentStore";
-import { useMessageStore } from "@/stores/useMessageStore";
-import { useUserStore } from "@/stores/useUserStore";
+import type { UserIntrf } from "../models/userModel";
+import { useBlogStore } from "../stores/useBlogStore";
+import { useCommentStore } from "../stores/useCommentStore";
+import { useMessageStore } from "../stores/useMessageStore";
+import { useUserStore } from "../stores/useUserStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
