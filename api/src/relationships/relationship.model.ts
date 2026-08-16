@@ -20,7 +20,7 @@ export interface UserRelationshipIntrf {
     user_id: string;
 }
 
-const relationshipsSchema = new Schema<RelationshipIntrf>({
+const relationshipsCollectionSchema = new Schema<RelationshipIntrf>({
     user_id: { required: true },
     username: { type: String, required: true },
     profile_picture: {
@@ -38,4 +38,4 @@ const relationshipsSchema = new Schema<RelationshipIntrf>({
     }
 });
 
-export const Relationships = mongoose.model("relationships", relationshipsSchema, "relationships");
+export const Relationships = mongoose.model("relationships", relationshipsCollectionSchema, "relationships");

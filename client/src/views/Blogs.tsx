@@ -1,4 +1,4 @@
-import BlogTableRow from "../components/BlogTableRow";
+import BlogTable from "../components/BlogTable";
 import useBlogService from "../services/useBlogService";
 
 export default function Blogs() {
@@ -7,7 +7,7 @@ export default function Blogs() {
     return (
         <section className="md:flex-row flex flex-col h-dvh">
             <div className="md:w-4/5 h-full flex flex-col border-l border-gray-500">
-                <BlogTableRow 
+                <BlogTable 
                     blogs={
                         getAllCurrentUserBlogs.data ? 
                         getAllCurrentUserBlogs.data.pages.flat() : []

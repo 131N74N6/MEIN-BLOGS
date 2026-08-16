@@ -1,4 +1,4 @@
-import { Blogs, NewBlogIntrf } from "./blog.model";
+import { Blogs, EditBlogIntrf, NewBlogIntrf } from "./blog.model";
 import { Users } from "../users/user.model";
 import { Comments } from "../comments/comment.model";
 import { Viewers } from "../viewers/viewer.model";
@@ -21,13 +21,13 @@ class BlogRepository {
         });
     }
 
-    async changeOneBlog(blogId: string, props: NewBlogIntrf) {
+    async changeOneBlog(props: EditBlogIntrf) {
         return await Promise.all([
-            Viewers.updateMany({ blog_id: blogId }, {
+            Viewers.updateMany({ blog_id: props.blog_id }, {
                 $set: { blog_title: props.title }
             }),
 
-            Blogs.updateOne({ _id: blogId }, {
+            Blogs.updateOne({ _id: props.blog_id }, {
                 $set: {
                     content: props.content,
                     media: props.media,

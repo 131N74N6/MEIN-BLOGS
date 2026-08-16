@@ -8,7 +8,7 @@ class ViewerRepository {
     }
 
     async getAllBlogViewers(props: ViewerPaginationIntrf) {
-        return await Viewers.find({ blog_id: props.blog_id }, { blog_id: 0, blog_title: 0 })
+        return await Viewers.find({ blog_id: props.blog_id }, { _id: 0, blog_id: 0, blog_title: 0 })
         .limit(props.limit)
         .skip(props.skip)
         .lean();

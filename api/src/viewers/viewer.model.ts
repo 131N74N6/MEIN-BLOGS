@@ -25,7 +25,7 @@ export interface ViewerPaginationIntrf {
     skip: number;
 }
 
-const viewerSchema = new Schema<ViewerIntrf>({
+const viewersCollectionSchema = new Schema<ViewerIntrf>({
     user_id: { type: Schema.Types.ObjectId },
     username: { type: String },
     profile_picture: {
@@ -39,4 +39,4 @@ const viewerSchema = new Schema<ViewerIntrf>({
     blog_title: { type: String }
 });
 
-export const Viewers = mongoose.model<ViewerIntrf>("viewers", viewerSchema, "viewers");
+export const Viewers = mongoose.model<ViewerIntrf>("viewers", viewersCollectionSchema, "viewers");

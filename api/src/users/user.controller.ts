@@ -7,22 +7,22 @@ import { Request, Response } from "express";
 class UserController {
     async changeUserController(req: AuthRequest, res: Response) {
         try {
+            const newProfileImage = req.file;
+            
             const currentUserId = req.user?.user_id;
             if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
 
-            const parsed = changeUserSchema.safeParse(req.body);
-            if (!parsed.success) return res.status(400).json({ message: "invalid input" });
+            const newProfile = changeUserSchema.safeParse(req.body);
+            if (!newProfile.success) return res.status(400).json({ message: "invalid input" });
 
-            const username = parsed.data.username;
-            const newProfileImage: Express.Multer.File | undefined = req.file;
 
-            if (!username && !newProfileImage) {
+            if (!newProfile.data.username && !newProfileImage) {
                 return res.status(400).json({ message: "no profile data to update" });
             }
 
             await userService.changeUserService({
                 currentUserId: currentUserId,
-                username: username,
+                username: newProfile.data.username,
                 selectedImage: newProfileImage
             });
 

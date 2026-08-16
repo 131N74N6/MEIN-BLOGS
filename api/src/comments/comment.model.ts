@@ -26,7 +26,7 @@ export interface ShowCommentIntrf {
     skip: number;
 }
 
-const commentSchema = new Schema<IComment>({
+const commentsCollectionSchema = new Schema<IComment>({
     blog_id: { type: Schema.Types.ObjectId, required: true },
     profile_picture: {
         filename: { type: String },
@@ -45,4 +45,4 @@ const commentSchema = new Schema<IComment>({
     }
 });
 
-export const Comments = mongoose.model<IComment>("comments", commentSchema, "comments");
+export const Comments = mongoose.model<IComment>("comments", commentsCollectionSchema, "comments");

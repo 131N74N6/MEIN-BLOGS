@@ -6,6 +6,7 @@ import { ApiError } from "../errors/api.error";
 import { ChangeUserIntrf, UserIntrf } from "./user.model";
 import { uploadToCloudinary } from "../cloudinary/cloudinary.service";
 import { v2 } from "cloudinary";
+import { SignInInput, SignUpInput } from "./user.validation";
 
 const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const maxFileSize = 5 * 1024 * 1024;
@@ -60,7 +61,7 @@ class UserService {
         const user = await userRepository.getCurrentUser(currentUserId);
         if (!user) throw new ApiError(404, "user not found");
         
-        if (props.selectedImage) {            
+        if (props.selectedImage) {
             if (!allowedFileType.includes(props.selectedImage.mimetype)) {
                 throw new ApiError(400, "this file is not allowed");
             }
@@ -143,7 +144,7 @@ class UserService {
         ]);
     }
 
-    async signInService(props: Pick<UserIntrf, "password" | "username">) {
+    async signInService(props: SignInInput) {
         const password = this.checkIsInputValid(props.password, "password", 8, 72);
         const username = this.checkIsInputValid(props.username, "username", 3, 30);
 
@@ -156,7 +157,7 @@ class UserService {
         return this.authentiationToken(user._id.toString(), user.username);
     }
 
-    async signUpService(props: Omit<UserIntrf, "profile_picture">) {
+    async signUpService(props: SignUpInput) {
         const password = this.checkIsInputValid(props.password, "password", 8, 72);
         const username = this.checkIsInputValid(props.username, "username", 3, 30);
         const email = this.checkIsEmailValid(props.email);

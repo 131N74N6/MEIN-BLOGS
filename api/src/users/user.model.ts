@@ -27,7 +27,7 @@ export interface UserIntrf {
     username: string;
 }
 
-const userSchema = new Schema<UserIntrf>({
+const usersCollectionSchema = new Schema<UserIntrf>({
     email: { 
         lowercase: true,
         trim: true,
@@ -59,4 +59,4 @@ const userSchema = new Schema<UserIntrf>({
     }
 });
 
-export const Users = mongoose.model<UserIntrf>("users", userSchema, "users");
+export const Users = mongoose.model<UserIntrf>("users", usersCollectionSchema, "users");

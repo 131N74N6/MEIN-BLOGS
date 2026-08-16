@@ -1,22 +1,12 @@
 import { z } from "zod";
+import { allowedFileType, maxFileSize } from "./blog.middleware";
 
-const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-const maxFileSize = 5 * 1024 * 1024;
-
-export const createBlogSchema = z.object({
+export const upsertBlogSchema = z.object({
     content: z
     .string()
     .trim()
     .min(1, "blog content mustn't empty")
     .max(30000, "blog content is too long"),
-
-    media: z
-    .custom<Express.Multer.File | undefined>((file) => file !== undefined && file !== null, {
-        error: 'file is required',
-    })
-    .refine((file) => file?.size! < maxFileSize, "max file size is 5mb")
-    .refine((file) => allowedFileType.includes(file?.mimetype!), "This file is not supported.")
-    .optional(),
 
     language: z
     .string()

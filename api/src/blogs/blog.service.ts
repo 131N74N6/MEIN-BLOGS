@@ -5,11 +5,10 @@ import { generateBlogContent } from "../gemini/gemini.service";
 import { v2 } from "cloudinary";
 import { BlogPaginationIntrf, GenerateBlogIntrf } from "./blog.validation";
 import { uploadToCloudinary } from "../cloudinary/cloudinary.service";
-import { NewBlogReqIntrf } from "./blog.model";
+import { EditBlogRawIntrf, NewBlogRawIntrf } from "./blog.model";
+import { allowedFileType, maxFileSize } from "./blog.middleware";
 
-const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const allowedLanguage = ["id", "en", "jp", "de"];
-const maxFileSize = 5 * 1024 * 1024;
 
 class BlogService {
     private checkIsLanguageValid(language: unknown): string {
@@ -45,7 +44,7 @@ class BlogService {
         return trimmed;
     }
 
-    async createNewBlog(props: NewBlogReqIntrf) {
+    async createNewBlog(props: NewBlogRawIntrf) {
         const blogContent = this.checkIsInputValid(props.content, "content", 1, 30000);
         const currentUserId = this.checkIsIdValid(props.current_user_id, "current user id");
         const blogLanguage = this.checkIsLanguageValid(props.language);
@@ -77,13 +76,13 @@ class BlogService {
         });
     }
 
-    async changeOneBlog(blogId: string, props: NewBlogReqIntrf) {
+    async changeOneBlog(props: EditBlogRawIntrf) {
         const blogContent = this.checkIsInputValid(props.content, "content", 1, 30000);
         const currentUserId = this.checkIsIdValid(props.current_user_id, "current user id");
         const blogLanguage = this.checkIsLanguageValid(props.language);
         const blogTitle = this.checkIsInputValid(props.title, "title", 3, 180);
 
-        const blog = await blogRepository.getBlogById(blogId);
+        const blog = await blogRepository.getBlogById(props.blog_id);
         if (!blog) throw new ApiError(404, "blog not found");
 
         if (blog.blog_owner_id.toString() !== currentUserId) {
@@ -110,7 +109,8 @@ class BlogService {
                 original_name: props.media.originalname
             });
 
-            await blogRepository.changeOneBlog(blogId, {
+            await blogRepository.changeOneBlog({
+                blog_id: blog._id.toString(),
                 content: blogContent || blog.content,
                 current_user_id: currentUserId,
                 media: newBlogMedia,
@@ -118,7 +118,8 @@ class BlogService {
                 title: blogTitle || blog.title
             });
         } else {
-            await blogRepository.changeOneBlog(blogId, {
+            await blogRepository.changeOneBlog({
+                blog_id: blog._id.toString(),
                 content: blogContent || blog.content,
                 current_user_id: currentUserId,
                 media: blog.media,

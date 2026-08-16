@@ -6,6 +6,8 @@ import { useUserStore } from "../stores/useUserStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useNavbarStore } from "../stores/useNavbarStore";
+import { useReltionshipStore } from "../stores/useReltionshipStore";
 
 export default function useUserService() {
     const navigate = useNavigate();
@@ -37,8 +39,9 @@ export default function useUserService() {
 
     const resetBlogInfoState = useBlogStore((state) => state.resetBlogInfoState);
     const resetBlogWindowState = useBlogStore((state) => state.resetBlogWindowState);
-
+    const resetRelationShipState = useReltionshipStore((state) => state.resetRelationShipState);
     const resetCommentState = useCommentStore((state) => state.resetCommentState);
+    const resetNavbarState = useNavbarStore((state) => state.resetNavbarState);
 
     const getCurrentUser = useQuery<UserIntrf>({
         queryKey: ["current-user"],
@@ -88,13 +91,16 @@ export default function useUserService() {
         },
         onSuccess: () => {
             queryClient.clear();
+            if (profilePictureRef.current) profilePictureRef.current.value = "";
             resetBlogInfoState();
             resetBlogWindowState();
             resetCommentState();
+            resetRelationShipState();
             resetUserInfoState();
             resetUserProfileState();
             resetUserWindowState();
-            if (profilePictureRef.current) profilePictureRef.current.value = "";
+            resetNavbarState();
+            navigate("/sign-in");
         }
     });
 
@@ -213,13 +219,15 @@ export default function useUserService() {
         },
         onSuccess: () => {
             queryClient.clear();
+            if (profilePictureRef.current) profilePictureRef.current.value = "";
             resetBlogInfoState();
             resetBlogWindowState();
             resetCommentState();
+            resetRelationShipState();
             resetUserInfoState();
             resetUserProfileState();
             resetUserWindowState();
-            if (profilePictureRef.current) profilePictureRef.current.value = "";
+            resetNavbarState();
             navigate("/sign-in");
         }
     });

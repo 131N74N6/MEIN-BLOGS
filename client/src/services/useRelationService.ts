@@ -3,7 +3,7 @@ import { useReltionshipStore } from "../stores/useReltionshipStore";
 import { useUserStore } from "../stores/useUserStore";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export default function useViewerService() {
+export default function useRelationshipService() {
     const queryClient = useQueryClient();
     const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/relationships`;
 

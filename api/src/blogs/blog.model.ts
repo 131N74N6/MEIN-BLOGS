@@ -36,7 +36,11 @@ export interface NewBlogIntrf {
     title: string;
 }
 
-export interface NewBlogReqIntrf {
+export interface EditBlogIntrf extends NewBlogIntrf {
+    blog_id: string;
+}
+
+export interface NewBlogRawIntrf {
     current_user_id: string;
     content: string;
     language: string;
@@ -44,7 +48,11 @@ export interface NewBlogReqIntrf {
     title: string;
 }
 
-const blogSchema = new Schema<BlogIntrf>({
+export interface EditBlogRawIntrf extends NewBlogRawIntrf {
+    blog_id: string;
+}
+
+const blogsCollectionSchema = new Schema<BlogIntrf>({
     language: { type: String },
     title: { type: String, required: true },
     media: {
@@ -71,4 +79,4 @@ const blogSchema = new Schema<BlogIntrf>({
     }
 });
 
-export const Blogs = mongoose.model<BlogIntrf>("blogs", blogSchema, "blogs");
+export const Blogs = mongoose.model<BlogIntrf>("blogs", blogsCollectionSchema, "blogs");

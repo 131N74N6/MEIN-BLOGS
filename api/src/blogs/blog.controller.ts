@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 import {
     blogPaginationSchema,
     blogIdParamSchema,
-    createBlogSchema,
+    upsertBlogSchema,
     generateBlogSchema
 } from "../blogs/blog.validation";
 import blogService from "./blog.service";
@@ -17,7 +17,7 @@ class BlogController {
             const currentUserId = req.user?.user_id;
             if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
 
-            const createBlog = createBlogSchema.safeParse(req.body);
+            const createBlog = upsertBlogSchema.safeParse(req.body);
             if (!createBlog.success) return res.status(400).json({ message: "invali input" });
 
             await blogService.createNewBlog({
@@ -44,10 +44,11 @@ class BlogController {
             const blogId = blogIdParamSchema.safeParse(req.params.blog_id);
             if (!blogId.success) return res.status(400).json({ message: "invalid blog id" });
 
-            const createBlog = createBlogSchema.safeParse(req.body);
+            const createBlog = upsertBlogSchema.safeParse(req.body);
             if (!createBlog.success) return res.status(400).json({ message: "invali input" });
 
-            await blogService.changeOneBlog(blogId.data, {
+            await blogService.changeOneBlog({
+                blog_id: blogId.data,
                 content: createBlog.data.content,
                 current_user_id: currentUserId,
                 language: createBlog.data.language,
