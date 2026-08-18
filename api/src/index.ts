@@ -1,4 +1,14 @@
+import dns from "node:dns/promises";
+import dotenv from "dotenv";
+dotenv.config();
+
+if (process.env.NODE_ENV !== "production") {
+    dns.setServers(["1.1.1.1", "8.8.8.8"]);
+    console.log("using dns server 1.1.1.1 and 8.8.8.8....");
+}
+
 import { db } from "./mongodb/mongodb.service";
+import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import cors from "cors";
 import express from "express";
@@ -9,13 +19,18 @@ import commentRouters from "./comments/comment.router";
 import relationshipRouters from "./relationships/relationship.router";
 import viewerRouters from "./viewers/viewer.router";
 import { v2 } from "cloudinary";
-import { rateLimiter } from "./utils/rate-limit.utility";
 
 const port = process.env.PORT || 5172;
 const app = express();
 
 app.use(helmet());
-app.use(rateLimiter);
+app.use(rateLimit({
+    legacyHeaders: false,
+    limit: 50,
+    message: { message: "too many authentication attempts, please try again later" },
+    standardHeaders: true,
+    windowMs: 20 * 60 * 1000, // 20 minutes
+}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
@@ -26,7 +41,7 @@ v2.config({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME
-})
+});
 app.use("/api/blogs", blogRouters);
 app.use("/api/comments", commentRouters);
 app.use("/api/relationships", relationshipRouters);

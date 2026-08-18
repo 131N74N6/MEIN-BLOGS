@@ -60,8 +60,7 @@ export default function useUserService() {
                 throw error;
             }
         },
-        retry: false,
-        staleTime: Infinity
+        retry: false
     });
 
     useEffect(() => {
@@ -171,13 +170,15 @@ export default function useUserService() {
     const signInMt = useMutation({
         mutationFn: async () => {
             try {
-                const signInForm = new FormData();
-                signInForm.append("username", username.trim());
-                signInForm.append("password", password.trim());
+                const signInData = {
+                    password: password.trim(),
+                    username: username.trim(),
+                }
 
                 const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/sign-in`, {
-                    body: signInForm,
+                    body: JSON.stringify(signInData),
                     credentials: "include",
+                    headers: { "Content-Type": "application/json" },
                     method: "POST"
                 });
 
@@ -193,6 +194,7 @@ export default function useUserService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["current-user"] });
+            navigate("/users/dashboard", { replace: true });
             setPassword("");
             setUsername("");
         }
@@ -235,14 +237,16 @@ export default function useUserService() {
     const signUpMt = useMutation({
         mutationFn: async () => {
             try {
-                const signUpForm = new FormData();
-                signUpForm.append("email", email.trim());
-                signUpForm.append("password", password.trim());
-                signUpForm.append("username", username.trim());
+                const signUpData = {
+                    email: email.trim(),
+                    password: password.trim(),
+                    username: username.trim(),
+                }
 
                 const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/sign-up`, {
-                    body: signUpForm,
+                    body: JSON.stringify(signUpData),
                     credentials: "include",
+                    headers: { "Content-Type": "application/json" },
                     method: "POST"
                 });
 
@@ -257,6 +261,7 @@ export default function useUserService() {
             setMessage(error.message);
         },
         onSuccess: () => {
+            navigate("/users/dashboard", { replace: true });
             setEmail("");
             setPassword("");
             setUsername("");

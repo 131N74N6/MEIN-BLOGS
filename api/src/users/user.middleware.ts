@@ -18,7 +18,7 @@ export function verifyToken(req: AuthRequest, res: Response, next: NextFunction)
     const currentToken = req.cookies?.token;
     if (!currentToken) return res.status(401).json({ message: "token is required" });
 
-    jwt.verify(process.env.JWT_TOKEN || "my_secret_key", (error: any, decode: any) => {
+    jwt.verify(currentToken, process.env.JWT_TOKEN || "my_secret_key", (error: any, decode: any) => {
         if (error) return res.status(403).json({ message: "invalid access token" });
         const payload = decode as CustomJwtPayload;
 

@@ -1,13 +1,5 @@
 import mongoose, { Schema } from "mongoose";
 
-export interface ProfilePictureIntrf {
-    filename: string;
-    filetype: string;
-    public_id: string;
-    resource_type: string;
-    url: string;
-}
-
 export interface ChangeUserIntrf {
     currentUserId: string;
     selectedImage?: Express.Multer.File;
@@ -32,8 +24,7 @@ const usersCollectionSchema = new Schema<UserIntrf>({
         lowercase: true,
         trim: true,
         type: String, 
-        required: true, 
-        unique: true
+        required: true
     },
     password: { 
         type: String, 
@@ -50,7 +41,6 @@ const usersCollectionSchema = new Schema<UserIntrf>({
         trim: true,
         type: String, 
         required: true, 
-        unique: true
     },
 }, {
     timestamps: {

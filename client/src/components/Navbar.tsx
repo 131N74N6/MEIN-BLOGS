@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useNavbarStore } from "../stores/useNavbarStore";
 import type { UseMutationResult } from "@tanstack/react-query";
-import { ChartBar, File, Menu, PlusSquare, User } from "lucide-react";
+import { ChartBar, File, Menu, PlusSquare, Power, User } from "lucide-react";
 import { cn } from "../lib/utils";
 
 interface NavbarIntrf {
@@ -19,12 +19,13 @@ export default function Navbar(props: NavbarIntrf) {
 
     return (
         <>
-            <nav className="h-full md:flex flex-col p-2.5 gap-2.5 bg-zinc-700 hidden">
+            <nav className="h-full md:w-1/5 md:flex flex-col p-2.5 gap-2.5 bg-zinc-700 hidden">
                 <button 
                     className={cn(
+                        "flex gap-2.5",
                         "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
                         "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${props.place === "create blog" ? 'bg-zinc-500' : 'bg-zinc-700'}`
+                        `${props.place === "create blog" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
                     )}
                     disabled={props.is_processing}
                     onClick={() => navigate("/users/blogs/create")}
@@ -35,9 +36,10 @@ export default function Navbar(props: NavbarIntrf) {
                 </button>
                 <button 
                     className={cn(
+                        "flex gap-2.5",
                         "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
                         "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${props.place === "your blogs" ? 'bg-zinc-500' : 'bg-zinc-700'}`
+                        `${props.place === "your blogs" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
                     )}
                     disabled={props.is_processing}
                     onClick={() => navigate("/users/blogs")}
@@ -48,32 +50,47 @@ export default function Navbar(props: NavbarIntrf) {
                 </button>
                 <button 
                     className={cn(
+                        "flex gap-2.5",
                         "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
                         "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${props.place === "your profile" ? 'bg-zinc-500' : 'bg-zinc-700'}`
+                        `${props.place === "your profile" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
                     )}
                     disabled={props.is_processing}
                     onClick={() => navigate("/users")}
                     type="button"
                 >
                     <User size={22}/>
-                    <div>Create Blog</div>
+                    <div>Profile</div>
                 </button>
                 <button 
                     className={cn(
+                        "flex gap-2.5",
                         "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
                         "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${props.place === "your dashboard" ? 'bg-zinc-500' : 'bg-zinc-700'}`
+                        `${props.place === "your dashboard" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
                     )}
                     disabled={props.is_processing}
                     onClick={() => navigate("/users/dashboard")}
                     type="button"
                 >
                     <ChartBar size={22}/>
-                    <div>Create Blog</div>
+                    <div>Dashboard</div>
+                </button>
+                <button 
+                    className={cn(
+                        "flex gap-2.5 hover:bg-zinc-600 p-2 hover:rounded-lg",
+                        "font-normal text-left text-base text-white ", 
+                        "disabled:cursor-not-allowed transition-colors cursor-pointer", 
+                    )}
+                    disabled={props.is_processing}
+                    onClick={() => props.sign_out.mutate()}
+                    type="button"
+                >
+                    <Power size={22}/>
+                    <div>Sign Out</div>
                 </button>
             </nav>
-            <nav className="bg-zinc-700 p-2.5">
+            <nav className="bg-zinc-700 p-2.5 flex md:hidden">
                 <button
                     className="disabled:cursor-not-allowed cursor-pointer text-white font-normal"
                     disabled={props.is_processing}
@@ -88,16 +105,17 @@ export default function Navbar(props: NavbarIntrf) {
             ) : null}
             <aside 
                 className={cn(
-                    "h-full z-50 md:hidden flex flex-col bg-zinc-700 gap-2.5 p-2.5 max-w-sm",
+                    "h-full w-4/5 z-50 md:hidden flex flex-col bg-zinc-700 gap-2.5 p-2.5 max-w-3xs",
                     "top-0 right-0 fixed inset-0 transition-transform duration-300 ease-in-out",
                     `${isOpen ? "translate-x-0" : "translate-x-full"}`
                 )}
             >
                 <button 
                     className={cn(
+                        "flex gap-2.5",
                         "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
                         "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${props.place === "create blog" ? 'bg-zinc-500' : 'bg-zinc-700'}`
+                        `${props.place === "create blog" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
                     )}
                     disabled={props.is_processing}
                     onClick={() => navigate("/users/blogs/create")}
@@ -108,9 +126,10 @@ export default function Navbar(props: NavbarIntrf) {
                 </button>
                 <button 
                     className={cn(
+                        "flex gap-2.5",
                         "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
                         "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${props.place === "your blogs" ? 'bg-zinc-500' : 'bg-zinc-700'}`
+                        `${props.place === "your blogs" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
                     )}
                     disabled={props.is_processing}
                     onClick={() => navigate("/users/blogs")}
@@ -121,29 +140,44 @@ export default function Navbar(props: NavbarIntrf) {
                 </button>
                 <button 
                     className={cn(
+                        "flex gap-2.5",
                         "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
                         "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${props.place === "your profile" ? 'bg-zinc-500' : 'bg-zinc-700'}`
+                        `${props.place === "your profile" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
                     )}
                     disabled={props.is_processing}
                     onClick={() => navigate("/users")}
                     type="button"
                 >
                     <User size={22}/>
-                    <div>Create Blog</div>
+                    <div>Profile</div>
                 </button>
                 <button 
                     className={cn(
+                        "flex gap-2.5",
                         "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
                         "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${props.place === "your dashboard" ? 'bg-zinc-500' : 'bg-zinc-700'}`
+                        `${props.place === "your dashboard" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
                     )}
                     disabled={props.is_processing}
                     onClick={() => navigate("/users/dashboard")}
                     type="button"
                 >
                     <ChartBar size={22}/>
-                    <div>Create Blog</div>
+                    <div>Dashboard</div>
+                </button>
+                <button 
+                    className={cn(
+                        "flex gap-2.5 hover:bg-zinc-600 p-2 hover:rounded-lg",
+                        "font-normal text-left text-base text-white ", 
+                        "disabled:cursor-not-allowed transition-colors cursor-pointer", 
+                    )}
+                    disabled={props.is_processing}
+                    onClick={() => props.sign_out.mutate()}
+                    type="button"
+                >
+                    <Power size={22}/>
+                    <div>Sign Out</div>
                 </button>
             </aside>
         </>

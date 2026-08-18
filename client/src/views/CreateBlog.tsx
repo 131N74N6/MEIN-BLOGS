@@ -23,7 +23,7 @@ export default function MakeBlog() {
     return (
         <section className="h-dvh flex md:flex-row flex-col">
             <Navbar is_processing={blog.processing} place="create blog" sign_out={user.signOutMt}/>
-            <div className="h-full w-full md:4/5 flex flex-col">
+            <div className="h-full w-full md:w-4/5 flex flex-col">
                 <EditorContent editor={editor} />
                 <FloatingMenu editor={editor}>This is the floating menu</FloatingMenu>
                 <BubbleMenu editor={editor}>This is the bubble menu</BubbleMenu>

@@ -30,6 +30,7 @@ class BlogRepository {
             Blogs.updateOne({ _id: props.blog_id }, {
                 $set: {
                     content: props.content,
+                    language: props.language,
                     media: props.media,
                     title: props.title,
                 }

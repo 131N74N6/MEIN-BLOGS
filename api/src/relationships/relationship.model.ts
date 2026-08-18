@@ -21,7 +21,7 @@ export interface UserRelationshipIntrf {
 }
 
 const relationshipsCollectionSchema = new Schema<RelationshipIntrf>({
-    user_id: { required: true },
+    user_id: { type: Schema.Types.ObjectId, required: true },
     username: { type: String, required: true },
     profile_picture: {
         filename: { type: String },

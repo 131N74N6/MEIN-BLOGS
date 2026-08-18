@@ -5,7 +5,7 @@ import { changeUserSchema, signInSchema, signUpSchema } from "./user.validation"
 import { Request, Response } from "express";
 
 class UserController {
-    async changeUserController(req: AuthRequest, res: Response) {
+    async changeUser(req: AuthRequest, res: Response) {
         try {
             const newProfileImage = req.file;
             
@@ -13,7 +13,7 @@ class UserController {
             if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
 
             const newProfile = changeUserSchema.safeParse(req.body);
-            if (!newProfile.success) return res.status(400).json({ message: "invalid input" });
+            if (!newProfile.success) return res.status(400).json({ message: newProfile.error.issues[0].message });
 
 
             if (!newProfile.data.username && !newProfileImage) {
@@ -32,7 +32,7 @@ class UserController {
         }
     }
 
-    async deleteOldProfileController(req: AuthRequest, res: Response) {
+    async deleteOldProfile(req: AuthRequest, res: Response) {
         try {
             const currentUserId = req.user?.user_id;
             if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
@@ -45,7 +45,7 @@ class UserController {
         }
     }
 
-    async deleteUserController(req: AuthRequest, res: Response) {
+    async deleteUser(req: AuthRequest, res: Response) {
         try {
             const currentUserId = req.user?.user_id;
             if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
@@ -58,17 +58,16 @@ class UserController {
         }
     }
 
-    async signInController(req: Request, res: Response) {
+    async signIn(req: Request, res: Response) {
         try {
-            const parsed = signInSchema.safeParse(req.body);
-            if (!parsed.success) return res.status(400).json({ message: "invalid input" });
+            const signIn = signInSchema.safeParse(req.body);
+            if (!signIn.success) return res.status(400).json({ message: signIn.error.issues[0].message });
 
-            const signInToken = await userService.signInService(parsed.data);
+            const signInToken = await userService.signInService(signIn.data);
 
             res.cookie("token", signInToken, {
                 httpOnly: true,
                 maxAge: 86400000,
-                path: "/",
                 sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
                 secure: process.env.NODE_ENV === "production"
             });
@@ -79,11 +78,10 @@ class UserController {
         }
     }
 
-    async signOutController(_: Request, res: Response) {
+    async signOut(_: Request, res: Response) {
         try {
             res.clearCookie("token", {
                 httpOnly: true,
-                path: "/",
                 sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
                 secure: process.env.NODE_ENV === "production"
             });
@@ -94,17 +92,16 @@ class UserController {
         }
     }
 
-    async signUpController(req: Request, res: Response) {
+    async signUp(req: Request, res: Response) {
         try {
-            const parsed = signUpSchema.safeParse(req.body);
-            if (!parsed.success) return res.status(400).json({ message: "invalid input" });
+            const signUp = signUpSchema.safeParse(req.body);
+            if (!signUp.success) return res.status(400).json({ message: signUp.error.issues[0].message });
 
-            const token = await userService.signUpService(parsed.data);
+            const token = await userService.signUpService(signUp.data);
 
             res.cookie("token", token, {
                 httpOnly: true,
                 maxAge: 86400000,
-                path: "/",
                 sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
                 secure: process.env.NODE_ENV === "production"
             });
@@ -115,7 +112,7 @@ class UserController {
         }
     }
 
-    async showProfileController(req: AuthRequest, res: Response) {
+    async showProfile(req: AuthRequest, res: Response) {
         try {
             const currentUserId = req.user?.user_id;
             if (!currentUserId) return res.status(401).json({ message: "unauthorized" });
@@ -123,6 +120,7 @@ class UserController {
             const user = await userService.showProfileService(currentUserId);
 
             return res.status(200).json({
+                email: user.email,
                 user_id: user._id,
                 username: user.username,
                 profile_picture: user.profile_picture

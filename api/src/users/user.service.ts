@@ -13,18 +13,15 @@ const maxFileSize = 5 * 1024 * 1024;
 
 class UserService {
     private checkIsUserIdValid(id: unknown): string {
-        const isValid = typeof id !== "string" || typeof id === "undefined" || id === undefined || 
-        id === null || id === "" || !mongoose.isValidObjectId(id);
+        const isNotValid = typeof id !== "string" || !id || !mongoose.isValidObjectId(id);
 
-        if (isValid) throw new ApiError(401, "unauthorized");
+        if (isNotValid) throw new ApiError(401, "unauthorized");
 
         return id;
     }
 
     private checkIsEmailValid(email: unknown): string {
-        if (typeof email !== "string" || email === undefined || email === "" || email === null) {
-            throw new ApiError(400, "invalid email");
-        }
+        if (typeof email !== "string" || !email) throw new ApiError(400, "invalid email");
 
         const trimmed = email.trim();
         if (trimmed.length > 254) throw new ApiError(400, "invalid email");
@@ -33,9 +30,7 @@ class UserService {
     }
 
     private checkIsInputValid(value: unknown, fieldName: string, min: number, max: number): string {
-        if (typeof value !== "string" || value === undefined || value === "" || value === null) {
-            throw new ApiError(400, `invalid ${fieldName}`);
-        }
+        if (typeof value !== "string" || !value) throw new ApiError(400, `invalid ${fieldName}`);
 
         const trimmed = value.trim();
         if (trimmed.length < min || trimmed.length > max) throw new ApiError(400, `invalid ${fieldName}`);
@@ -44,22 +39,24 @@ class UserService {
     }
 
     private authentiationToken(userId: string, username: string) {
-        const jwtToken = process.env.JWT_TOKEN;
-        if (!jwtToken) throw new ApiError(500, "internal server error");
-
         return jwt.sign(
             { user_id: userId, username: username },
-            jwtToken,
+            process.env.JWT_TOKEN || "my_secret_key",
             { expiresIn: "1d" }
         )
     }
     
     async changeUserService(props: ChangeUserIntrf) {
         const currentUserId = this.checkIsUserIdValid(props.currentUserId);
-        const username = this.checkIsInputValid(props.username, "username", 3, 30);
 
         const user = await userRepository.getCurrentUser(currentUserId);
         if (!user) throw new ApiError(404, "user not found");
+        
+        let newUsername = user.username;
+        
+        if (props.username !== undefined && props.username !== "") {
+            newUsername = this.checkIsInputValid(props.username, "username", 3, 30);
+        }
         
         if (props.selectedImage) {
             if (!allowedFileType.includes(props.selectedImage.mimetype)) {
@@ -85,12 +82,12 @@ class UserService {
     
             await userRepository.changeUser(user._id.toString(), {
                 profile_picture: newProfileImage,
-                username: username.trim() || user.username
+                username: newUsername.trim()
             });
         } else {
             await userRepository.changeUser(user._id.toString(), {
                 profile_picture: user.profile_picture,
-                username: username.trim() || user.username
+                username: newUsername.trim()
             });
         }
     }

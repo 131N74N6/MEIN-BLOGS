@@ -7,7 +7,9 @@ import { useMessageStore } from "../stores/useMessageStore";
 export default function SignUp() {
     const navigate = useNavigate();
 
-    const { signOutMt, userProcessing } = useUserService();
+    const { getCurrentUser, signUpMt, userProcessing } = useUserService();
+
+    const currentUserId = useUserStore((state) => state.currentUserId);
     
     const message = useMessageStore((state) => state.message);
     const setMessage = useMessageStore((state) => state.setMessage);
@@ -20,6 +22,12 @@ export default function SignUp() {
 
     const username = useUserStore((state) => state.username);
     const setUsername = useUserStore((state) => state.setUsername);
+
+    useEffect(() => {
+        if (getCurrentUser.isLoading === false && currentUserId !== "") {
+            navigate("/users/dashboard", { replace: true });
+        }
+    }, [currentUserId, getCurrentUser.isLoading, navigate]);
     
     useEffect(() => {
         if (message) {
@@ -30,7 +38,7 @@ export default function SignUp() {
 
     const signUp = (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
-        signOutMt.mutate();
+        signUpMt.mutate();
     }
     
     return (

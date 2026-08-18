@@ -4,18 +4,18 @@ import userController from "./user.controller";
 
 const userRouters = Router();
 
-userRouters.delete("/rm", verifyToken, userController.deleteUserController);
+userRouters.delete("/rm", verifyToken, userController.deleteUser);
 
-userRouters.delete("/rm-picture", verifyToken, userController.deleteOldProfileController);
+userRouters.delete("/rm-picture", verifyToken, userController.deleteOldProfile);
 
-userRouters.get("/show", verifyToken, userController.showProfileController);
+userRouters.get("/show", verifyToken, userController.showProfile);
 
-userRouters.post("/sign-in", userController.signInController);
+userRouters.post("/sign-in", userController.signIn);
 
-userRouters.post("/sign-out", verifyToken, userController.signOutController);
+userRouters.post("/sign-out", verifyToken, userController.signOut);
 
-userRouters.post("/sign-up", userController.signUpController);
+userRouters.post("/sign-up", userController.signUp);
 
-userRouters.put("/remake", verifyToken, verifyProfilePicture, userController.changeUserController);
+userRouters.put("/remake", verifyToken, verifyProfilePicture, userController.changeUser);
 
 export default userRouters;

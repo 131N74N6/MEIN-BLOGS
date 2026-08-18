@@ -7,7 +7,9 @@ import { useEffect } from "react";
 export default function SignUp() {
     const navigate = useNavigate();
 
-    const { signInMt, userProcessing } = useUserService();
+    const { getCurrentUser, signInMt, userProcessing } = useUserService();
+
+    const currentUserId = useUserStore((state) => state.currentUserId);
 
     const message = useMessageStore((state) => state.message);
     const setMessage = useMessageStore((state) => state.setMessage);
@@ -17,6 +19,12 @@ export default function SignUp() {
 
     const username = useUserStore((state) => state.username);
     const setUsername = useUserStore((state) => state.setUsername);
+
+    useEffect(() => {
+        if (getCurrentUser.isLoading === false && currentUserId !== "") {
+            navigate("/users/dashboard", { replace: true });
+        }
+    }, [currentUserId, getCurrentUser.isLoading, navigate]);
 
     useEffect(() => {
         if (message) {
