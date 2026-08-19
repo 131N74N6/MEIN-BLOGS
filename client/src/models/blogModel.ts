@@ -39,17 +39,15 @@ export interface BlogCardIntrf {
     on_delete: UseMutationResult<any, Error, string, unknown>;
 }
 
-export interface BlogTableRowIntrf {
+export interface BlogTableIntrf {
     blogs: Pick<BlogIntrf, "_id" | "title" | "created_at">[];
     fetch_next_page: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>;
     has_next_page: boolean;
     is_processing: boolean;
     is_fetching_next_page: boolean;
-    on_delete: UseMutationResult<any, Error, string, unknown>;
 }
 
-export interface BlogTableDataIntrf {
+export interface BlogTableRowIntrf {
     blog: Pick<BlogIntrf, "_id" | "title" | "created_at">;
     is_processing: boolean;
-    on_delete: UseMutationResult<any, Error, string, unknown>;
 }

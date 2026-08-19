@@ -6,17 +6,13 @@ import { v2 } from "cloudinary";
 import { BlogPaginationIntrf, GenerateBlogIntrf } from "./blog.validation";
 import { uploadToCloudinary } from "../cloudinary/cloudinary.service";
 import { EditBlogRawIntrf, NewBlogRawIntrf } from "./blog.model";
-import { allowedFileType, maxFileSize } from "./blog.middleware";
-
-const allowedLanguage = ["id", "en", "jp", "de"];
+import { allowedFileType, allowedLanguage, maxFileSize } from "./blog.middleware";
 
 class BlogService {
     private checkIsLanguageValid(language: unknown): string {
-        if (language === undefined || language === null || language === "") {
+        if (!language || typeof language !== "string" || language === "") {
             throw new ApiError(400, "invalid language");
         }
-        
-        if (typeof language !== "string") throw new ApiError(400, "invalid language");
 
         const trimmed = language.trim();
         if (!allowedLanguage.includes(trimmed)) throw new ApiError(400, "invalid language");
@@ -25,8 +21,7 @@ class BlogService {
     }
 
     private checkIsIdValid(value: unknown, fieldName: string): string {
-        const isNotValid = value === undefined || value === null || value === "" || 
-        typeof value === "undefined" || typeof value !== "string" || !mongoose.isValidObjectId(value);
+        const isNotValid = !value || typeof value !== "string" || !mongoose.isValidObjectId(value);
 
         if (isNotValid) throw new ApiError(400, `invalid ${fieldName}`);
 
@@ -156,22 +151,33 @@ class BlogService {
         await blogRepository.deleteAllBlogs(blogsIds, currentUserId);
     }
 
-    async deleteOneBlog(current_user_id: string, id: string) {
+    async deleteChosenBlogs(blogs_ids: string[], current_user_id: string, ) {
+        const operations = [];
         const currentUserId = this.checkIsIdValid(current_user_id, "current user id");
-        const blog = await blogRepository.getBlogById(id);
+        const blogs = await blogRepository.getChosenCurrentUserBlogs(blogs_ids);
 
-        if (!blog) throw new ApiError(404, "blog not found");
+        if (blogs.length === 0) throw new ApiError(404, "blog not found");
 
-        if (blog.blog_owner_id.toString() !== currentUserId) {
+        const blogsIds = blogs.map((blog) => blog._id.toString());
+        const blogsMedia = blogs.map((blog) => blog.media);
+        
+        if (blogs[0].blog_owner_id.toString() !== currentUserId) {
             throw new ApiError(403, "you are not allowed to delete this blog");
         }
 
-        await Promise.all([
-            v2.uploader.destroy(blog.media.public_id, { 
-                resource_type: blog.media.resource_type 
-            }),
-            blogRepository.deleteOneBlog(id)
-        ]);
+        if (blogsMedia.length > 0) {
+            const deleteFromCloudinary = blogsMedia.map((media) => {
+                return v2.uploader.destroy(media.public_id, { 
+                    resource_type: media.resource_type 
+                });
+            });
+
+            operations.push(...deleteFromCloudinary);
+        }
+
+        if (operations.length > 0) await Promise.all(operations);
+
+        await blogRepository.deleteChosenBlog(blogsIds);
     }
 
     async generateNewBlog(props: GenerateBlogIntrf) {

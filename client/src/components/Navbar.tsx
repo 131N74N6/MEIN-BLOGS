@@ -101,11 +101,11 @@ export default function Navbar(props: NavbarIntrf) {
                 </button>
             </nav>
             {isOpen ? (
-                <div className="cursor-pointer fixed inset-0 z-40 md:hidden" onClick={navbarToggle}></div>
+                <div className="cursor-pointer fixed inset-0 z-20 md:hidden" onClick={navbarToggle}></div>
             ) : null}
             <aside 
                 className={cn(
-                    "h-full w-4/5 z-50 md:hidden flex flex-col bg-zinc-700 gap-2.5 p-2.5 max-w-3xs",
+                    "h-full w-4/5 z-30 md:hidden flex flex-col bg-zinc-700 gap-2.5 p-2.5 max-w-3xs",
                     "top-0 right-0 fixed inset-0 transition-transform duration-300 ease-in-out",
                     `${isOpen ? "translate-x-0" : "translate-x-full"}`
                 )}

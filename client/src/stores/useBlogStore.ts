@@ -3,6 +3,11 @@ import { persist } from "zustand/middleware";
 import type { StateCreator } from "zustand";
 
 export interface BlogInfoState {
+    blogIdToggle: (blogIdParam: string) => void;
+
+    chosenBlogsIds: string[];
+    resetChosenBlogsIds: () => void;
+
     content: string;
     setContent: (content: string) => void;
 
@@ -17,6 +22,9 @@ export interface BlogInfoState {
 
     resetBlogInfoState: () => void;
 
+    selectMode: boolean;
+    setSelectMode: (selectMode: boolean) => void;
+
     title: string;
     setTitle: (title: string) => void;
 }
@@ -28,6 +36,14 @@ interface BlogWindowState {
 }
 
 const useBlogInfoSlice: StateCreator<BlogInfoState> = (set) => ({
+    blogIdToggle: (blogIdParam: string) => set((state) => ({
+        chosenBlogsIds: state.chosenBlogsIds.includes(blogIdParam) ?
+        state.chosenBlogsIds.filter(blogId => blogId !== blogIdParam) : [...state.chosenBlogsIds, blogIdParam]
+    })),
+
+    chosenBlogsIds: [],
+    resetChosenBlogsIds: () => set({ chosenBlogsIds: [] }),
+
     content: "",
     setContent: (content: string) => set({ content }),
 
@@ -41,12 +57,16 @@ const useBlogInfoSlice: StateCreator<BlogInfoState> = (set) => ({
     setLanguage: (language: string) => set({ language }),
 
     resetBlogInfoState: () => set({
+        chosenBlogsIds: [],
         content: "",
         media: null,
         mediaUrl: null,
         language: "",
         title: ""
     }),
+
+    selectMode: false,
+    setSelectMode: (selectMode: boolean) => set({ selectMode }),
 
     title: "",
     setTitle: (title: string) => set({ title })

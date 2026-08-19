@@ -1,8 +1,9 @@
 import multer from "multer";
 import { Request } from "express";
 
-export const maxFileSize = 5 * 1024 * 1024;
 export const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+export const allowedLanguage = ["id", "en", "jp", "de"];
+export const maxFileSize = 5 * 1024 * 1024;
 
 const storage = multer.memoryStorage();
 

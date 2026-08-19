@@ -5,9 +5,9 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tansta
 import { useRef } from "react";
 
 export default function useBlogService() {
-    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/blogs`;
     const queryClient = useQueryClient();
     const blogMediaRef = useRef<HTMLInputElement>(null);
+    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/blogs`;
 
     const setMessage = useMessageStore((state) => state.setMessage);
 
@@ -18,6 +18,7 @@ export default function useBlogService() {
 
     const media = useBlogStore((state) => state.media);
     const setMedia = useBlogStore((state) => state.setMedia);
+
     const setMediaUrl = useBlogStore((state) => state.setMediaUrl);
     
     const language = useBlogStore((state) => state.language);
@@ -27,6 +28,7 @@ export default function useBlogService() {
     const setTitle = useBlogStore((state) => state.setTitle);
     
     const blogId = useBlogStore((state) => state.blogId);
+    const chosenBlogsIds = useBlogStore((state) => state.chosenBlogsIds);
 
     const blogMediaPrefiew = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -102,10 +104,11 @@ export default function useBlogService() {
         },
     });
 
-    const deleteOneCurrentUserBlogMt = useMutation({
-        mutationFn: async (id: string) => {
+    const deleteChosenCurrentUserBlogMt = useMutation({
+        mutationFn: async () => {
             try {
-                const request = await fetch(`${baseUrl}/rm/${id}`, {
+                const request = await fetch(`${baseUrl}/rm-chosen`, {
+                    body: JSON.stringify({ blogs_ids: chosenBlogsIds }),
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     method: "DELETE"
@@ -258,14 +261,14 @@ export default function useBlogService() {
         }
     });
 
-    const processing = deleteAllCurrentUserBlogsMt.isPending || deleteOneCurrentUserBlogMt.isPending ||
+    const processing = deleteAllCurrentUserBlogsMt.isPending || deleteChosenCurrentUserBlogMt.isPending ||
     createNewBlogMt.isPending || generateNewBlogMt.isPending || updateOneBlogMt.isPending;
 
     return {
         blogMediaPrefiew,
         createNewBlogMt,
         deleteAllCurrentUserBlogsMt,
-        deleteOneCurrentUserBlogMt,
+        deleteChosenCurrentUserBlogMt,
         generateNewBlogMt,
         getAllBlogs,
         getAllCurrentUserBlogs,

@@ -11,7 +11,6 @@ export interface ViewerIntrf {
         url: string;
     } | null;
     blog_id: Types.ObjectId;
-    blog_title: string;
 }
 
 export interface VisitBlogIntrf {
@@ -35,8 +34,7 @@ const viewersCollectionSchema = new Schema<ViewerIntrf>({
         resource_type: { type: String },
         url: { type: String }
     },
-    blog_id: { type: Schema.Types.ObjectId },
-    blog_title: { type: String }
+    blog_id: { type: Schema.Types.ObjectId }
 });
 
 export const Viewers = mongoose.model<ViewerIntrf>("viewers", viewersCollectionSchema, "viewers");

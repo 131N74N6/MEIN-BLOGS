@@ -1,9 +1,9 @@
 import { cn } from "../lib/utils";
-import type { BlogTableRowIntrf } from "../models/blogModel";
-import { Eraser, Pencil } from "lucide-react";
+import type { BlogTableIntrf } from "../models/blogModel";
 import Loading from "./Loading";
+import BlogRow from "./BlogRow";
 
-export default function BlogTable(props: BlogTableRowIntrf) {
+export default function BlogTable(props: BlogTableIntrf) {
     return (
         // 1. Root container harus w-full agar tunduk pada parent (md:w-4/5)
         <div className="w-full">
@@ -28,33 +28,7 @@ export default function BlogTable(props: BlogTableRowIntrf) {
                         ) : (
                             props.blogs.map((blog) => (
                                 // PERBAIKAN 2: Wajib tambahkan key={blog._id} untuk list rendering di React
-                                <tr 
-                                    key={blog._id} 
-                                    className="border-b transition duration-300 ease-in-out hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                                >
-                                    <td className="whitespace-nowrap px-6 py-4 font-medium">
-                                        {new Date(blog.created_at).toLocaleString()}
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4 max-w-xs truncate" title={blog.title}>
-                                        {blog.title}
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4 text-center">
-                                        <button 
-                                            className="mr-3 text-red-500 hover:text-red-700 transition-colors inline-flex items-center justify-center"
-                                            onClick={() => props.on_delete.mutate(blog._id)}
-                                            disabled={props.is_processing}
-                                            title="Delete Blog"
-                                        >
-                                            <Eraser size={20}/>
-                                        </button>
-                                        <button 
-                                            className="text-blue-500 hover:text-blue-700 transition-colors inline-flex items-center justify-center"
-                                            title="Edit Blog"
-                                        >
-                                            <Pencil size={20}/>
-                                        </button>
-                                    </td>
-                                </tr>
+                                <BlogRow blog={blog} is_processing={props.is_processing}/>
                             ))
                         )}
                     </tbody>

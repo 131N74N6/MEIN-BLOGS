@@ -7,7 +7,7 @@ const blogRouters = Router();
 
 blogRouters.delete("/rm-all", verifyToken, blogController.deleteAllBlogs);
 
-blogRouters.delete("/rm/:blog_id", verifyToken, blogController.deleteOneBlog);
+blogRouters.delete("/rm-chosen", verifyToken, blogController.deleteChosenBlogs);
 
 blogRouters.get("/show-all", blogController.getAllBlogs);
 

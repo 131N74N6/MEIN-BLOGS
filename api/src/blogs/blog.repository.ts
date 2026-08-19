@@ -22,42 +22,43 @@ class BlogRepository {
     }
 
     async changeOneBlog(props: EditBlogIntrf) {
-        return await Promise.all([
-            Viewers.updateMany({ blog_id: props.blog_id }, {
-                $set: { blog_title: props.title }
-            }),
-
-            Blogs.updateOne({ _id: props.blog_id }, {
-                $set: {
-                    content: props.content,
-                    language: props.language,
-                    media: props.media,
-                    title: props.title,
-                }
-            })
-        ]);
+        return await Blogs.updateOne({ _id: props.blog_id }, {
+            $set: {
+                content: props.content,
+                language: props.language,
+                media: props.media,
+                title: props.title,
+            }
+        });
     }
 
-    async deleteAllBlogs(blogId: string[], currentUserId: string) {
+    async deleteAllBlogs(blogsIds: string[], currentUserId: string) {
         return await Promise.all([
-            Viewers.deleteMany({ blog_id: { $in: blogId } }),
-            Comments.deleteMany({ blog_id: { $in: blogId } }),
+            Viewers.deleteMany({ blog_id: { $in: blogsIds } }),
+            Comments.deleteMany({ blog_id: { $in: blogsIds } }),
             Blogs.deleteMany({ blog_owner_id: currentUserId })
         ]);
     }
 
-    async deleteOneBlog(blogId: string) {
+    async deleteChosenBlog(blogsIds: string[]) {
         return await Promise.all([
-            Viewers.deleteMany({ blog_id: blogId }),
-            Comments.deleteMany({ blog_id: blogId }),
-            Blogs.deleteOne({ _id: blogId })
+            Viewers.deleteMany({ blog_id: { $in: blogsIds } }),
+            Comments.deleteMany({ blog_id: { $in: blogsIds } }),
+            Blogs.deleteOne({ _id: { $in: blogsIds } })
         ]);
     }
 
     async getAllCurrentUserBlogs(currentUserId: string) {
         return await Blogs.find(
             { blog_owner_id: currentUserId },
-            { blog_owner_id: 0, blog_owner_profile_picture: 0, viewers: 0 }
+            { blog_owner_id: 0, blog_owner_name: 0, blog_owner_profile_picture: 0, viewers: 0 }
+        ).lean();
+    }
+
+    async getChosenCurrentUserBlogs(blogsIds: string[]) {
+        return await Blogs.find(
+            { _id: { $in: blogsIds } },
+            { blog_owner_profile_picture: 0, blog_owner_name: 0, viewers: 0 }
         ).lean();
     }
 

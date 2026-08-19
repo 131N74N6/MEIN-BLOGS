@@ -9,6 +9,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./views/Home";
 import Personal from "./views/Personal";
 import Dashboard from "./views/Dashboard";
+import BlogContent from "./views/BlogContent";
+import EditBlog from "./views/EditBlog";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -29,6 +31,8 @@ export default function App() {
                     <Route element={<SignIn/>} path="/sign-in"/>
                     <Route element={<SignUp/>} path="/sign-up"/>
                     <Route element={<ProtectedRoute><Blogs/></ProtectedRoute>} path="/users/blogs"/>
+                    <Route element={<ProtectedRoute><BlogContent/></ProtectedRoute>} path="/users/blogs/blog/:blog._id"/>
+                    <Route element={<ProtectedRoute><EditBlog/></ProtectedRoute>} path="/users/blogs/blog/edit/:blog._id"/>
                     <Route element={<ProtectedRoute><User/></ProtectedRoute>} path="/users"/>
                     <Route element={<ProtectedRoute><Dashboard/></ProtectedRoute>} path="/users/dashboard"/>
                     <Route element={<ProtectedRoute><Personal/></ProtectedRoute>} path="/person"/>
