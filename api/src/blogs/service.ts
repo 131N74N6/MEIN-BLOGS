@@ -1,0 +1,222 @@
+import blogRepository from "./repository";
+import { generateBlogContent } from "../gemini/service";
+import { v2 } from "cloudinary";
+import { uploadToCloudinary } from "../cloudinary/service";
+import { ObjectId } from "mongodb";
+import { TBlogs } from "./model";
+import { BlogApiError } from "../error/message";
+
+export const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+export const allowedLanguage = ["id", "en", "jp", "de"];
+export const maxFileSize = 5 * 1024 * 1024;
+
+class BlogService {
+    private checkIsIdValid(value: unknown, fieldName: string) {
+        const isNotValid = !value || typeof value !== "string" || !ObjectId.isValid(value);
+        if (isNotValid) throw new BlogApiError(400, `invalid ${fieldName}`);
+
+        const objectIdValue = new ObjectId(value);
+        return objectIdValue;
+    }
+
+    private checkIsInputValid(value: unknown, fieldName: string, min: number) {
+        if (typeof value !== "string" || !value || value === "") throw new BlogApiError(400, `invalid ${fieldName}`);
+
+        const trimmed = value.trim();
+        if (trimmed.length < min) throw new BlogApiError(400, `invalid ${fieldName}`);
+
+        return trimmed;
+    }
+
+    async createNewBlog(props: Omit<TBlogs["add_raw"], "blog_owner_name" | "blog_owner_profile_picture">) {
+        const blogContent = this.checkIsInputValid(props.content, "content", 1);
+        const currentUserId = this.checkIsIdValid(props.blog_owner_id, "current user id");
+        const blogLanguage = this.checkIsInputValid(props.language, "language", 1);
+        const blogTitle = this.checkIsInputValid(props.title, "title", 1);
+
+        const fileArrayBuffer = await props.media.arrayBuffer();
+        const fileBuffer = Buffer.from(fileArrayBuffer);
+
+        if (!props.media) throw new BlogApiError(400, "file is required to make new blog");
+
+        if (!allowedFileType.includes(props.media.type)) {
+            throw new BlogApiError(400, "this file is not allowed");
+        }
+
+        if (props.media.size > maxFileSize) {
+            throw new BlogApiError(400, "file size is too large");
+        }
+
+        const newBlogMedia = await uploadToCloudinary({
+            file_buffer: fileBuffer,
+            foldername: "blogs_media",
+            mimetype: props.media.type,
+            original_name: props.media.name
+        });
+
+        await blogRepository.createNewBlog({
+            content: blogContent,
+            created_at: props.created_at,
+            blog_owner_id: currentUserId,
+            language: blogLanguage,
+            media: newBlogMedia,
+            title: blogTitle, 
+            updated_at: props.updated_at
+        });
+    }
+
+    async changeOneBlog(props: TBlogs["change_raw"]) {
+        const blogContent = this.checkIsInputValid(props.content, "content", 1);
+        const currentUserId = this.checkIsIdValid(props.blog_owner_id, "current user id");
+        const blogLanguage = this.checkIsInputValid(props.language, "language", 1);
+        const blogTitle = this.checkIsInputValid(props.title, "title", 1);
+
+        const fileArrayBuffer = await props.media.arrayBuffer();
+        const fileBuffer = Buffer.from(fileArrayBuffer);
+
+        const blog = await blogRepository.getBlogById(props._id);
+        if (!blog) throw new BlogApiError(404, "blog not found");
+
+        if (blog.blog_owner_id.toString() !== currentUserId) {
+            throw new BlogApiError(403, "you are not allowed to edit this blog");
+        }
+
+        if (props.media) {
+            if (!allowedFileType.includes(props.media.type)) {
+                throw new BlogApiError(400, "this file is not allowed");
+            }
+
+            if (props.media.size > maxFileSize) {
+                throw new BlogApiError(400, "file size is too large");
+            }
+
+            await v2.uploader.destroy(blog.media.public_id, {
+                resource_type: blog.media.resource_type
+            });
+
+            const newBlogMedia = await uploadToCloudinary({
+                file_buffer: fileBuffer,
+                foldername: "blogs_media",
+                mimetype: props.media.type,
+                original_name: props.media.name
+            });
+
+            await blogRepository.changeOneBlog({
+                _id: blog._id,
+                content: blogContent || blog.content,
+                blog_owner_id: currentUserId,
+                media: newBlogMedia,
+                language: blogLanguage || blog.language,
+                title: blogTitle || blog.title,
+                updated_at: props.updated_at
+            });
+        } else {
+            await blogRepository.changeOneBlog({
+                _id: blog._id,
+                content: blogContent || blog.content,
+                blog_owner_id: currentUserId,
+                media: blog.media,
+                language: blogLanguage || blog.language,
+                title: blogTitle || blog.title,
+                updated_at: props.updated_at
+            });
+        }
+    }
+
+    async deleteAllBlogs(currentUserId: string) {
+        const operation = [];
+        const blog_owner_id = new ObjectId(currentUserId);
+        const blogs = await blogRepository.getAllCurrentUserBlogs(currentUserId);
+
+        if (blogs.length === 0) return;
+
+        if (blogs[0].blog_owner_id !== currentUserId) {
+            throw new BlogApiError(403, "you are not allowed to delete these blogs");
+        }
+
+        const blogsIds = blogs.map(blog => blog._id);
+        const blogsMedia = blogs.map(blog => blog.media);
+        
+        if (blogsMedia.length > 0) {
+            const deleteFromCloudinary = blogsMedia.map(blogMedia => {
+                return v2.uploader.destroy(blogMedia.public_id, { 
+                    resource_type: blogMedia.resource_type 
+                });
+            });
+
+            operation.push(...deleteFromCloudinary);
+        }
+
+        if (operation.length > 0) await Promise.all(operation);
+        
+        await blogRepository.deleteAllBlogs(blogsIds, blog_owner_id);
+    }
+
+    async deleteChosenBlogs(blogsIds: string[], current_user_id: string, ) {
+        const operations = [];
+        const blogs_ids = blogsIds.map(id => new ObjectId(id));
+        const currentUserId = this.checkIsIdValid(current_user_id, "current user id");
+        const blogs = await blogRepository.getChosenCurrentUserBlogs(blogs_ids);
+
+        if (blogs.length === 0) return;
+
+        const blogsMedia = blogs.map((blog) => blog.media);
+        
+        if (blogs[0].blog_owner_id.toString() !== currentUserId) {
+            throw new BlogApiError(403, "you are not allowed to delete this blog");
+        }
+
+        if (blogsMedia.length > 0) {
+            const deleteFromCloudinary = blogsMedia.map((media) => {
+                return v2.uploader.destroy(media.public_id, { 
+                    resource_type: media.resource_type 
+                });
+            });
+
+            operations.push(...deleteFromCloudinary);
+        }
+
+        if (operations.length > 0) await Promise.all(operations);
+
+        await blogRepository.deleteChosenBlog(blogs_ids);
+    }
+
+    async generateNewBlog(props: TBlogs["generate"]) {
+        const blogLanguage = this.checkIsInputValid(props.language, "language", 1);
+        const blogTitle = this.checkIsInputValid(props.title, "title", 1);
+
+        const generatedContent = await generateBlogContent({
+            language: blogLanguage,
+            title: blogTitle,
+        });
+
+        return generatedContent;
+    }
+
+    async getAllBlogs(page: Omit<TBlogs["pagination"], "page" | "blog_owner_id">) {
+        return await blogRepository.getAllBlogsWithPagination(page);
+    }
+
+    async getAllCurrentUserBlogs(page: Omit<TBlogs["pagination"], "page">) {
+        const currentUserId = this.checkIsIdValid(page.blog_owner_id, "current user id");
+
+        return await blogRepository.getAllCurrentUserBlogsWithPagination({
+            blog_owner_id: currentUserId,
+            limit: page.limit,
+            skip: page.skip
+        });
+    }
+
+    async getBlogContentById(id: string) {
+        const blogId = this.checkIsIdValid(id, "blog id");
+        const blogContent = await blogRepository.getBlogById(blogId);
+
+        if (!blogContent) return;
+        
+        return blogContent;
+    }
+}
+
+const blogService = new BlogService();
+
+export default blogService;
