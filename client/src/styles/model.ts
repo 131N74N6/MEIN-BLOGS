@@ -5,4 +5,11 @@ export type NavbarState = {
     resetNavbarState: () => void;
 }
 
-export type StyleUnion = NavbarState;
+export type MessageState = {
+    message: string | null;
+    setMessage: (message: string | null) => void;
+
+    resetMessageState: () => void;
+}
+
+export type StyleUnion = MessageState & NavbarState;

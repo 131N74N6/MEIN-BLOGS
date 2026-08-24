@@ -2,15 +2,13 @@ import { TBlogs } from "./model";
 import { db } from "../mongodb/service";
 import { ObjectId } from "mongodb";
 
-type TAddBlogResult = Omit<TBlogs["add_result"], "_id" | "blog_owner_name" | "blog_owner_profile_picture">;
-
 class BlogRepository {
     private blogs = db().collection("blogs");
     private comments = db().collection("comments");
     private views = db().collection("views");
     private users = db().collection("user");
 
-    async createNewBlog(props: TAddBlogResult) {
+    async createNewBlog(props: Omit<TBlogs["add_result"], "_id" | "blog_owner_name" | "blog_owner_profile_picture">) {
         const user = await this.users.find(
             { _id: props.blog_owner_id }, 
             { projection: { password: 0, profile_picture: 0 }}
@@ -49,8 +47,6 @@ class BlogRepository {
     }
 
     async deleteChosenBlog(blogs_ids: ObjectId[]) {
-        // const blogs_ids = blogsIds.map(id => new ObjectId(id));
-
         return await Promise.all([
             this.views.deleteMany({ blog_id: { $in: blogs_ids } }),
             this.comments.deleteMany({ blog_id: { $in: blogs_ids } }),

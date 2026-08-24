@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { RelationshipState } from "./model";
 
-export const useReltionshipStore = create<RelationshipState>()(persist((set) => ({
+export const useRelationStore = create<RelationshipState>()(persist((set) => ({
     otherUserId: "",
     setOtherUserId: (otherUserId: string) => set({ otherUserId }),
 

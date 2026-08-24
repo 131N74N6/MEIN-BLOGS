@@ -1,6 +1,7 @@
 import { useBlogStore } from "../blogs/store";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useViewerStore } from "./store";
+import { apiRequest } from "../handler/api";
 
 export default function useViewerService() {
     const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/viewers`;
@@ -18,58 +19,28 @@ export default function useViewerService() {
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            try {
-                const request = await fetch(`${baseUrl}/show-all/${blogId}?page=${pageParam}&limit=${16}`, {
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    method: "GET"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiRequest(`${baseUrl}/${blogId}?page=${pageParam}&limit=${16}`, {
+                method: "GET"
+            });
         },
         queryKey: [`blog-viewers-${blogId}`]
     });
 
-    const getAllBlogViewersTotal = useQuery<number>({
+    const getAllBlogViewersTotal = useQuery({
         enabled: !!blogId,
         queryFn: async () => {
-            try {
-                const request = await fetch(`${baseUrl}/total/${blogId}`, {
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    method: "GET"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiRequest(`${baseUrl}/${blogId}/total`, {
+                method: "GET"
+            });
         },
         queryKey: [`blog-viewers-total-${blogId}`]
     });
 
     const seeOneBlogMt = useMutation({
         mutationFn: async () => {
-            try {
-                const request = await fetch(`${baseUrl}/blog/${blogId}`, {
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    method: "POST"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiRequest(`${baseUrl}/${blogId}`, {
+                method: "POST"
+            });
         },
         onError: (error) => {
             setViewerMessage(error.message);

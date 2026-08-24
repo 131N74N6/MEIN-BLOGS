@@ -44,11 +44,15 @@ const blogInfoSlice: StateCreator<BlogInfoState> = (set) => ({
 });
 
 const blogWindowSlice: StateCreator<BlogWindowState> = (set) => ({
-    blogId: "",
-    setBlogId: (blogId: string) => set({ blogId }),
+    blogId: undefined,
+    setBlogId: (blogId: string | undefined) => set({ blogId }),
+
+    blogOwnerId: undefined,
+    setBlogOwnerId: (blogOwnerId: string | undefined) => set({ blogOwnerId }),
 
     resetBlogWindowState: () => set({
-        blogId: ""
+        blogId: undefined,
+        blogOwnerId: undefined
     })
 });
 
@@ -61,9 +65,10 @@ export const useBlogStore = create<Union>()(persist((...x) => ({
     ...blogInfoSlice(...x),
     ...blogMessageSlice(...x),
     ...blogWindowSlice(...x)
-}),
-{ 
-    name: "blog_id",
-    partialize: (state) => ({ blogId: state.blogId }),
-}
-));
+}), { 
+    name: "blog_data",
+    partialize: (state) => ({ 
+        blogId: state.blogId, 
+        blogOwnerId: state.blogOwnerId 
+    }),
+}));

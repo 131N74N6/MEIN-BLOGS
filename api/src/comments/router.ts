@@ -14,11 +14,10 @@ const commentRouters = new Elysia({ prefix: "/api/comments" })
 .get("/:blog_id/total", async ({ params: { blog_id }}) => await commentController.getCommentsTotalInOneBlog(blog_id), {
     params: commentSchema.params
 })
-.post("/:blog_id", async ({ body, user, params: { blog_id }}) => await commentController.createComment({
-    blog_id: blog_id,
+.post("/:blog_id", async ({ body, user, params }) => await commentController.createComment({
+    blog_id: params.blog_id,
     blog_owner_id: body.blog_owner_id,
     user_id: user.id,
-    profile_picture: body.profile_picture,
     text: body.text
 }), {
     body: t.Omit(commentSchema.add, ["created_at", "username"]),

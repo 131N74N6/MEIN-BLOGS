@@ -20,7 +20,7 @@ class CommentService {
         return trimmed;
     }
 
-    async createComment(new_comment: Omit<TComment["add"], "created_at" | "username">) {
+    async createComment(new_comment: Omit<TComment["add"], "created_at" | "username" | "profile_picture">) {
         const blogId = this.checkIsIdValid(new_comment.blog_id, "blog id");
         const currentUserId = this.checkIsIdValid(new_comment.blog_owner_id, "current user id");
         const commentText = this.checkIsInputValid(new_comment.text, 1);
@@ -30,9 +30,7 @@ class CommentService {
         await commentRepository.createComment({
             blog_id: blogId, 
             blog_owner_id: currentUserId,
-            created_at: created_at, 
             text: commentText,
-            profile_picture: new_comment.profile_picture,
             user_id: new_comment.user_id
         });
     }

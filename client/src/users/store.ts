@@ -1,13 +1,18 @@
 import { create } from "zustand";
 import type { StateCreator } from "zustand";
 import type { Union, UserIdInput, UserMessage, UserProfileState } from "./model";
+import { persist } from "zustand/middleware";
 
 const userIdSlice: StateCreator<UserIdInput> = (set) => ({
-    currentUserId: "",
+    currentUserId: undefined,
     setCurrentUserId: (currentUserId) => set({ currentUserId }),
 
+    otherUserId: undefined,
+    setotherUserId: (otherUserId: string | undefined) => set({ otherUserId }),
+
     resetUserIdState: () => set({
-        currentUserId: ""
+        currentUserId: undefined,
+        otherUserId: undefined
     })
 });
 
@@ -53,8 +58,11 @@ const userProfileSlice: StateCreator<UserProfileState> = (set) => ({
     }),
 });
 
-export const useUserStore = create<Union>()((...x) => ({
+export const useUserStore = create<Union>()(persist((...x) => ({
     ...userMessageSlice(...x),
     ...userProfileSlice(...x),
     ...userIdSlice(...x)
+}), {
+    name: "user",
+    partialize: (state) => ({ otherUserId: state.otherUserId })
 }));

@@ -2,6 +2,7 @@ import { useBlogStore } from "./store";
 import { useUserStore } from "../users/store";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
+import { apiRequest, apiUpload } from "../handler/api";
 
 export default function useBlogService() {
     const queryClient = useQueryClient();
@@ -40,25 +41,13 @@ export default function useBlogService() {
 
     const createNewBlogMt = useMutation({
         mutationFn: async () => {
-            try {
-                const newBlogForm = new FormData();
-                newBlogForm.append("content", content);
-                newBlogForm.append("language", language.trim());
-                newBlogForm.append("title", title.trim());
-                if (media) newBlogForm.append("blog_media", media);
+            const newBlogForm = new FormData();
+            newBlogForm.append("content", content);
+            newBlogForm.append("language", language.trim());
+            newBlogForm.append("title", title.trim());
+            if (media) newBlogForm.append("blog_media", media);
 
-                const request = await fetch(`${baseUrl}/create`, {
-                    body: newBlogForm,
-                    credentials: "include",
-                    method: "POST"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiUpload(`${baseUrl}`, newBlogForm, "POST");
         },
         onError: (error) => {
             setBlogMessage(error.message);
@@ -75,19 +64,9 @@ export default function useBlogService() {
 
     const deleteAllCurrentUserBlogsMt = useMutation({
         mutationFn: async () => {
-            try {
-                const request = await fetch(`${baseUrl}/rm-all`, {
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    method: "DELETE"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiRequest(`${baseUrl}`, {
+                method: "DELETE"
+            });
         },
         onError: (error) => {
             setBlogMessage(error.message);
@@ -105,20 +84,10 @@ export default function useBlogService() {
 
     const deleteChosenCurrentUserBlogMt = useMutation({
         mutationFn: async () => {
-            try {
-                const request = await fetch(`${baseUrl}/rm-chosen`, {
-                    body: JSON.stringify({ blogs_ids: chosenBlogsIds }),
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    method: "DELETE"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiRequest(`${baseUrl}/bulk`, {
+                body: JSON.stringify({ blogs_ids: chosenBlogsIds }),
+                method: "DELETE"
+            });
         },
         onError: (error) => {
             setBlogMessage(error.message);
@@ -136,24 +105,12 @@ export default function useBlogService() {
 
     const generateNewBlogMt = useMutation({
         mutationFn: async () => {
-            try {
-                const newBlogForm = new FormData();
-                newBlogForm.append("language", language);
-                newBlogForm.append("title", title);
-                if (media) newBlogForm.append("file", media);
+            const newBlogForm = new FormData();
+            newBlogForm.append("language", language);
+            newBlogForm.append("title", title);
+            if (media) newBlogForm.append("file", media);
 
-                const request = await fetch(`${baseUrl}/generate`, {
-                    body: newBlogForm,
-                    credentials: "include",
-                    method: "POST"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiUpload(`${baseUrl}/generate`, newBlogForm, "POST");
         },
         onError: (error) => {
             setBlogMessage(error.message);
@@ -169,18 +126,9 @@ export default function useBlogService() {
         initialPageParam: 1,
         queryKey: ["all-blogs"],
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
-            try {
-                const request = await fetch(`/show-all?page=${pageParam}&limit=${16}`, {
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    method: "GET"
-                });
-
-                const response = await request.json();
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiRequest(`${baseUrl}?page=${pageParam}&limit=${16}`, {
+                method: "GET"
+            });
         }
     });
 
@@ -193,18 +141,9 @@ export default function useBlogService() {
         initialPageParam: 1,
         queryKey: [`user-blogs-${currentUserId}`],
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
-            try {
-                const request = await fetch(`${baseUrl}/mine/show-all?page=${pageParam}&limit=${16}`, {
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    method: "GET"
-                });
-
-                const response = await request.json();
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiRequest(`${baseUrl}/mine?page=${pageParam}&limit=${16}`, {
+                method: "GET"
+            });
         }
     });
 
@@ -212,43 +151,21 @@ export default function useBlogService() {
         enabled: !!blogId,
         queryKey: [`blog-content-${blogId}`],
         queryFn: async () => {
-            try {
-                const request = await fetch(`${baseUrl}/show/${blogId}`, {
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    method: "GET"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiRequest(`${baseUrl}/show/${blogId}`, {
+                method: "GET"
+            });
         }
     });
 
     const updateOneBlogMt = useMutation({
         mutationFn: async (id: string) => {
-            try {
-                const updateBlogForm = new FormData();
-                updateBlogForm.append("content", content);
-                updateBlogForm.append("language", language.trim());
-                updateBlogForm.append("title", title.trim());
-                if (media) updateBlogForm.append("blog_media", media);
+            const updateBlogForm = new FormData();
+            updateBlogForm.append("content", content);
+            updateBlogForm.append("language", language.trim());
+            updateBlogForm.append("title", title.trim());
+            if (media) updateBlogForm.append("blog_media", media);
 
-                const request = await fetch(`${baseUrl}/remake/${id}`, {
-                    body: updateBlogForm,
-                    credentials: "include",
-                    method: "PUT"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiUpload(`${baseUrl}/${id}`, updateBlogForm, "PUT");
         },
         onError: (error) => {
             setBlogMessage(error.message);

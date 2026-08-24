@@ -22,8 +22,8 @@ const app = new Elysia()
     max: 30,
     errorResponse: "Too many request attempts try again later.",
 }))
-.all("/api/auth/*", async (ctx) => { return await authService.handler(ctx.request); })
 .onError(setupErrorHandler)
+.all("/api/auth/*", async (ctx) => { return await authService.handler(ctx.request); })
 .use(blogRouters)
 .use(commentRouters)
 .use(relationsRouters)

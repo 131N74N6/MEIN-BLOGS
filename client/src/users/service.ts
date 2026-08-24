@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBlogStore } from "../blogs/store";
 import { useCommentStore } from "../comments/store";
 import { useUserStore } from "./store";
-import type { UserIntrf } from "./model";
-import { useReltionshipStore } from "../relationships/store";
+import { useReltionshipStore } from "../relations/store";
 import { useStyleStore } from "../styles/store";
+import { apiRequest, apiUpload } from "../handler/api";
 
 export default function useUserService() {
     const navigate = useNavigate();
@@ -14,21 +14,16 @@ export default function useUserService() {
     const profilePictureRef = useRef<HTMLInputElement>(null);
 
     const setUserMessage = useUserStore((state) => state.setUserMessage);
-    const setCurrentUserId = useUserStore((state) => state.setCurrentUserId);
-
+    const otherUserId = useUserStore((state) => state.otherUserId);
     const newUserName = useUserStore((state) => state.newUserName);
     const setNewUserName = useUserStore((state) => state.setNewUserName);
-
     const newProfilePcture = useUserStore((state) => state.newProfilePcture);
     const setNewProfilePcture = useUserStore((state) => state.setNewProfilePcture);
-    
     const setNewProfilePctureUrl = useUserStore((state) => state.setNewProfilePctureUrl);
-
     const resetUserProfileState = useUserStore((state) => state.resetUserProfileState);
     const resetUserIdState = useUserStore((state) => state.resetUserIdState);
     
     const blogId = useBlogStore((state) => state.blogId);
-
     const resetBlogInfoState = useBlogStore((state) => state.resetBlogInfoState);
     const resetBlogWindowState = useBlogStore((state) => state.resetBlogWindowState);
 
@@ -38,47 +33,11 @@ export default function useUserService() {
 
     const resetNavbarState = useStyleStore((state) => state.resetNavbarState);
 
-    const getCurrentUser = useQuery<UserIntrf>({
-        queryKey: ["current-user"],
-        queryFn: async () => {
-            try {
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/show`, {
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    method: 'GET'
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
-        },
-        retry: false
-    });
-
-    useEffect(() => {
-        if (getCurrentUser.data && getCurrentUser.data.user_id) {
-            setCurrentUserId(getCurrentUser.data.user_id);
-        }
-    }, [getCurrentUser.data]);
-
     const deleteUserMt = useMutation({
         mutationFn: async () => {
-            try {
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/rm`, {
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    method: "DELETE"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiRequest(`${import.meta.env.VITE_BASE_API_URL}/users/`, {
+                method: "DELETE"
+            });
         },
         onError: (error) => {
             setUserMessage(error.message);
@@ -97,29 +56,11 @@ export default function useUserService() {
         }
     });
 
-    const handleUserProfilePicture = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newFile = event.target.files?.[0];
-        if (newFile) setNewProfilePcture(newFile);
-        const newFileUrl = URL.createObjectURL(newFile as Blob);
-        setNewProfilePctureUrl(newFileUrl);
-        if (profilePictureRef.current) profilePictureRef.current.value = "";
-    }
-
-    const removeOldProfilePictureMt = useMutation({
+    const deleteOldProfilePictureMt = useMutation({
         mutationFn: async () => {
-            try {
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/rm-picture`, {
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    method: "DELETE"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiRequest(`${import.meta.env.VITE_BASE_API_URL}/users/profile-picture`, {
+                method: "DELETE"
+            });
         },
         onError: (error) => {
             setUserMessage(error.message);
@@ -129,25 +70,31 @@ export default function useUserService() {
         }
     });
     
+    const getOtherUser = useQuery({
+        queryKey: [`other-user`],
+        queryFn: async () => {
+            return await apiRequest(`${import.meta.env.VITE_BASE_API_URL}/users/${otherUserId}`, {
+                method: "GET"
+            });
+        },
+        retry: false
+    });
+
+    const handleUserProfilePicture = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newFile = event.target.files?.[0];
+        if (newFile) setNewProfilePcture(newFile);
+        const newFileUrl = URL.createObjectURL(newFile as Blob);
+        setNewProfilePctureUrl(newFileUrl);
+        if (profilePictureRef.current) profilePictureRef.current.value = "";
+    }
+    
     const updateUserMt = useMutation({
         mutationFn: async () => {
-            try {
-                const changeUserForm = new FormData();
-                changeUserForm.append("username", newUserName.trim());
-                if (newProfilePcture) changeUserForm.append("profile_picture", newProfilePcture);
+            const changeUserForm = new FormData();
+            changeUserForm.append("username", newUserName.trim());
+            if (newProfilePcture) changeUserForm.append("profile_picture", newProfilePcture);
 
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/remake`, {
-                    body: changeUserForm,
-                    credentials: "include",
-                    method: "PUT"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiUpload(`${import.meta.env.VITE_BASE_API_URL}/users/`, changeUserForm, "PUT");
         },
         onError: (error) => {
             setUserMessage(error.message);
@@ -161,11 +108,11 @@ export default function useUserService() {
         }
     });
 
-    const isProcessing = deleteUserMt.isPending || removeOldProfilePictureMt.isPending || 
+    const isProcessing = deleteUserMt.isPending || deleteOldProfilePictureMt.isPending || 
     updateUserMt.isPending;
 
     return { 
-        deleteUserMt, updateUserMt, getCurrentUser, handleUserProfilePicture, profilePictureRef, 
-        isProcessing
+        deleteUserMt, deleteOldProfilePictureMt, getOtherUser, handleUserProfilePicture, 
+        isProcessing, profilePictureRef, updateUserMt
     }
 }

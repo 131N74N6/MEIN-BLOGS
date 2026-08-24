@@ -3,11 +3,10 @@ import { TComment } from "./model";
 import commentService from "./service";
 
 class CommentController {
-    async createComment(new_comment: Omit<TComment["add"], "created_at" | "username">) {
+    async createComment(new_comment: Omit<TComment["add"], "created_at" | "username" | "profile_picture">) {
         await commentService.createComment({
             blog_id: new_comment.blog_id,
             blog_owner_id: new_comment.blog_owner_id,
-            profile_picture: new_comment.profile_picture,
             user_id: new_comment.user_id,
             text: new_comment.text
         });

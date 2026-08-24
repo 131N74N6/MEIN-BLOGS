@@ -1,6 +1,9 @@
 export type UserIdInput = {
-    currentUserId: string;
-    setCurrentUserId: (currentUserId: string) => void;
+    currentUserId: string | undefined;
+    setCurrentUserId: (currentUserId: string | undefined) => void;
+
+    otherUserId: string | undefined;
+    setotherUserId: (otherUserId: string | undefined) => void;
 
     resetUserIdState: () => void;
 }

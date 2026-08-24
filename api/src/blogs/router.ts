@@ -13,13 +13,13 @@ const blogRouters = new Elysia({ prefix: "/api/blogs"})
 .get("/", async ({ query }) => await blogController.getAllBlogs(query), {
     query: t.Omit(blogSchema.pagination, ["skip"])
 })
-.get("/:_id", async ({ params }) => await blogController.getBlogContentById(params._id), {
-    params: blogSchema.params
-})
 .get("/mine", async ({ query, user }) => await blogController.getAllUserBlogs({
     page: query.page, limit: query.limit, blog_owner_id: new ObjectId(user.id)
 }), {
     query: t.Omit(blogSchema.pagination, ["skip"])
+})
+.get("/:_id", async ({ params }) => await blogController.getBlogContentById(params._id), {
+    params: blogSchema.params
 })
 .post("/", async ({ body, user }) => await blogController.createNewBlog({
     blog_owner_id: new ObjectId(user.id),

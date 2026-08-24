@@ -1,12 +1,15 @@
 import { createAuthClient } from "better-auth/react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "./store";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useBlogStore } from "../blogs/store";
-import { useReltionshipStore } from "../relationships/store";
+import { useRelationStore } from "../relations/store";
 import { useCommentStore } from "../comments/store";
 import { useStyleStore } from "../styles/store";
 import { useUserStore } from "../users/store";
+import { authService } from "../../../api/src/auth/service";
+import { inferAdditionalFields } from "better-auth/client/plugins";
+import { useEffect } from "react";
 
 export default function useAuthService() {
     const navigate = useNavigate();
@@ -26,7 +29,7 @@ export default function useAuthService() {
     const resetBlogInfoState = useBlogStore((state) => state.resetBlogInfoState);
     const resetBlogWindowState = useBlogStore((state) => state.resetBlogWindowState);
 
-    const resetRelationShipState = useReltionshipStore((state) => state.resetRelationShipState);
+    const resetRelationShipState = useRelationStore((state) => state.resetRelationShipState);
 
     const resetCommentState = useCommentStore((state) => state.resetCommentState);
     
@@ -34,22 +37,40 @@ export default function useAuthService() {
 
     const resetUserProfileState = useUserStore((state) => state.resetUserProfileState);
     const resetUserIdState = useUserStore((state) => state.resetUserIdState);
-
+    const setCurrentUserId = useUserStore((state) => state.setCurrentUserId);
+    
     const authClient = createAuthClient({
-        baseURL: new URL(`${import.meta.env.VITE_BASE_API_URL}`).origin
+        baseURL: new URL(`${import.meta.env.VITE_BASE_API_URL}`).origin,
+        plugins: [inferAdditionalFields<typeof authService>()]
     });
 
-    const getSession = () => {
-        const session = authClient.useSession();
+    const getCurrentUser = useQuery({
+        queryKey: ["current-user"],
+        queryFn: async () => {
+            const request = await authClient.getSession();
+            if (request.error || !request.data) return null;
 
-        return { 
-            user_id: session.data?.user.id,
-            name: session.data?.user.name, 
-            email: session.data?.user.email, 
-            profile_picture: session.data?.user.image,
-            created_at: session.data?.user.createdAt
+            return { 
+                created_at: request.data.user.createdAt,
+                description: request.data.user.description,
+                email: request.data.user.email, 
+                profile_picture: {
+                    public_id: request.data.user.image_public_id,
+                    url: request.data.user.image,
+                },
+                user_id: request.data.user.id,
+                user_name: request.data.user.name,
+                user_session: request.data.session
+            }
+        },
+        retry: false
+    });
+
+    useEffect(() => {
+        if (getCurrentUser && getCurrentUser.data && getCurrentUser.data.user_id) {
+            setCurrentUserId(getCurrentUser.data.user_id);
         }
-    }
+    }, [getCurrentUser.data?.user_id]);
 
     const signInMt = useMutation({
         mutationFn: async () => {
@@ -117,5 +138,5 @@ export default function useAuthService() {
 
     const isProcessing = signInMt.isPending || signOutMt.isPending || signUpMt.isPending;
 
-    return { authClient, getSession, isProcessing, signInMt, signOutMt, signUpMt }
+    return { authClient, getCurrentUser, isProcessing, signInMt, signOutMt, signUpMt }
 }

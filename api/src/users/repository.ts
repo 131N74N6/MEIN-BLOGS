@@ -67,8 +67,13 @@ class UserRepository {
         ]);
     }
 
-    async getCurrentUser(currentUserId: string) {
-        const user = await this.users.findOne({ _id: new ObjectId(currentUserId) }, { projection: { password: 0 } });
+    async getCurrentUser(current_user_id: string) {
+        const user = await this.users.findOne({ _id: new ObjectId(current_user_id) }, { projection: { password: 0 } });
+        return user;
+    }
+
+    async getOthertUser(user_id: string) {
+        const user = await this.users.findOne({ _id: new ObjectId(user_id) }, { projection: { password: 0 } });
         return user;
     }
 

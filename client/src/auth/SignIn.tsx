@@ -22,10 +22,10 @@ export default function SignUp() {
     const setEmailForSignIn = useAuthStore((state) => state.setEmailForSignIn);
 
     useEffect(() => {
-        if (user.getCurrentUser.isLoading === false && currentUserId !== "") {
+        if (auth.getCurrentUser.isLoading === false && currentUserId !== "") {
             navigate("/users/dashboard", { replace: true });
         }
-    }, [currentUserId, user.getCurrentUser.isLoading, navigate]);
+    }, [currentUserId, auth.getCurrentUser.isLoading, navigate]);
 
     useEffect(() => {
         if (signInMessage) {

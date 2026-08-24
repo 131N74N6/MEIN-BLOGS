@@ -1,32 +1,26 @@
 import { useBlogStore } from "../blogs/store";
+import { apiRequest } from "../handler/api";
 import { useCommentStore } from "./store";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function useCommentSevice() {
     const queryClient = useQueryClient();
     const blogId = useBlogStore((state) => state.blogId);
+    const blogOwnerId = useBlogStore((state) => state.blogOwnerId);
 
     const commentText = useCommentStore((state) => state.text);
     const setCommentMessage = useCommentStore((state) => state.setCommentMessage);
 
     const createNewCommentMt = useMutation({
         mutationFn: async () => {
-            try {
-                const blogCommentForm = new FormData();
-                blogCommentForm.append("blog_id", blogId);
-                blogCommentForm.append("text", commentText);
-
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/comments/make/${blogId}`, {
-                    body: blogCommentForm,
-                    credentials: "include",
-                    method: "POST"
-                });
-
-                const response = await request.json();
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiRequest(`${import.meta.env.VITE_BASE_API_URL}/comments/${blogId}`, {
+                body: JSON.stringify({
+                    blog_id: blogId,
+                    blog_owner_id: blogOwnerId,
+                    text: commentText.trim()
+                }),
+                method: "POST"
+            });
         },
         onError: (error) => {
             setCommentMessage(error.message);
@@ -46,19 +40,11 @@ export default function useCommentSevice() {
         initialPageParam: 1,
         queryKey: [`blog-comments-${blogId}`],
         queryFn: async ({ pageParam = 1}: { pageParam?: number}) => {
-            try {
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/comments/show-all/${blogId}?page=${pageParam}&limit=${16}`, {
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    method: "GET"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiRequest(`${import.meta.env.VITE_BASE_API_URL}/comments/${blogId}?page=${pageParam}&limit=${16}`, {
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                method: "GET"
+            });
         },
         staleTime: Infinity
     });
@@ -67,19 +53,11 @@ export default function useCommentSevice() {
         enabled: !!blogId,
         queryKey: [`blog-comments-total-${blogId}`],
         queryFn: async () => {
-            try {
-                const request = await fetch(`${import.meta.env.VITE_BASE_API_URL}/comments/total/${blogId}`, {
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    method: "GET"
-                });
-
-                const response = await request.json();
-                if (!request.ok) throw new Error(response.message);
-                return response;
-            } catch (error) {
-                throw error;
-            }
+            return await apiRequest(`${import.meta.env.VITE_BASE_API_URL}/comments/${blogId}/total`, {
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                method: "GET"
+            });
         },
         staleTime: Infinity
     });

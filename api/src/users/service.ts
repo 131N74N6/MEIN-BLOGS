@@ -133,8 +133,8 @@ class UserService {
         ]);
     }
 
-    async getCurrentUser(currentUserId: string) {
-        const user = await userRepository.getCurrentUser(currentUserId);
+    async getOthertUser(user_id: string) {
+        const user = await userRepository.getOthertUser(user_id);
         if (!user) throw new BlogApiError(404, "user not found");
 
         return user;

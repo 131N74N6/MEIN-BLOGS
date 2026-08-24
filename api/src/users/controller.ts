@@ -17,8 +17,8 @@ class UserController {
         return { message: "successfully delete user", success: true };
     }
 
-    async getCurrentUser(current_user_id: string) {
-        const user = await userService.getCurrentUser(current_user_id);
+    async getOthertUser(user_id: string) {
+        const user = await userService.getOthertUser(user_id);
         return { data: user, success: true };
     }
 }

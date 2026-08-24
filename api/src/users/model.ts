@@ -23,7 +23,10 @@ export const userSchema = {
         image_resource_type: t.Union([t.String(), t.Null(), t.Undefined()]),
         updatedAt: t.Date({ error: "invalid date" })
     }),
-    data: t.Unsafe<User>({ error: "invalid data" })
+    data: t.Unsafe<User>({ error: "invalid data" }),
+    other_user: t.Object({
+        user_id: t.String({ error: "invalid data", format: "^[0-9a-fA-F]{24}$" })
+    })
 }
 
 export type TUser = {
