@@ -35,16 +35,16 @@ export default function UserBlog() {
     }, [message, setMessage]);
 
     useEffect(() => {
-        if (currentUserId === undefined) {
+        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
             navigate("/sign-in", { replace: true });
         }
-    }, [currentUserId, auth.getCurrentUser.isLoading, navigate]);
+    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
-    const is_processing = blogs.processing || user.isProcessing;
+    const isProcessing = blogs.processing || user.isProcessing;
 
     return (
         <section className="flex md:flex-row flex-col h-dvh">
-            <Navbar/>
+            <Navbar is_processing={isProcessing} place="your blogs" sign_out={auth.signOutMt}/>
             {message ? <Alert message={message}/> : null}
             <main className="h-full flex flex-col w-full md:w-4/5">
                 <header className="">
@@ -52,7 +52,7 @@ export default function UserBlog() {
                         <div className="flex justify-end gap-2.5">
                             <button
                                 className="disabled:cursor-not-allowed cursor-pointer text-sm p-1.5 bg-amber-700 text-white font-normal hover:bg-amber-500 transition-colors"
-                                disabled={is_processing}
+                                disabled={isProcessing}
                                 onClick={() => {
                                     setSelectMode(false);
                                     resetChosenBlogsIds();
@@ -66,7 +66,7 @@ export default function UserBlog() {
                             </button>
                             <button
                                 className="disabled:cursor-not-allowed cursor-pointer text-sm p-1.5 bg-red-700 text-white font-normal hover:bg-red-500 transition-colors"
-                                disabled={is_processing}
+                                disabled={isProcessing}
                                 onClick={() => blogs.deleteChosenCurrentUserBlogMt.mutate()}
                                 type="button"
                             >
@@ -80,7 +80,7 @@ export default function UserBlog() {
                         <div className="flex justify-end gap-2.5">                            
                             <button
                                 className="disabled:cursor-not-allowed cursor-pointer text-sm p-1.5 bg-green-700 text-white font-normal hover:bg-green-500 transition-colors"
-                                disabled={is_processing}
+                                disabled={isProcessing}
                                 onClick={() => setSelectMode(true)}
                                 type="button"
                             >
@@ -91,7 +91,7 @@ export default function UserBlog() {
                             </button>
                             <button
                                 className="disabled:cursor-not-allowed cursor-pointer text-sm p-1.5 bg-olive-700 text-white font-normal hover:bg-olive-500 transition-colors"
-                                disabled={is_processing}
+                                disabled={isProcessing}
                                 onClick={() => blogs.deleteAllCurrentUserBlogsMt.mutate()}
                                 type="button"
                             >

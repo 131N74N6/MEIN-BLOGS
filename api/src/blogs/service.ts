@@ -7,7 +7,7 @@ import { TBlogs } from "./model";
 import { BlogApiError } from "../error/message";
 
 export const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-export const allowedLanguage = ["id", "en", "jp", "de"];
+export const allowedLanguage = ["indonesia", "inggris", "jepang", "jerman"];
 export const maxFileSize = 5 * 1024 * 1024;
 
 class BlogService {
@@ -43,9 +43,14 @@ class BlogService {
             throw new BlogApiError(400, "this file is not allowed");
         }
 
+        if (!allowedLanguage.includes(blogLanguage)) {
+            throw new BlogApiError(400, "this language is not supported yet");
+        }
+
         if (props.media.size > maxFileSize) {
             throw new BlogApiError(400, "file size is too large");
         }
+
 
         const newBlogMedia = await uploadToCloudinary({
             file_buffer: fileBuffer,

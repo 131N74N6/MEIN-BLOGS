@@ -26,8 +26,8 @@ export default function BlogRow(blog: BlogRowData) {
                             "items-center justify-center"
                         )}
                         disabled={blog.is_processing}
-                        onClick={() => navigate(`/user/blogs/blog/${blog.data._id}`)}
-                        title="See Blog"
+                        onClick={() => navigate(`/users/blogs/${blog.data._id}`)}
+                        type="button"
                     >
                         <SquareArrowDownLeft size={20}/>
                     </button>
@@ -41,7 +41,7 @@ export default function BlogRow(blog: BlogRowData) {
                             onClick={() => {
                                 if (selectMode) blogIdToggle(blog.data._id);
                             }}
-                            title="hasn't chosen"
+                            type="button"
                         >
                             {hasSelected ? <SquareCheck size={20}/> : <Square size={20}/>}
                         </button>
@@ -52,8 +52,8 @@ export default function BlogRow(blog: BlogRowData) {
                                 "items-center justify-center"
                             )}
                             disabled={blog.is_processing}
-                            onClick={() => navigate(`/user/blogs/blog/edit/${blog.data._id}`)}
-                            title="Edit Blog"
+                            onClick={() => navigate(`/user/blogs/edit/${blog.data._id}`)}
+                            type="button"
                         >
                             <Pencil size={20}/>
                         </button>

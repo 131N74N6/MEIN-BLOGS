@@ -189,6 +189,7 @@ export default function useBlogService() {
 
     return {
         blogMediaPrefiew,
+        blogMediaRef,
         createNewBlogMt,
         deleteAllCurrentUserBlogsMt,
         deleteChosenCurrentUserBlogMt,

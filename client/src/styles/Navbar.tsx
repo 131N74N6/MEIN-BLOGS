@@ -31,7 +31,7 @@ export default function Navbar(info: NavbarIntrf) {
                     type="button"
                 >
                     <Home size={22}/>
-                    <div>Create Blog</div>
+                    <div>Home</div>
                 </button>
                 <button 
                     className={cn(
@@ -135,7 +135,7 @@ export default function Navbar(info: NavbarIntrf) {
                     type="button"
                 >
                     <Home size={22}/>
-                    <div>Create Blog</div>
+                    <div>Home</div>
                 </button>
                 <button 
                     className={cn(

@@ -2,13 +2,15 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuthStore } from "./store";
 import useAuthService from "./service";
+import { useUserStore } from "../users/store";
+import { useStyleStore } from "../styles/store";
 
 export default function SignUp() {
     const navigate = useNavigate();
     const auth = useAuthService();
     
-    const signUpMessage = useAuthStore((state) => state.signUpMessage);
-    const setSignUpMessage = useAuthStore((state) => state.setSignUpMessage);
+    const message = useStyleStore((state) => state.message);
+    const setMessage = useStyleStore((state) => state.setMessage);
 
     const emailForSignUp = useAuthStore((state) => state.emailForSignUp);
     const setEmailForSignUp = useAuthStore((state) => state.setEmailForSignUp);
@@ -19,12 +21,18 @@ export default function SignUp() {
     const usernameForSignUp = useAuthStore((state) => state.usernameForSignUp);
     const setUsernameForSignUp = useAuthStore((state) => state.setUsernameForSignUp);
     
+    const currentUserId = useUserStore((state) => state.currentUserId);
+
     useEffect(() => {
-        if (signUpMessage) {
-            const timer = setTimeout(() => setSignUpMessage(undefined), 1800);
+        if (currentUserId && !auth.getCurrentUser.isLoading) navigate("/home", { replace: true });
+    }, [currentUserId, auth.getCurrentUser.data, auth.getCurrentUser.isLoading, navigate]);
+    
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => setMessage(null), 1800);
             return () => clearTimeout(timer);
         }
-    }, [signUpMessage, setSignUpMessage]);
+    }, [message, setMessage]);
 
     const signUp = (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -32,8 +40,9 @@ export default function SignUp() {
     }
     
     return (
-        <div className="flex justify-center items-center h-dvh bg-background p-2.5">
+        <section className="flex justify-center items-center h-dvh bg-background p-2.5">
             <form className="flex w-82.5 flex-col gap-2.5 p-2.5 border border-gray-500 shadow" onSubmit={signUp}>
+                <h3 className="font-semibold text-xl text-gray-600">Sign Up</h3>
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs lg:text-lg md:text-base sm:text-sm font-medium text-gray-600" htmlFor="email">email</label>
                     <input
@@ -87,12 +96,12 @@ export default function SignUp() {
                         {auth.isProcessing ? "Please wait..." : "Sign Up"}
                     </button>
                 </div>
-                {signUpMessage ? (
+                {message ? (
                     <div className="text-red-600 text-center font-medium text-xs sm:text-sm md:text-md lg:text-lg">
-                        {signUpMessage}
+                        {message}
                     </div>
                 ) : null}
             </form>
-        </div>
+        </section>
     );
 }

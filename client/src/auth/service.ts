@@ -9,6 +9,7 @@ import { useStyleStore } from "../styles/store";
 import { useUserStore } from "../users/store";
 import type { AuthServiceApi } from "../../../api/src/auth/model";
 import { inferAdditionalFields } from "better-auth/client/plugins";
+import { useEffect } from "react";
 
 export default function useAuthService() {
     const navigate = useNavigate();
@@ -17,12 +18,10 @@ export default function useAuthService() {
     const emailForSignUp = useAuthStore((state) => state.emailForSignUp);
     const passwordForSignUp = useAuthStore((state) => state.passwordForSignUp);
     const usernameForSignUp = useAuthStore((state) => state.usernameForSignUp);
-    const setSignUpMessage = useAuthStore((state) => state.setSignUpMessage);
     const resetSignUpInput = useAuthStore((state) => state.resetSignUpInput);
 
     const passwordForSignIn = useAuthStore((state) => state.passwordForSignIn);
     const emailForSignIn = useAuthStore((state) => state.emailForSignIn);
-    const setSignInMessage = useAuthStore((state) => state.setSignInMessage);
     const resetSignInInput = useAuthStore((state) => state.resetSignInInput);
     
     const resetBlogInfoState = useBlogStore((state) => state.resetBlogInfoState);
@@ -33,6 +32,7 @@ export default function useAuthService() {
     const resetCommentState = useCommentStore((state) => state.resetCommentState);
     
     const resetNavbarState = useStyleStore((state) => state.resetNavbarState);
+    const setMessage = useStyleStore((state) => state.setMessage);
 
     const resetUserProfileState = useUserStore((state) => state.resetUserProfileState);
     const resetUserIdState = useUserStore((state) => state.resetUserIdState);
@@ -68,6 +68,12 @@ export default function useAuthService() {
         retry: false
     });
 
+    useEffect(() => {
+        if (getCurrentUser.data?.user_id) {
+            setCurrentUserId(getCurrentUser.data.user_id);
+        }
+    }, [getCurrentUser.data?.user_id, setCurrentUserId]);
+
     const signInMt = useMutation({
         mutationFn: async () => {
             const request = await authClient.signIn.email({ 
@@ -80,7 +86,7 @@ export default function useAuthService() {
             return request.data.user;
         },
         onError: (error) => {
-            setSignInMessage(error.message);
+            setMessage(error.message);
         },
         onSuccess: async (data) => {
             setCurrentUserId(data.id);
@@ -98,9 +104,10 @@ export default function useAuthService() {
             return request.data;
         },
         onError: (error) => {
-            setSignInMessage(error.message);
+            setMessage(error.message);
         },
         onSuccess: () => {
+            queryClient.setQueryData(['current-user'], null);
             queryClient.clear();
             resetSignInInput();
             resetSignUpInput();
@@ -127,7 +134,7 @@ export default function useAuthService() {
             return request.data.user;
         },
         onError: (error) => {
-            setSignUpMessage(error.message);
+            setMessage(error.message);
         },
         onSuccess: async (data) => {
             setCurrentUserId(data.id);

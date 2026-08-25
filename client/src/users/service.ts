@@ -44,6 +44,7 @@ export default function useUserService() {
             setUserMessage(error.message);
         },
         onSuccess: () => {
+            queryClient.setQueryData(['current-user'], null);
             queryClient.clear();
             if (profilePictureRef.current) profilePictureRef.current.value = "";
             resetBlogInfoState();
