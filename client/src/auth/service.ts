@@ -7,9 +7,8 @@ import { useRelationStore } from "../relations/store";
 import { useCommentStore } from "../comments/store";
 import { useStyleStore } from "../styles/store";
 import { useUserStore } from "../users/store";
-import { authService } from "../../../api/src/auth/service";
+import type { AuthServiceApi } from "../../../api/src/auth/model";
 import { inferAdditionalFields } from "better-auth/client/plugins";
-import { useEffect } from "react";
 
 export default function useAuthService() {
     const navigate = useNavigate();
@@ -40,8 +39,11 @@ export default function useAuthService() {
     const setCurrentUserId = useUserStore((state) => state.setCurrentUserId);
     
     const authClient = createAuthClient({
-        baseURL: new URL(`${import.meta.env.VITE_BASE_API_URL}`).origin,
-        plugins: [inferAdditionalFields<typeof authService>()]
+        baseURL: import.meta.env.VITE_BASE_API_URL,
+        plugins: [inferAdditionalFields<AuthServiceApi>()],
+        fetchOptions: {
+            credentials: "include"
+        }
     });
 
     const getCurrentUser = useQuery({
@@ -66,12 +68,6 @@ export default function useAuthService() {
         retry: false
     });
 
-    useEffect(() => {
-        if (getCurrentUser && getCurrentUser.data && getCurrentUser.data.user_id) {
-            setCurrentUserId(getCurrentUser.data.user_id);
-        }
-    }, [getCurrentUser.data?.user_id]);
-
     const signInMt = useMutation({
         mutationFn: async () => {
             const request = await authClient.signIn.email({ 
@@ -80,14 +76,17 @@ export default function useAuthService() {
             });
 
             if (request.error) throw new Error(request.error.message);
+
             return request.data.user;
         },
         onError: (error) => {
             setSignInMessage(error.message);
         },
-        onSuccess: () => {
-            navigate("/users/dashboard");
+        onSuccess: async (data) => {
+            setCurrentUserId(data.id);
+            await queryClient.invalidateQueries({ queryKey: ["current-user"] });
             resetSignInInput();
+            navigate("/home", { replace: true });
         }
     });
 
@@ -130,9 +129,11 @@ export default function useAuthService() {
         onError: (error) => {
             setSignUpMessage(error.message);
         },
-        onSuccess: () => {
-            navigate("/users/dashboard");
-            resetSignUpInput();
+        onSuccess: async (data) => {
+            setCurrentUserId(data.id);
+            await queryClient.invalidateQueries({ queryKey: ["current-user"] });
+            resetSignInInput();
+            navigate("/home", { replace: true });
         }
     });
 

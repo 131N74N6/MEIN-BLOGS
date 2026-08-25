@@ -3,10 +3,11 @@ import { useRelationStore } from "./store";
 import { useUserStore } from "../users/store";
 import { apiRequest } from "../handler/api";
 import { useStyleStore } from "../styles/store";
+import type { ViewerDetail } from "./model";
 
 export default function useRelationshipService() {
     const queryClient = useQueryClient();
-    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/relationps`;
+    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/relations/api`;
 
     const setMessage = useStyleStore((state) => state.setMessage);
 
@@ -22,9 +23,11 @@ export default function useRelationshipService() {
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            return await apiRequest(`${baseUrl}/followed/${otherUserId}?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<ViewerDetail[]>(`${baseUrl}/followed/${otherUserId}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
+            
+            return request.data ?? [];
         },
         queryKey: [`followed-${otherUserId}`]
     });
@@ -32,9 +35,11 @@ export default function useRelationshipService() {
     const getAllFollowedTotal = useQuery({
         enabled: !!otherUserId,
         queryFn: async () => {
-            return await apiRequest(`${baseUrl}/followed/${otherUserId}/total`, {
+            const request = await apiRequest<number>(`${baseUrl}/followed/${otherUserId}/total`, {
                 method: "GET"
             });
+
+            return request.data ?? 0;
         },
         queryKey: [`followed-total-${otherUserId}`]
     });
@@ -47,9 +52,11 @@ export default function useRelationshipService() {
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            return await apiRequest(`${baseUrl}/followers/${otherUserId}?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<ViewerDetail[]>(`${baseUrl}/followers/${otherUserId}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
+            
+            return request.data ?? [];
         },
         queryKey: [`followers-${otherUserId}`]
     });
@@ -73,9 +80,11 @@ export default function useRelationshipService() {
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            return await apiRequest(`${baseUrl}/followed/${currentUserId}?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<ViewerDetail[]>(`${baseUrl}/followed/${currentUserId}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
+            
+            return request.data ?? [];
         },
         queryKey: [`followed-${currentUserId}`]
     });
@@ -98,9 +107,11 @@ export default function useRelationshipService() {
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            return await apiRequest(`${baseUrl}/followers/${currentUserId}?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<ViewerDetail[]>(`${baseUrl}/followers/${currentUserId}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
+            
+            return request.data ?? [];
         },
         queryKey: [`followers-${currentUserId}`]
     });

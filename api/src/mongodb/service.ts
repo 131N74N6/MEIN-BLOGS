@@ -1,26 +1,27 @@
 import { Db, MongoClient } from "mongodb";
 
 const uri = import.meta.env.MONGODB_URI!;
-const dbName = import.meta.env.MONGODB_DB_NAME ?? "mein-blogs";
+const dbName = import.meta.env.MONGODB_DB_NAME!;
 
-let mongodb: MongoClient | null = null;
-let connection: Db | null = null;;
+export const mongodbClient = new MongoClient(uri);
 
-export async function dbConnect() {
-    if (connection) return connection;
-
-    try {
-        mongodb = new MongoClient(uri);
-        await mongodb.connect();
-        console.log("database connection successfully");
-        connection = mongodb.db(dbName);
-        return connection;
-    } catch (error) {
-        console.log("database connection failed");
-    }
+// Inisialisasi koneksi langsung di top-level
+try {
+    await mongodbClient.connect();
+    console.log("database connection successfully");
+} catch (error) {
+    console.error("database connection failed:", error);
+    process.exit(1);
 }
 
-export function db() {
-    if (!connection) throw new Error("database not exist");
+const connection: Db = mongodbClient.db(dbName);
+
+// Export db sebagai fungsi sinkron yang mengembalikan instance Db
+export function db(): Db {
+    return connection;
+}
+
+// Opsional: Untuk kompatibilitas jika masih dipanggil di index.ts
+export async function dbConnect(): Promise<Db> {
     return connection;
 }

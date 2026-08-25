@@ -4,3 +4,12 @@ export type ViewerMessage = {
 }
 
 export type ViewerUnion = ViewerMessage;
+
+export type ViewerDetail = {
+    _id: string;
+    blog_id: string;
+    created_at: Date;
+    profile_picture: string | null;
+    user_id: string;
+    username: string;
+}

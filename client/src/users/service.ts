@@ -4,11 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useBlogStore } from "../blogs/store";
 import { useCommentStore } from "../comments/store";
 import { useUserStore } from "./store";
-import { useReltionshipStore } from "../relations/store";
+import { useRelationStore } from "../relations/store";
 import { useStyleStore } from "../styles/store";
 import { apiRequest, apiUpload } from "../handler/api";
 
 export default function useUserService() {
+    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/api/users`;
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const profilePictureRef = useRef<HTMLInputElement>(null);
@@ -27,7 +28,7 @@ export default function useUserService() {
     const resetBlogInfoState = useBlogStore((state) => state.resetBlogInfoState);
     const resetBlogWindowState = useBlogStore((state) => state.resetBlogWindowState);
 
-    const resetRelationShipState = useReltionshipStore((state) => state.resetRelationShipState);
+    const resetRelationShipState = useRelationStore((state) => state.resetRelationShipState);
 
     const resetCommentState = useCommentStore((state) => state.resetCommentState);
 
@@ -35,7 +36,7 @@ export default function useUserService() {
 
     const deleteUserMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`${import.meta.env.VITE_BASE_API_URL}/users/`, {
+            return await apiRequest(`${baseUrl}`, {
                 method: "DELETE"
             });
         },
@@ -58,7 +59,7 @@ export default function useUserService() {
 
     const deleteOldProfilePictureMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`${import.meta.env.VITE_BASE_API_URL}/users/profile-picture`, {
+            return await apiRequest(`${baseUrl}/profile-picture`, {
                 method: "DELETE"
             });
         },
@@ -73,7 +74,7 @@ export default function useUserService() {
     const getOtherUser = useQuery({
         queryKey: [`other-user`],
         queryFn: async () => {
-            return await apiRequest(`${import.meta.env.VITE_BASE_API_URL}/users/${otherUserId}`, {
+            return await apiRequest(`${baseUrl}/${otherUserId}`, {
                 method: "GET"
             });
         },
@@ -94,7 +95,7 @@ export default function useUserService() {
             changeUserForm.append("username", newUserName.trim());
             if (newProfilePcture) changeUserForm.append("profile_picture", newProfilePcture);
 
-            return await apiUpload(`${import.meta.env.VITE_BASE_API_URL}/users/`, changeUserForm, "PUT");
+            return await apiUpload(`${baseUrl}`, changeUserForm, "PUT");
         },
         onError: (error) => {
             setUserMessage(error.message);

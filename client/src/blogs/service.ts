@@ -3,11 +3,12 @@ import { useUserStore } from "../users/store";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import { apiRequest, apiUpload } from "../handler/api";
+import type { BlogDetail } from "./model";
 
 export default function useBlogService() {
     const queryClient = useQueryClient();
     const blogMediaRef = useRef<HTMLInputElement>(null);
-    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/blogs`;
+    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/blogs/api`;
 
     const setBlogMessage = useBlogStore((state) => state.setBlogMessage);
 
@@ -39,13 +40,33 @@ export default function useBlogService() {
         if (blogMediaRef.current) blogMediaRef.current.value = "";
     }
 
+    const changeOneBlogMt = useMutation({
+        mutationFn: async (id: string) => {
+            const updateBlogForm = new FormData();
+            updateBlogForm.append("content", content);
+            updateBlogForm.append("language", language.trim());
+            updateBlogForm.append("title", title.trim());
+            if (media) updateBlogForm.append("media", media);
+
+            return await apiUpload(`${baseUrl}/${id}`, updateBlogForm, "PUT");
+        },
+        onError: (error) => {
+            setBlogMessage(error.message);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`blog-content-${blogId}`] });
+            queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
+        }
+    });
+
     const createNewBlogMt = useMutation({
         mutationFn: async () => {
             const newBlogForm = new FormData();
             newBlogForm.append("content", content);
             newBlogForm.append("language", language.trim());
             newBlogForm.append("title", title.trim());
-            if (media) newBlogForm.append("blog_media", media);
+            if (media) newBlogForm.append("media", media);
 
             return await apiUpload(`${baseUrl}`, newBlogForm, "POST");
         },
@@ -126,9 +147,11 @@ export default function useBlogService() {
         initialPageParam: 1,
         queryKey: ["all-blogs"],
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
-            return await apiRequest(`${baseUrl}?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<BlogDetail[]>(`${baseUrl}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
+
+            return request.data ?? [];
         }
     });
 
@@ -141,9 +164,11 @@ export default function useBlogService() {
         initialPageParam: 1,
         queryKey: [`user-blogs-${currentUserId}`],
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
-            return await apiRequest(`${baseUrl}/mine?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<BlogDetail[]>(`${baseUrl}/mine?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
+
+            return request.data ?? [];
         }
     });
 
@@ -151,34 +176,16 @@ export default function useBlogService() {
         enabled: !!blogId,
         queryKey: [`blog-content-${blogId}`],
         queryFn: async () => {
-            return await apiRequest(`${baseUrl}/show/${blogId}`, {
+            const request = await apiRequest<BlogDetail>(`${baseUrl}/show/${blogId}`, {
                 method: "GET"
             });
-        }
-    });
 
-    const updateOneBlogMt = useMutation({
-        mutationFn: async (id: string) => {
-            const updateBlogForm = new FormData();
-            updateBlogForm.append("content", content);
-            updateBlogForm.append("language", language.trim());
-            updateBlogForm.append("title", title.trim());
-            if (media) updateBlogForm.append("blog_media", media);
-
-            return await apiUpload(`${baseUrl}/${id}`, updateBlogForm, "PUT");
-        },
-        onError: (error) => {
-            setBlogMessage(error.message);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`blog-content-${blogId}`] });
-            queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
+            return request.data ?? {};
         }
     });
 
     const processing = deleteAllCurrentUserBlogsMt.isPending || deleteChosenCurrentUserBlogMt.isPending ||
-    createNewBlogMt.isPending || generateNewBlogMt.isPending || updateOneBlogMt.isPending;
+    createNewBlogMt.isPending || generateNewBlogMt.isPending || changeOneBlogMt.isPending;
 
     return {
         blogMediaPrefiew,
@@ -190,6 +197,6 @@ export default function useBlogService() {
         getAllCurrentUserBlogs,
         getOneBlogContent,
         processing,
-        updateOneBlogMt,
+        changeOneBlogMt,
     }
 }

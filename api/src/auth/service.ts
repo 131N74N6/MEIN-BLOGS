@@ -1,4 +1,4 @@
-import { betterAuth } from "better-auth"
+import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { db } from "../mongodb/service";
 
@@ -6,6 +6,7 @@ export const authService = betterAuth({
     database: mongodbAdapter(db()),
     secret: import.meta.env.BETTER_AUTH_SECRET,
     baseURL: import.meta.env.BETTER_AUTH_URL,
+    trustedOrigins: ["http://localhost:5173", "http://localhost:3000"],
 
     // Enable email/password authentication
     emailAndPassword: {

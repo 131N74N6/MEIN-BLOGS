@@ -66,43 +66,26 @@ class BlogRepository {
     }
 
     async getChosenCurrentUserBlogs(blogs_ids: ObjectId[]) {
-        return await this.blogs.find(
-            { _id: { $in: blogs_ids } },
-            { projection: {blog_owner_profile_picture: 0, blog_owner_name: 0, viewers: 0 }}
-        ).toArray();
+        return await this.blogs.find({ _id: { $in: blogs_ids } }).toArray();
     }
 
     async getAllCurrentUserBlogsWithPagination(page: Omit<TBlogs["pagination"], "page">) {
         const blog_owner_id = new ObjectId(page.blog_owner_id);
 
-        return await this.blogs.find(
-            { blog_owner_id: blog_owner_id },
-            { projection: { 
-                blog_owner_id: 0, 
-                blog_owner_name: 0, blog_owner_profile_picture: 0, 
-                viewers: 0 
-            }}
-        )
+        return await this.blogs.find({ blog_owner_id: blog_owner_id })
         .limit(page.limit)
         .skip(page.skip)
         .toArray();
     }
 
     async getAllBlogsWithPagination(page: Omit<TBlogs["pagination"], "blog_owner_id" | "page">) {
-        return await this.blogs.find(
-            {},
-            { projection: { 
-                blog_owner_id: 0, 
-                blog_owner_profile_picture: 0, 
-                viewers: 0 
-            }}
-        )
+        return await this.blogs.find({})
         .limit(page.limit)
         .skip(page.skip)
         .toArray();
     }
 
-    async getBlogById(blog_id: ObjectId) {
+    async getBlogContentById(blog_id: ObjectId) {
         return await this.blogs.findOne({ _id: blog_id });
     }
 }

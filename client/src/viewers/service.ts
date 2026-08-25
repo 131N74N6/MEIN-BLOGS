@@ -1,15 +1,16 @@
 import { useBlogStore } from "../blogs/store";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useViewerStore } from "./store";
 import { apiRequest } from "../handler/api";
+import { useStyleStore } from "../styles/store";
+import type { ViewerDetail } from "./model";
 
 export default function useViewerService() {
-    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/viewers`;
+    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/api/viewers`;
     const queryClient = useQueryClient();
 
     const blogId = useBlogStore((state) => state.blogId);
 
-    const setViewerMessage = useViewerStore((state) => state.setViewerMessage);
+    const setMessage = useStyleStore((state) => state.setMessage);
 
     const getAllBlogViewers = useInfiniteQuery({
         enabled: !!blogId,
@@ -19,9 +20,11 @@ export default function useViewerService() {
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            return await apiRequest(`${baseUrl}/${blogId}?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<ViewerDetail[]>(`${baseUrl}/${blogId}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
+
+            return request.data ?? [];
         },
         queryKey: [`blog-viewers-${blogId}`]
     });
@@ -29,9 +32,11 @@ export default function useViewerService() {
     const getAllBlogViewersTotal = useQuery({
         enabled: !!blogId,
         queryFn: async () => {
-            return await apiRequest(`${baseUrl}/${blogId}/total`, {
+            const request = await apiRequest<number>(`${baseUrl}/${blogId}/total`, {
                 method: "GET"
             });
+
+            return request.data ?? 0;
         },
         queryKey: [`blog-viewers-total-${blogId}`]
     });
@@ -43,7 +48,7 @@ export default function useViewerService() {
             });
         },
         onError: (error) => {
-            setViewerMessage(error.message);
+            setMessage(error.message);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`blog-viewers-${blogId}`] });

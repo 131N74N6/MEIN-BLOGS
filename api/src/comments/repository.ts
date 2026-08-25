@@ -22,7 +22,7 @@ class CommentRepository {
 
     async getAllCommentsInOneBlog(config: Omit<TComment["pagination"], "page">) {
         const comments = await this.comments.find(
-            { blog_id: new ObjectId(config.blog_id) }, { projection: { blog_owner_id: 0 }}
+            { blog_id: new ObjectId(config.blog_id) }, { projection: { blog_id: 0, blog_owner_id: 0 }}
         )
         .limit(config.limit)
         .skip(config.skip)

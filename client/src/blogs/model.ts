@@ -1,3 +1,5 @@
+import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from "@tanstack/react-query";
+
 export type BlogInfoState = {
     blogIdToggle: (blogIdParam: string) => void;
 
@@ -45,7 +47,7 @@ export type BlogDetail = {
     blog_owner_id: string;
     blog_owner_profile_picture: string | null;
     blog_owner_name: string;
-    created_at: Date;
+    created_at: string;
     content: string;
     language: string;
     title: string;
@@ -56,5 +58,18 @@ export type BlogDetail = {
         resource_type: string;
         url: string;
     };
-    updated_at: Date;
+    updated_at: string;
+}
+
+export type BlogRowData = {
+    data: Pick<BlogDetail, "_id" | "title" | "created_at" | "language">;
+    is_processing: boolean;
+}
+
+export type BlogTableData = {
+    data: Pick<BlogDetail, "_id" | "title" | "created_at" | "language">[];
+    fetch_next_page: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>
+    has_next_page: boolean;
+    is_fetching_next_page: boolean;
+    is_processing: boolean;
 }

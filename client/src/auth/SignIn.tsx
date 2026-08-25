@@ -1,16 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuthStore } from "./store";
-import { useUserStore } from "../users/store";
 import useAuthService from "./service";
-import useUserService from "../users/service";
 
-export default function SignUp() {
+export default function SignIn() {
     const navigate = useNavigate();
     const auth = useAuthService();
-    const user = useUserService();
-
-    const currentUserId = useUserStore((state) => state.currentUserId);
 
     const signInMessage = useAuthStore((state) => state.signInMessage);
     const setSignInMessage = useAuthStore((state) => state.setSignInMessage);
@@ -20,12 +15,6 @@ export default function SignUp() {
 
     const emailForSignIn = useAuthStore((state) => state.emailForSignIn);
     const setEmailForSignIn = useAuthStore((state) => state.setEmailForSignIn);
-
-    useEffect(() => {
-        if (auth.getCurrentUser.isLoading === false && currentUserId !== "") {
-            navigate("/users/dashboard", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isLoading, navigate]);
 
     useEffect(() => {
         if (signInMessage) {
@@ -69,19 +58,19 @@ export default function SignUp() {
                         <div className="text-gray-400 text-xs sm:text-sm md:text-md lg:text-lg font-medium">Don't have account ?</div>
                         <button 
                             className="text-blue-400 text-xs sm:text-sm md:text-md lg:text-lg font-medium hover:underline cursor-pointer disabled:cursor-not-allowed"
-                            disabled={user.isProcessing}
+                            disabled={auth.isProcessing}
                             onClick={() => navigate("/sign-up")}
                             type="button"
                         >
-                            Sign In
+                            Sign Up
                         </button>
                     </div>
                     <button 
                         className="bg-blue-600 text-white font-medium sm:text-sm lg:text-lg md:text-md text-xs md:p-2 p-1.5 cursor-pointer disabled:cursor-not-allowed" 
-                        disabled={user.isProcessing}
+                        disabled={auth.isProcessing}
                         type="submit"
                     >
-                        {user.isProcessing ? "Please wait..." : "Sign In"}
+                        {auth.isProcessing ? "Please wait..." : "Sign In"}
                     </button>
                 </div>
                 {signInMessage ? (

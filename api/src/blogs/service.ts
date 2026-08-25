@@ -74,7 +74,7 @@ class BlogService {
         const fileArrayBuffer = await props.media.arrayBuffer();
         const fileBuffer = Buffer.from(fileArrayBuffer);
 
-        const blog = await blogRepository.getBlogById(props._id);
+        const blog = await blogRepository.getBlogContentById(props._id);
         if (!blog) throw new BlogApiError(404, "blog not found");
 
         if (blog.blog_owner_id.toString() !== currentUserId) {
@@ -209,7 +209,7 @@ class BlogService {
 
     async getBlogContentById(id: string) {
         const blogId = this.checkIsIdValid(id, "blog id");
-        const blogContent = await blogRepository.getBlogById(blogId);
+        const blogContent = await blogRepository.getBlogContentById(blogId);
 
         if (!blogContent) return;
         

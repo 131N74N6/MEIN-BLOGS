@@ -1,9 +1,11 @@
 import { useBlogStore } from "../blogs/store";
 import { apiRequest } from "../handler/api";
+import type { CommentDetail } from "./model";
 import { useCommentStore } from "./store";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function useCommentSevice() {
+    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/comments/api`;
     const queryClient = useQueryClient();
     const blogId = useBlogStore((state) => state.blogId);
     const blogOwnerId = useBlogStore((state) => state.blogOwnerId);
@@ -13,7 +15,7 @@ export default function useCommentSevice() {
 
     const createNewCommentMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`${import.meta.env.VITE_BASE_API_URL}/comments/${blogId}`, {
+            return await apiRequest(`${baseUrl}/${blogId}`, {
                 body: JSON.stringify({
                     blog_id: blogId,
                     blog_owner_id: blogOwnerId,
@@ -40,11 +42,11 @@ export default function useCommentSevice() {
         initialPageParam: 1,
         queryKey: [`blog-comments-${blogId}`],
         queryFn: async ({ pageParam = 1}: { pageParam?: number}) => {
-            return await apiRequest(`${import.meta.env.VITE_BASE_API_URL}/comments/${blogId}?page=${pageParam}&limit=${16}`, {
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
+            const request = await apiRequest<CommentDetail[]>(`${baseUrl}/${blogId}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
+
+            return request.data ?? [];
         },
         staleTime: Infinity
     });
@@ -53,11 +55,11 @@ export default function useCommentSevice() {
         enabled: !!blogId,
         queryKey: [`blog-comments-total-${blogId}`],
         queryFn: async () => {
-            return await apiRequest(`${import.meta.env.VITE_BASE_API_URL}/comments/${blogId}/total`, {
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
+            const request = await apiRequest<number>(`${baseUrl}/${blogId}/total`, {
                 method: "GET"
             });
+
+            return request.data ?? 0;
         },
         staleTime: Infinity
     });

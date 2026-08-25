@@ -26,5 +26,3 @@ export type SignUpInput = {
 
     resetSignUpInput: () => void;
 }
-
-export type AuthUnion = SignInInput & SignUpInput;

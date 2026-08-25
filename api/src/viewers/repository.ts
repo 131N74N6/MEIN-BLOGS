@@ -31,10 +31,7 @@ class ViewerRepository {
     }
 
     async seeOneBlog(props: Omit<TViewer["data"], "created_at" | "username" | "profile_picture">) {
-        const blog = await this.blogs.find(
-            { _id: new ObjectId(props.blog_id) }, 
-            { projection: { _id: 1} }
-        ).toArray();
+        const blog = await this.blogs.find({ _id: new ObjectId(props.blog_id) }).toArray();
 
         const user = await this.users.find(
             { _id: new ObjectId(props.user_id) }, 

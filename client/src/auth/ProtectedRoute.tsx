@@ -9,7 +9,7 @@ interface ProtectedRouteIntrf {
 export default function ProtectedRoute(props: ProtectedRouteIntrf) {
     const auth = useAuthService();
 
-    if (!auth.getCurrentUser.data) {
+    if (!auth.getCurrentUser.data && auth.getCurrentUser.isLoading) {
         return (
             <div className="bg-white flex justify-center items-center h-dvh">
                 <Loading/>
