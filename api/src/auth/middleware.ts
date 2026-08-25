@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import { authService } from "./service";
+import { BlogApiError } from "../error/message";
 
 export const authMiddleware = () => (app: Elysia) => {
     return app.derive(async ({ request }) => {
@@ -7,7 +8,7 @@ export const authMiddleware = () => (app: Elysia) => {
             headers: request.headers
         });
 
-        if (!session) throw new Error('Unauthorized');
+        if (!session) throw new BlogApiError(401, 'Unauthorized');
         
         return { user: session.user };
     });
