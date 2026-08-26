@@ -6,7 +6,7 @@ import SignIn from "./auth/SignIn";
 import SignUp from "./auth/SignUp";
 import Home from "./blogs/Home";
 import ProtectedRoute from "./auth/ProtectedRoute";
-import UserBlog from "./blogs/UserBlog";
+import UserBlog from "./users/UserBlog";
 import Dashboard from "./users/Dashboard";
 import EditProfile from "./users/EditProfile";
 import BlogDetail from "./blogs/BlogDetail";

@@ -15,8 +15,7 @@ class BlogService {
         const isNotValid = !value || typeof value !== "string" || !ObjectId.isValid(value);
         if (isNotValid) throw new BlogApiError(400, `invalid ${fieldName}`);
 
-        const objectIdValue = new ObjectId(value);
-        return objectIdValue;
+        return value;
     }
 
     private checkIsInputValid(value: unknown, fieldName: string, min: number) {
@@ -28,7 +27,7 @@ class BlogService {
         return trimmed;
     }
 
-    async createNewBlog(props: Omit<TBlogs["add_raw"], "blog_owner_name" | "blog_owner_profile_picture">) {
+    async createNewBlog(props: Omit<TBlogs["add_raw"], "blog_owner_name" | "blog_owner_profile_picture" | "created_at" | "updated_at">) {
         const blogContent = this.checkIsInputValid(props.content, "content", 1);
         const currentUserId = this.checkIsIdValid(props.blog_owner_id, "current user id");
         const blogLanguage = this.checkIsInputValid(props.language, "language", 1);
@@ -61,16 +60,14 @@ class BlogService {
 
         await blogRepository.createNewBlog({
             content: blogContent,
-            created_at: props.created_at,
             blog_owner_id: currentUserId,
             language: blogLanguage,
             media: newBlogMedia,
-            title: blogTitle, 
-            updated_at: props.updated_at
+            title: blogTitle
         });
     }
 
-    async changeOneBlog(props: TBlogs["change_raw"]) {
+    async changeOneBlog(props: Omit<TBlogs["change_raw"], "updated_at">) {
         const blogContent = this.checkIsInputValid(props.content, "content", 1);
         const currentUserId = this.checkIsIdValid(props.blog_owner_id, "current user id");
         const blogLanguage = this.checkIsInputValid(props.language, "language", 1);
@@ -107,30 +104,27 @@ class BlogService {
             });
 
             await blogRepository.changeOneBlog({
-                _id: blog._id,
+                _id: props._id,
                 content: blogContent || blog.content,
                 blog_owner_id: currentUserId,
                 media: newBlogMedia,
                 language: blogLanguage || blog.language,
-                title: blogTitle || blog.title,
-                updated_at: props.updated_at
+                title: blogTitle || blog.title
             });
         } else {
             await blogRepository.changeOneBlog({
-                _id: blog._id,
+                _id: props._id,
                 content: blogContent || blog.content,
                 blog_owner_id: currentUserId,
                 media: blog.media,
                 language: blogLanguage || blog.language,
-                title: blogTitle || blog.title,
-                updated_at: props.updated_at
+                title: blogTitle || blog.title
             });
         }
     }
 
     async deleteAllBlogs(currentUserId: string) {
         const operation = [];
-        const blog_owner_id = new ObjectId(currentUserId);
         const blogs = await blogRepository.getAllCurrentUserBlogs(currentUserId);
 
         if (blogs.length === 0) return;
@@ -139,7 +133,7 @@ class BlogService {
             throw new BlogApiError(403, "you are not allowed to delete these blogs");
         }
 
-        const blogsIds = blogs.map(blog => blog._id);
+        const blogsIds = blogs.map(blog => blog._id.toString());
         const blogsMedia = blogs.map(blog => blog.media);
         
         if (blogsMedia.length > 0) {
@@ -154,12 +148,11 @@ class BlogService {
 
         if (operation.length > 0) await Promise.all(operation);
         
-        await blogRepository.deleteAllBlogs(blogsIds, blog_owner_id);
+        await blogRepository.deleteAllBlogs(blogsIds, currentUserId);
     }
 
-    async deleteChosenBlogs(blogsIds: string[], current_user_id: string, ) {
+    async deleteChosenBlogs(blogs_ids: string[], current_user_id: string, ) {
         const operations = [];
-        const blogs_ids = blogsIds.map(id => new ObjectId(id));
         const currentUserId = this.checkIsIdValid(current_user_id, "current user id");
         const blogs = await blogRepository.getChosenCurrentUserBlogs(blogs_ids);
 
@@ -195,7 +188,7 @@ class BlogService {
             title: blogTitle,
         });
 
-        return generatedContent;
+        return generatedContent.contents;
     }
 
     async getAllBlogs(page: Omit<TBlogs["pagination"], "page" | "blog_owner_id">) {

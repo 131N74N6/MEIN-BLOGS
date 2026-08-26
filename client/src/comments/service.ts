@@ -5,7 +5,6 @@ import { useCommentStore } from "./store";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function useCommentSevice() {
-    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/comments/api`;
     const queryClient = useQueryClient();
     const blogId = useBlogStore((state) => state.blogId);
     const blogOwnerId = useBlogStore((state) => state.blogOwnerId);
@@ -15,7 +14,7 @@ export default function useCommentSevice() {
 
     const createNewCommentMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`${baseUrl}/${blogId}`, {
+            return await apiRequest(`/api/comments/${blogId}`, {
                 body: JSON.stringify({
                     blog_id: blogId,
                     blog_owner_id: blogOwnerId,
@@ -42,7 +41,7 @@ export default function useCommentSevice() {
         initialPageParam: 1,
         queryKey: [`blog-comments-${blogId}`],
         queryFn: async ({ pageParam = 1}: { pageParam?: number}) => {
-            const request = await apiRequest<CommentDetail[]>(`${baseUrl}/${blogId}?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<CommentDetail[]>(`/api/comments/${blogId}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
 
@@ -55,7 +54,7 @@ export default function useCommentSevice() {
         enabled: !!blogId,
         queryKey: [`blog-comments-total-${blogId}`],
         queryFn: async () => {
-            const request = await apiRequest<number>(`${baseUrl}/${blogId}/total`, {
+            const request = await apiRequest<number>(`/api/comments/${blogId}/total`, {
                 method: "GET"
             });
 

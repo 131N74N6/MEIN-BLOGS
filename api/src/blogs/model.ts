@@ -1,26 +1,19 @@
 import { t, UnwrapSchema } from "elysia";
-import { ObjectId } from "mongodb";
 
 export const blogSchema = {
     add_raw: t.Object({
-        blog_owner_id: t.Transform(t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid data" }))
-        .Decode(value => new ObjectId(value))
-        .Encode(value => value.toHexString()),
-
+        blog_owner_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid id" }),
         blog_owner_profile_picture: t.Union([t.String(), t.Null()]),
         blog_owner_name: t.String({ minLength: 1, error: "invalid data"}),
         created_at: t.Date({ error: "invalid date" }),
-        content: t.String({ minLenength: 1, error: "invalid language"}),
+        content: t.String({ minLenength: 1, error: "invalid content"}),
         language: t.String({ minLength: 1, error: "invalid language"}),
         media: t.File({ maxSize: 6 * 1024 * 1024, type: "image/*", error: "invalid file" }),
         title: t.String({ minLength: 1, error: "invalid title"}),
         updated_at: t.Date({ error: "invalid date" })
     }),
     add_result: t.Object({
-        blog_owner_id: t.Transform(t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid data" }))
-        .Decode(value => new ObjectId(value))
-        .Encode(value => value.toHexString()),
-
+        blog_owner_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid id" }),
         blog_owner_profile_picture: t.Union([t.String(), t.Null()]),
         blog_owner_name: t.String({ minLength: 1, error: "invalid data"}),
         created_at: t.Date({ error: "invalid date" }),
@@ -37,14 +30,8 @@ export const blogSchema = {
         updated_at: t.Date({ error: "invalid date" })
     }),
     change_raw: t.Object({
-        _id: t.Transform(t.String({ format: "^[0-9a-fA-F]{24}$", error: "invalid data" }))
-        .Decode(value => new ObjectId(value))
-        .Encode(value => value.toHexString()),
-
-        blog_owner_id: t.Transform(t.String({ format: "^[0-9a-fA-F]{24}$", error: "invalid data" }))
-        .Decode(value => new ObjectId(value))
-        .Encode(value => value.toHexString()),
-        
+        _id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid id" }),
+        blog_owner_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid id" }),
         content: t.String({ minLength: 1, error: "invalid content"}),
         language: t.String({ minLength: 1, error: "invalid language"}),
         media: t.File({ maxSize: 6 * 1024 * 1024, type: "image/*", error: "invalid file" }),
@@ -52,14 +39,8 @@ export const blogSchema = {
         updated_at: t.Date({ error: "invalid date" })
     }),
     change_result: t.Object({
-        _id: t.Transform(t.String({ format: "^[0-9a-fA-F]{24}$", error: "invalid data" }))
-        .Decode(value => new ObjectId(value))
-        .Encode(value => value.toHexString()),
-
-        blog_owner_id: t.Transform(t.String({ format: "^[0-9a-fA-F]{24}$", error: "invalid data" }))
-        .Decode(value => new ObjectId(value))
-        .Encode(value => value.toHexString()),
-
+        _id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid id" }),
+        blog_owner_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid id" }),
         content: t.String({ minLength: 1, error: "invalid content"}),
         language: t.String({ minLength: 1, error: "invalid language"}),
         media: t.Object({
@@ -73,14 +54,8 @@ export const blogSchema = {
         updated_at: t.Date({ error: "invalid date" })
     }),
     data: t.Object({
-        _id: t.Transform(t.String({ format: "^[0-9a-fA-F]{24}$", error: "invalid data" }))
-        .Decode(value => new ObjectId(value))
-        .Encode(value => value.toHexString()),
-
-        blog_owner_id: t.Transform(t.String({ format: "^[0-9a-fA-F]{24}$", error: "invalid data" }))
-        .Decode(value => new ObjectId(value))
-        .Encode(value => value.toHexString()),
-
+        _id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid id" }),
+        blog_owner_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid id" }),
         blog_owner_profile_picture: t.Union([t.String(), t.Null()]),
         blog_owner_name: t.String({ minLength: 1, error: "invalid data"}),
         created_at: t.Date({ error: "invalid date" }),
@@ -101,10 +76,7 @@ export const blogSchema = {
         title: t.String({ minLength: 1, error: "invalid title"}),
     }),
     pagination: t.Object({
-        blog_owner_id: t.Transform(t.String({ format: "^[0-9a-fA-F]{24}$", error: "invalid data" }))
-        .Decode(value => new ObjectId(value))
-        .Encode(value => value.toHexString()),
-
+        blog_owner_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid id" }),
         limit: t.Number({ maximum: 30, default: 16, error: "Invalid data" }),
         page: t.Number({ default: 1, minimum: 1, error: "Invalid data" }),
         skip: t.Number({ maximum: 30, default: 16, error: "Invalid data" })

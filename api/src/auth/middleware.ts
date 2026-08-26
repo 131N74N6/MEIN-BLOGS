@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { authService } from "./service";
 import { BlogApiError } from "../error/message";
 
-export const authMiddleware = () => (app: Elysia) => {
+export const authMiddleware = (app: Elysia) => {
     return app.derive(async ({ request }) => {
         const session = await authService.api.getSession({
             headers: request.headers

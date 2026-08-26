@@ -4,14 +4,18 @@ import commentController from "./controller";
 import { commentSchema } from "./model";
 
 const commentRouters = new Elysia({ prefix: "/api/comments" })
-.use(authMiddleware())
-.get("/:blog_id", async ({ params: { blog_id }, query }) => await commentController.getAllCommentsInOneBlog({
-    blog_id: blog_id, page: query.page, limit: query.limit
-}), {
+.use(authMiddleware)
+.get("/:blog_id", async ({ params, query }) => {
+    return await commentController.getAllCommentsInOneBlog({
+        blog_id: params.blog_id, page: query.page, limit: query.limit
+    })
+}, {
     params: commentSchema.params,
     query: t.Omit(commentSchema.pagination, ["skip"])
 })
-.get("/:blog_id/total", async ({ params: { blog_id }}) => await commentController.getCommentsTotalInOneBlog(blog_id), {
+.get("/:blog_id/total", async ({ params }) => {
+    return await commentController.getCommentsTotalInOneBlog(params.blog_id)
+}, {
     params: commentSchema.params
 })
 .post("/:blog_id", async ({ body, user, params }) => await commentController.createComment({

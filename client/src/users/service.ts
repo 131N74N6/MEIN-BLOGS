@@ -9,7 +9,6 @@ import { useStyleStore } from "../styles/store";
 import { apiRequest, apiUpload } from "../handler/api";
 
 export default function useUserService() {
-    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/api/users`;
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const profilePictureRef = useRef<HTMLInputElement>(null);
@@ -36,7 +35,7 @@ export default function useUserService() {
 
     const deleteUserMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`${baseUrl}`, {
+            return await apiRequest(`/api/users`, {
                 method: "DELETE"
             });
         },
@@ -60,7 +59,7 @@ export default function useUserService() {
 
     const deleteOldProfilePictureMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`${baseUrl}/profile-picture`, {
+            return await apiRequest(`/api/users/profile-picture`, {
                 method: "DELETE"
             });
         },
@@ -75,7 +74,7 @@ export default function useUserService() {
     const getOtherUser = useQuery({
         queryKey: [`other-user`],
         queryFn: async () => {
-            return await apiRequest(`${baseUrl}/${otherUserId}`, {
+            return await apiRequest(`/api/users/${otherUserId}`, {
                 method: "GET"
             });
         },
@@ -96,7 +95,7 @@ export default function useUserService() {
             changeUserForm.append("username", newUserName.trim());
             if (newProfilePcture) changeUserForm.append("profile_picture", newProfilePcture);
 
-            return await apiUpload(`${baseUrl}`, changeUserForm, "PUT");
+            return await apiUpload(`/api/users`, changeUserForm, "PUT");
         },
         onError: (error) => {
             setUserMessage(error.message);

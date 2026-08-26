@@ -21,24 +21,24 @@ const app = new Elysia()
     credentials: true,
     origin: ["http://localhost:5173", "http://localhost:3000"]
 }))
-.onRequest(({ request, set }) => {
-    const clientIP = request.headers.get("x-forwarded-for") || "local-client";
-    const now = Date.now();
-    const clientData = requestCounts.get(clientIP);
-
-    if (!clientData || now > clientData.resetTime) {
-        requestCounts.set(clientIP, { count: 1, resetTime: now + DURATION });
-        return;
-    }
-
-    if (clientData.count >= RATE_LIMIT) {
-        set.status = 429;
-        throw new BlogApiError(429, "Too many request attempts, try again later.");
-    }
-
-    clientData.count++;
-})
 .use(setupErrorHandler)
+// .onRequest(({ request, set }) => {
+//     const clientIP = request.headers.get("x-forwarded-for") || "local-client";
+//     const now = Date.now();
+//     const clientData = requestCounts.get(clientIP);
+
+//     if (!clientData || now > clientData.resetTime) {
+//         requestCounts.set(clientIP, { count: 1, resetTime: now + DURATION });
+//         return;
+//     }
+
+//     if (clientData.count >= RATE_LIMIT) {
+//         set.status = 429;
+//         throw new BlogApiError(429, "Too many request attempts, try again later.");
+//     }
+
+//     clientData.count++;
+// })
 .all("/api/auth/*", async (ctx) => { return await authService.handler(ctx.request); })
 .use(blogRouters)
 .use(commentRouters)

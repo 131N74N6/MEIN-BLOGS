@@ -6,8 +6,8 @@ export type BlogInfoState = {
     chosenBlogsIds: string[];
     resetChosenBlogsIds: () => void;
 
-    content: string;
-    setContent: (content: string) => void;
+    content: string | undefined;
+    setContent: (content: string | undefined) => void;
 
     media: File | null;
     setMedia: (media: File | null) => void;
@@ -72,4 +72,16 @@ export type BlogTableData = {
     has_next_page: boolean;
     is_fetching_next_page: boolean;
     is_processing: boolean;
+}
+
+export type BlogCardData = {
+    data: Omit<BlogDetail, "blog_owner_id" | "updated_at">;
+}
+
+export type BlogGridData = {
+    data: Omit<BlogDetail, "blog_owner_id" | "updated_at">[];
+    fetchNextPage: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<BlogDetail[], unknown>, Error>>;
+    hasNextPage: boolean;
+    isFetchingNextPage: boolean;
+    isProcessing: boolean;
 }

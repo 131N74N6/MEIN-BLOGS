@@ -88,8 +88,7 @@ export default function useAuthService() {
         onError: (error) => {
             setMessage(error.message);
         },
-        onSuccess: async (data) => {
-            setCurrentUserId(data.id);
+        onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ["current-user"] });
             resetSignInInput();
             navigate("/home", { replace: true });
@@ -136,8 +135,7 @@ export default function useAuthService() {
         onError: (error) => {
             setMessage(error.message);
         },
-        onSuccess: async (data) => {
-            setCurrentUserId(data.id);
+        onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ["current-user"] });
             resetSignInInput();
             navigate("/home", { replace: true });

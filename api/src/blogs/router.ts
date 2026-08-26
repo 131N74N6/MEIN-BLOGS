@@ -2,27 +2,32 @@ import Elysia, { t } from "elysia";
 import blogController from "./controller";
 import { blogSchema } from "./model";
 import { authMiddleware } from "../auth/middleware";
-import { ObjectId } from "mongodb";
 
 const blogRouters = new Elysia({ prefix: "/api/blogs"})
-.use(authMiddleware())
+.use(authMiddleware)
 .delete("/", async ({ user }) => await blogController.deleteAllBlogs(user.id))
 .delete("/bulk", async({ body, user }) => await blogController.deleteChosenBlogs(body.blogs_ids, user.id), {
     body: t.Object({ blogs_ids: t.Array(t.String()) })
 })
-.get("/", async ({ query }) => await blogController.getAllBlogs(query), {
-    query: t.Omit(blogSchema.pagination, ["skip"])
+.get("/", async ({ query }) => {
+    return await blogController.getAllBlogs(query);
+}, {
+    query: t.Omit(blogSchema.pagination, ["skip", "blog_owner_id"])
 })
-.get("/mine", async ({ query, user }) => await blogController.getAllUserBlogs({
-    page: query.page, limit: query.limit, blog_owner_id: new ObjectId(user.id)
-}), {
-    query: t.Omit(blogSchema.pagination, ["skip"])
+.get("/mine", async ({ query, user }) => {
+    return await blogController.getAllUserBlogs({
+        page: query.page, limit: query.limit, blog_owner_id: user.id
+    });
+}, {
+    query: t.Omit(blogSchema.pagination, ["skip", "blog_owner_id"])
 })
-.get("/:_id", async ({ params }) => await blogController.getBlogContentById(params._id), {
+.get("/:_id", async ({ params }) => {
+    return await blogController.getBlogContentById(params._id);
+}, {
     params: blogSchema.params
 })
 .post("/", async ({ body, user }) => await blogController.createNewBlog({
-    blog_owner_id: new ObjectId(user.id),
+    blog_owner_id: user.id,
     content: body.content,
     language: body.language,
     media: body.media,
@@ -30,12 +35,14 @@ const blogRouters = new Elysia({ prefix: "/api/blogs"})
 }), {
     body: t.Omit(blogSchema.add_raw, ["blog_owner_name", "blog_owner_profile_picture"])
 })
-.post("/generate", async ({ body }) => await blogController.generateNewBlog(body), {
+.post("/generate", async ({ body }) => {
+    return await blogController.generateNewBlog(body);
+}, {
     body: blogSchema.generate
 })
-.put("/:_id", async ({ body, params: { _id } }) => await blogController.changeOneBlog({
-    _id: new ObjectId(_id), 
-    blog_owner_id: body.blog_owner_id,
+.put("/:_id", async ({ body, params, user }) => await blogController.changeOneBlog({
+    _id: params._id,
+    blog_owner_id: user.id,
     content: body.content,
     language: body.language,
     media: body.media,

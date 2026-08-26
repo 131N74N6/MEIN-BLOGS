@@ -3,8 +3,6 @@ import blogService from "./service";
 
 class BlogController {
     async changeOneBlog(body: Omit<TBlogs["change_raw"], "updated_at">) {
-        const updated_at = new Date();
-
         await blogService.changeOneBlog({
             _id: body._id,
             blog_owner_id: body.blog_owner_id,
@@ -12,24 +10,18 @@ class BlogController {
             language: body.language,
             media: body.media,
             title: body.title,
-            updated_at: updated_at
         });
 
         return { message: "one blog changed", success: true };
     }
 
     async createNewBlog(body: Omit<TBlogs["add_raw"], "created_at" | "updated_at" | "blog_owner_name" | "blog_owner_profile_picture">) {
-        const created_at = new Date();
-        const updated_at = created_at;
-
         await blogService.createNewBlog({
             content: body.content,
-            created_at: created_at,
             blog_owner_id: body.blog_owner_id,
             language: body.language,
             media: body.media,
-            title: body.title,
-            updated_at: updated_at
+            title: body.title
         });
 
         return { message: "new blog created", success: true };
@@ -50,7 +42,7 @@ class BlogController {
             language: body.language, title: body.title
         });
 
-        return { message: newGeneratedBlog.contents, success: true };
+        return { data: newGeneratedBlog, success: true };
     }
 
     async getAllBlogs(query: Omit<TBlogs["pagination"], "skip" | "blog_owner_id">) {
@@ -59,7 +51,6 @@ class BlogController {
         const skip = (page - 1) * limit;
 
         const blogs = await blogService.getAllBlogs({ limit: limit, skip: skip });
-
         return blogs;
     }
 

@@ -7,7 +7,6 @@ import type { ViewerDetail } from "./model";
 
 export default function useRelationshipService() {
     const queryClient = useQueryClient();
-    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/relations/api`;
 
     const setMessage = useStyleStore((state) => state.setMessage);
 
@@ -23,7 +22,7 @@ export default function useRelationshipService() {
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            const request = await apiRequest<ViewerDetail[]>(`${baseUrl}/followed/${otherUserId}?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<ViewerDetail[]>(`/api/relations/followed/${otherUserId}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
             
@@ -35,7 +34,7 @@ export default function useRelationshipService() {
     const getAllFollowedTotal = useQuery({
         enabled: !!otherUserId,
         queryFn: async () => {
-            const request = await apiRequest<number>(`${baseUrl}/followed/${otherUserId}/total`, {
+            const request = await apiRequest<number>(`/api/relations/followed/${otherUserId}/total`, {
                 method: "GET"
             });
 
@@ -52,7 +51,7 @@ export default function useRelationshipService() {
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            const request = await apiRequest<ViewerDetail[]>(`${baseUrl}/followers/${otherUserId}?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<ViewerDetail[]>(`/api/relations/followers/${otherUserId}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
             
@@ -64,7 +63,7 @@ export default function useRelationshipService() {
     const getAllFollowersTotal = useQuery({
         enabled: !!otherUserId,
         queryFn: async () => {
-            return await apiRequest(`${baseUrl}/followers/${otherUserId}/total`, {
+            return await apiRequest(`/api/relations/followers/${otherUserId}/total`, {
                 method: "GET"
             });
         },
@@ -80,7 +79,7 @@ export default function useRelationshipService() {
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            const request = await apiRequest<ViewerDetail[]>(`${baseUrl}/followed/${currentUserId}?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<ViewerDetail[]>(`/api/relations/followed/${currentUserId}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
             
@@ -92,7 +91,7 @@ export default function useRelationshipService() {
     const getAllCurrentUserFollowedTotal = useQuery({
         enabled: !!currentUserId,
         queryFn: async () => {
-            return await apiRequest(`${baseUrl}/followed/${currentUserId}/total`, {
+            return await apiRequest(`/api/relations/followed/${currentUserId}/total`, {
                 method: "GET"
             });
         },
@@ -107,7 +106,7 @@ export default function useRelationshipService() {
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            const request = await apiRequest<ViewerDetail[]>(`${baseUrl}/followers/${currentUserId}?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<ViewerDetail[]>(`/api/relations/followers/${currentUserId}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
             
@@ -119,7 +118,7 @@ export default function useRelationshipService() {
     const getAllCurrentUserFollowersTotal = useQuery({
         enabled: !!currentUserId,
         queryFn: async () => {
-            return await apiRequest(`${baseUrl}/followers/${currentUserId}/total`, {
+            return await apiRequest(`/api/relations/followers/${currentUserId}/total`, {
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 method: "GET"
@@ -131,7 +130,7 @@ export default function useRelationshipService() {
     const hasUserFollowed = useQuery({
         enabled: !!currentUserId && !!otherUserId,
         queryFn: async () => {
-            return await apiRequest(`${baseUrl}/has-followed/${currentUserId}/${otherUserId}`, {
+            return await apiRequest(`/api/relations/has-followed/${currentUserId}/${otherUserId}`, {
                 method: "GET"
             });
         },
@@ -140,7 +139,7 @@ export default function useRelationshipService() {
 
     const startFollowOneUserMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`${baseUrl}/${otherUserId}`, {
+            return await apiRequest(`/api/relations/${otherUserId}`, {
                 method: "POST"
             });
         },
@@ -158,7 +157,7 @@ export default function useRelationshipService() {
 
     const unfollowOneUserMt = useMutation({
         mutationFn: async (followed_user_id: string) => {
-            return await apiRequest(`${baseUrl}/${followed_user_id}`, {
+            return await apiRequest(`/api/relations/${followed_user_id}`, {
                 method: "DELETE"
             });
         },

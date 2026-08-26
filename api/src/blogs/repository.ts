@@ -5,12 +5,24 @@ import { ObjectId } from "mongodb";
 class BlogRepository {
     private blogs = db().collection("blogs");
     private comments = db().collection("comments");
-    private views = db().collection("views");
+    private viewers = db().collection("viewers");
     private users = db().collection("user");
 
-    async createNewBlog(props: Omit<TBlogs["add_result"], "_id" | "blog_owner_name" | "blog_owner_profile_picture">) {
+    async changeOneBlog(props: Omit<TBlogs["change_result"], "updated_at">) {
+        return await this.blogs.updateOne({ _id: new ObjectId(props._id) }, {
+            $set: {
+                content: props.content,
+                language: props.language,
+                media: props.media,
+                title: props.title,
+                updated_at: new Date()
+            }
+        });
+    }
+
+    async createNewBlog(props: Omit<TBlogs["add_result"], "blog_owner_name" | "blog_owner_profile_picture" | "created_at" | "updated_at">) {
         const user = await this.users.find(
-            { _id: props.blog_owner_id }, 
+            { _id: new ObjectId(props.blog_owner_id) }, 
             { projection: { password: 0, profile_picture: 0 }}
         ).toArray();
 
@@ -19,60 +31,42 @@ class BlogRepository {
             blog_owner_profile_picture: user[0].profile_picture,
             blog_owner_id: user[0]._id,
             content: props.content,
-            created_at: props.created_at,
+            created_at: new Date(),
             media: props.media,
             title: props.title,
-            updated_at: props.updated_at
+            updated_at: new Date(),
         });
     }
 
-    async changeOneBlog(props: TBlogs["change_result"]) {
-        return await this.blogs.updateOne({ _id: props._id }, {
-            $set: {
-                content: props.content,
-                language: props.language,
-                media: props.media,
-                title: props.title,
-                updated_at: props.updated_at
-            }
-        });
-    }
-
-    async deleteAllBlogs(blogs_ids: ObjectId[], current_user_id: ObjectId) {
+    async deleteAllBlogs(blogs_ids: string[], current_user_id: string) {
         return await Promise.all([
-            this.views.deleteMany({ blog_id: { $in: blogs_ids } }),
+            this.viewers.deleteMany({ blog_id: { $in: blogs_ids } }),
             this.comments.deleteMany({ blog_id: { $in: blogs_ids } }),
             this.blogs.deleteMany({ blog_owner_id: current_user_id })
         ]);
     }
 
-    async deleteChosenBlog(blogs_ids: ObjectId[]) {
+    async deleteChosenBlog(blogs_ids: string[]) {
+        const ids = blogs_ids.map(id => new ObjectId(id));
+
         return await Promise.all([
-            this.views.deleteMany({ blog_id: { $in: blogs_ids } }),
-            this.comments.deleteMany({ blog_id: { $in: blogs_ids } }),
-            this.blogs.deleteOne({ _id: { $in: blogs_ids } })
+            this.viewers.deleteMany({ blog_id: { $in: ids } }),
+            this.comments.deleteMany({ blog_id: { $in: ids } }),
+            this.blogs.deleteOne({ _id: { $in: ids } })
         ]);
     }
 
     async getAllCurrentUserBlogs(currentUserId: string) {
-        return await this.blogs.find(
-            { blog_owner_id: currentUserId },
-            { projection: { 
-                blog_owner_id: 0, 
-                blog_owner_name: 0, blog_owner_profile_picture: 0, 
-                viewers: 0 
-            }}
-        ).toArray();
+        return await this.blogs.find({ blog_owner_id: currentUserId }).toArray();
     }
 
-    async getChosenCurrentUserBlogs(blogs_ids: ObjectId[]) {
-        return await this.blogs.find({ _id: { $in: blogs_ids } }).toArray();
+    async getChosenCurrentUserBlogs(blogs_ids: string[]) {
+        const ids = blogs_ids.map(id => new ObjectId(id));
+        return await this.blogs.find({ _id: { $in: ids } }).toArray();
     }
 
     async getAllCurrentUserBlogsWithPagination(page: Omit<TBlogs["pagination"], "page">) {
-        const blog_owner_id = new ObjectId(page.blog_owner_id);
-
-        return await this.blogs.find({ blog_owner_id: blog_owner_id })
+        return await this.blogs.find({ blog_owner_id: new ObjectId(page.blog_owner_id) })
         .limit(page.limit)
         .skip(page.skip)
         .toArray();
@@ -85,8 +79,8 @@ class BlogRepository {
         .toArray();
     }
 
-    async getBlogContentById(blog_id: ObjectId) {
-        return await this.blogs.findOne({ _id: blog_id });
+    async getBlogContentById(blog_id: string) {
+        return await this.blogs.findOne({ _id: new ObjectId(blog_id) });
     }
 }
 

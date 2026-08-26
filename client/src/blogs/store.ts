@@ -15,8 +15,8 @@ const blogInfoSlice: StateCreator<BlogInfoState> = (set) => ({
     chosenBlogsIds: [],
     resetChosenBlogsIds: () => set({ chosenBlogsIds: [] }),
 
-    content: "",
-    setContent: (content: string) => set({ content }),
+    content: undefined,
+    setContent: (content: string | undefined) => set({ content }),
 
     media: null,
     setMedia: (media: File | null) => set({ media }),
@@ -29,7 +29,7 @@ const blogInfoSlice: StateCreator<BlogInfoState> = (set) => ({
 
     resetBlogInfoState: () => set({
         chosenBlogsIds: [],
-        content: "",
+        content: undefined,
         media: null,
         mediaUrl: null,
         language: "",

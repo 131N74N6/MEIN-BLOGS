@@ -10,6 +10,14 @@ type NavbarIntrf = {
     sign_out: UseMutationResult<any, Error, void, unknown>
 }
 
+const asideItems = [
+    { label: "Home", path: "/home", place: "home", icon: Home },
+    { label: "Create Blog", path: "/users/blogs/create", place: "create blog", icon: PlusSquare },
+    { label: "Blogs", path: "/users/blogs", place: "your blogs", icon: File },
+    { label: "Profile", path: "/users", place: "your profile", icon: User },
+    { label: "Dashboard", path: "/users/dashboard", place: "your dashboard", icon: ChartBar },
+];
+
 export default function Navbar(info: NavbarIntrf) {
     const navigate = useNavigate();
     const isOpen = useStyleStore((state) => state.isOpen);
@@ -19,76 +27,26 @@ export default function Navbar(info: NavbarIntrf) {
     return (
         <>
             <aside className="md:w-1/4 bg-zinc-700 md:flex flex-col gap-2.5 p-2.5 hidden h-full">
-                <button 
-                    className={cn(
-                        "flex gap-2.5",
-                        "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
-                        "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${info.place === "home" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
-                    )}
-                    disabled={info.is_processing}
-                    onClick={() => navigate("/home")}
-                    type="button"
-                >
-                    <Home size={22}/>
-                    <div>Home</div>
-                </button>
-                <button 
-                    className={cn(
-                        "flex gap-2.5",
-                        "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
-                        "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${info.place === "create blog" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
-                    )}
-                    disabled={info.is_processing}
-                    onClick={() => navigate("/users/blogs/create")}
-                    type="button"
-                >
-                    <PlusSquare size={22}/>
-                    <div>Create Blog</div>
-                </button>
-                <button 
-                    className={cn(
-                        "flex gap-2.5",
-                        "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
-                        "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${info.place === "your blogs" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
-                    )}
-                    disabled={info.is_processing}
-                    onClick={() => navigate("/users/blogs")}
-                    type="button"
-                >
-                    <File size={22}/>
-                    <div>Blogs</div>
-                </button>
-                <button 
-                    className={cn(
-                        "flex gap-2.5",
-                        "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
-                        "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${info.place === "your profile" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
-                    )}
-                    disabled={info.is_processing}
-                    onClick={() => navigate("/users")}
-                    type="button"
-                >
-                    <User size={22}/>
-                    <div>Profile</div>
-                </button>
-                <button 
-                    className={cn(
-                        "flex gap-2.5",
-                        "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
-                        "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${info.place === "your dashboard" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
-                    )}
-                    disabled={info.is_processing}
-                    onClick={() => navigate("/users/dashboard")}
-                    type="button"
-                >
-                    <ChartBar size={22}/>
-                    <div>Dashboard</div>
-                </button>
+                {asideItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                        <button 
+                            className={cn(
+                                "flex gap-2.5",
+                                "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
+                                "disabled:cursor-not-allowed transition-colors cursor-pointer", 
+                                `${info.place === item.place ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
+                            )}
+                            disabled={info.is_processing}
+                            key={item.path}
+                            onClick={() => navigate(item.path)}
+                            type="button"
+                        >
+                            <Icon size={22} />
+                            <div>{item.label}</div>
+                        </button>
+                    );
+                })}
                 <button 
                     className={cn(
                         "flex gap-2.5 hover:bg-zinc-600 p-2 hover:rounded-lg",
@@ -119,80 +77,30 @@ export default function Navbar(info: NavbarIntrf) {
             <aside 
                 className={cn(
                     "h-full w-4/5 z-30 md:hidden flex flex-col bg-zinc-700 gap-2.5 p-2.5 max-w-3xs",
-                    "top-0 right-0 fixed inset-0 transition-transform duration-300 ease-in-out",
+                    "top-0 right-0 fixed transition-transform duration-300 ease-in-out",
                     `${isOpen ? "translate-x-0" : "translate-x-full"}`
                 )}
             >
-                <button 
-                    className={cn(
-                        "flex gap-2.5",
-                        "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
-                        "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${info.place === "home" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
-                    )}
-                    disabled={info.is_processing}
-                    onClick={() => navigate("/home")}
-                    type="button"
-                >
-                    <Home size={22}/>
-                    <div>Home</div>
-                </button>
-                <button 
-                    className={cn(
-                        "flex gap-2.5",
-                        "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
-                        "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${info.place === "create blog" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
-                    )}
-                    disabled={info.is_processing}
-                    onClick={() => navigate("/users/blogs/create")}
-                    type="button"
-                >
-                    <PlusSquare size={22}/>
-                    <div>Create Blog</div>
-                </button>
-                <button 
-                    className={cn(
-                        "flex gap-2.5",
-                        "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
-                        "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${info.place === "your blogs" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
-                    )}
-                    disabled={info.is_processing}
-                    onClick={() => navigate("/users/blogs")}
-                    type="button"
-                >
-                    <File size={22}/>
-                    <div>Blogs</div>
-                </button>
-                <button 
-                    className={cn(
-                        "flex gap-2.5",
-                        "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
-                        "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${info.place === "your profile" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
-                    )}
-                    disabled={info.is_processing}
-                    onClick={() => navigate("/users")}
-                    type="button"
-                >
-                    <User size={22}/>
-                    <div>Profile</div>
-                </button>
-                <button 
-                    className={cn(
-                        "flex gap-2.5",
-                        "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
-                        "disabled:cursor-not-allowed transition-colors cursor-pointer", 
-                        `${info.place === "your dashboard" ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
-                    )}
-                    disabled={info.is_processing}
-                    onClick={() => navigate("/users/dashboard")}
-                    type="button"
-                >
-                    <ChartBar size={22}/>
-                    <div>Dashboard</div>
-                </button>
+                {asideItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                        <button 
+                            className={cn(
+                                "flex gap-2.5",
+                                "font-normal text-left text-base text-white hover:bg-zinc-600 p-2", 
+                                "disabled:cursor-not-allowed transition-colors cursor-pointer", 
+                                `${info.place === item.place ? 'bg-zinc-500' : 'bg-zinc-700'} rounded-lg`
+                            )}
+                            disabled={info.is_processing}
+                            key={item.path}
+                            onClick={() => navigate(item.path)}
+                            type="button"
+                        >
+                            <Icon size={22} />
+                            <div>{item.label}</div>
+                        </button>
+                    );
+                })}
                 <button 
                     className={cn(
                         "flex gap-2.5 hover:bg-zinc-600 p-2 hover:rounded-lg",

@@ -7,13 +7,15 @@ import { useBlogStore } from "./store";
 import { Image, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../users/store";
+import { useStyleStore } from "../styles/store";
+import Alert from "../styles/Alert";
 
 export default function CreateBlog() {
-    const navigate = useNavigate();
-    
     const auth = useAuthService();
     const blog = useBlogService();
+    const navigate = useNavigate();
     
+    const content = useBlogStore((state) => state.content);
     const setContent = useBlogStore((state) => state.setContent);
 
     const setLanguage = useBlogStore((state) => state.setLanguage);
@@ -25,6 +27,9 @@ export default function CreateBlog() {
 
     const title = useBlogStore((state) => state.title);
     const setTitle = useBlogStore((state) => state.setTitle);
+
+    const message = useStyleStore((state) => state.message);
+    const setMessage = useStyleStore((state) => state.setMessage);
     
     const currentUserId = useUserStore((state) => state.currentUserId);
 
@@ -38,6 +43,13 @@ export default function CreateBlog() {
     }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
     useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => setMessage(null), 1800);
+            return () => clearTimeout(timer);
+        }
+    }, [message, setMessage]);
+
+    useEffect(() => {
         if (!quillRef.current && editorTextRef.current) {
             quillRef.current = new Quill(editorTextRef.current, { theme: "snow" });
 
@@ -49,6 +61,12 @@ export default function CreateBlog() {
         }
     }, [setContent]);
 
+    useEffect(() => {
+        if (quillRef.current && content !== quillRef.current.root.innerHTML) {
+            quillRef.current.root.innerHTML = content || "";
+        }
+    }, [content]);
+
     const isProcessing = blog.processing || auth.isProcessing;
 
     const publishBlog = (event: React.SubmitEvent<HTMLFormElement>) => {
@@ -57,8 +75,9 @@ export default function CreateBlog() {
     }
 
     return (
-        <section className="flex md:flex-row flex-col h-dvh">
+        <section className="flex md:flex-row flex-col h-dvh relative z-10">
             <Navbar place="create blog" sign_out={auth.signOutMt} is_processing={blog.processing}/>
+            {message ? <Alert message={message}/> : null}
             <main className="h-full md:w-3/4 w-full flex flex-col overflow-y-auto">
                 <form className="flex flex-col p-2.5 gap-2.5" onSubmit={publishBlog}>
                     <div className="flex flex-col gap-1.5">
@@ -116,7 +135,13 @@ export default function CreateBlog() {
                     <div className="flex flex-col gap-1.5">
                         <label className="text-base font-semibold text-gray-600">Content</label>
                         <div className="h-[50dvh] flex flex-col">
-                            <div ref={editorTextRef} className="h-full overflow-y-auto border-x border-b border-gray-400 rounded-b-md"/>
+                            {isProcessing ? (
+                                <div className="flex justify-center items-center h-full">
+                                    <div className="text-base font-medium text-gray-700">Please wait</div>
+                                </div>
+                            ) : (
+                                <div ref={editorTextRef} className="h-full overflow-y-auto border-x border-b border-gray-400 rounded-b-md"/>
+                            )}
                         </div>
                     </div>
                     <div className="flex justify-end gap-2.5">

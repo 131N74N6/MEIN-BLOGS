@@ -51,6 +51,19 @@ export const authService = betterAuth({
         }
     },
 
+    databaseHooks: {
+        session: {
+            delete: {
+                after: async (session) => {
+                    if (session?.id) {
+                        const database = db();
+                        await database.collection("session").deleteOne({ id: session.id });
+                    }
+                }
+            }
+        }
+    },
+
     advanced: {
         database: {
             generateId: false
