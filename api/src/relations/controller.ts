@@ -26,12 +26,12 @@ class RelationController {
         return { data: following, success: true };
     }
 
-    async getFollowersTotal(params: Pick<TRelation["pagination"], "user_id">) {
+    async getFollowersTotal(params: Pick<TRelation["add"], "user_id">) {
         const total = await relationService.getFollowersTotal({ user_id: params.user_id });
         return { data: total, success: true };
     }
 
-    async getFollowedUserTotal(params: Pick<TRelation["pagination"], "user_id">) {
+    async getFollowedUserTotal(params: Pick<TRelation["add"], "user_id">) {
         const total = await relationService.getFollowedUserTotal({ user_id: params.user_id });
         return { data: total, success: true };
     }
@@ -44,7 +44,7 @@ class RelationController {
         return { data: hasUserFollowed, success: true };
     }
 
-    async startFollowedOneUser(body: Omit<TRelation["add"], "username" | "created_at" | "profile_picture">) {
+    async startFollowedOneUser(body: TRelation["add"]) {
         await relationService.startFollowedOneUser({
             user_id: body.user_id, followed_user_id: body.followed_user_id
         });
@@ -52,7 +52,7 @@ class RelationController {
         return { message: "successfully followed", success: true };
     }
 
-    async stopFollowingOneUser(props: Pick<TRelation["pagination"], "followed_user_id">) {
+    async stopFollowingOneUser(props: Pick<TRelation["add"], "followed_user_id">) {
         await relationService.stopFollowingOneUser({ followed_user_id: props.followed_user_id });
         return { message: "successfully unfollowed", success: true };
     }

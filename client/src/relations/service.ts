@@ -7,124 +7,75 @@ import type { ViewerDetail } from "./model";
 
 export default function useRelationshipService() {
     const queryClient = useQueryClient();
-
     const setMessage = useStyleStore((state) => state.setMessage);
 
     const currentUserId = useUserStore((state) => state.currentUserId);
-
     const otherUserId = useRelationStore((state) => state.otherUserId);
 
     const getAllFollowed = useInfiniteQuery({
-        enabled: !!otherUserId,
+        enabled: !! currentUserId || !!otherUserId,
         getNextPageParam: (lastPage, allPages) => {
             if (lastPage.length < 16) return;
             return allPages.length + 1;
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            const request = await apiRequest<ViewerDetail[]>(`/api/relations/followed/${otherUserId}?page=${pageParam}&limit=${16}`, {
-                method: "GET"
-            });
+            const endpoint = otherUserId ? 
+            `/api/relations/followed/${otherUserId}?page=${pageParam}&limit=${16}` :
+            `/api/relations/followed/${currentUserId}?page=${pageParam}&limit=${16}`;
+
+            const request = await apiRequest<ViewerDetail[]>(endpoint, { method: "GET" });
             
             return request.data ?? [];
         },
-        queryKey: [`followed-${otherUserId}`]
-    });
-
-    const getAllFollowedTotal = useQuery({
-        enabled: !!otherUserId,
-        queryFn: async () => {
-            const request = await apiRequest<number>(`/api/relations/followed/${otherUserId}/total`, {
-                method: "GET"
-            });
-
-            return request.data ?? 0;
-        },
-        queryKey: [`followed-total-${otherUserId}`]
+        queryKey: otherUserId ? [`followed-${otherUserId}`] : [`followed-${currentUserId}`]
     });
 
     const getAllFollowers = useInfiniteQuery({
-        enabled: !!otherUserId,
+        enabled: !!currentUserId || !!otherUserId,
         getNextPageParam: (lastPage, allPages) => {
             if (lastPage.length < 16) return;
             return allPages.length + 1;
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            const request = await apiRequest<ViewerDetail[]>(`/api/relations/followers/${otherUserId}?page=${pageParam}&limit=${16}`, {
-                method: "GET"
-            });
+            const endpoint = otherUserId ? 
+            `/api/relations/followers/${otherUserId}?page=${pageParam}&limit=${16}` :
+            `/api/relations/followers/${currentUserId}?page=${pageParam}&limit=${16}`;
+
+            const request = await apiRequest<ViewerDetail[]>(endpoint, { method: "GET" });
             
             return request.data ?? [];
         },
-        queryKey: [`followers-${otherUserId}`]
+        queryKey: otherUserId ? [`followers-${otherUserId}`] : [`followers-${currentUserId}`]
+    });
+
+    const getAllFollowedTotal = useQuery({
+        enabled: !!currentUserId || !!otherUserId,
+        queryFn: async () => {
+            const endpoint = otherUserId ? 
+            `/api/relations/followed/${otherUserId}/total` :
+            `/api/relations/followed/${currentUserId}/total`;
+
+            const request = await apiRequest<number>(endpoint, { method: "GET" });
+
+            return request.data ?? 0;
+        },
+        queryKey: otherUserId ? [`followed-total-${otherUserId}`] : [`followed-total-${currentUserId}`]
     });
 
     const getAllFollowersTotal = useQuery({
-        enabled: !!otherUserId,
+        enabled: !!currentUserId || !!otherUserId,
         queryFn: async () => {
-            return await apiRequest(`/api/relations/followers/${otherUserId}/total`, {
-                method: "GET"
-            });
-        },
-        queryKey: [`followers-total-${otherUserId}`]
-    });
+            const endpoint = otherUserId ? 
+            `/api/relations/followers/${otherUserId}/total` :
+            `/api/relations/followers/${currentUserId}/total`;
 
-    
-    const getAllCurrentUserFollowed = useInfiniteQuery({
-        enabled: !!currentUserId,
-        getNextPageParam: (lastPage, allPages) => {
-            if (lastPage.length < 16) return;
-            return allPages.length + 1;
-        },
-        initialPageParam: 1,
-        queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            const request = await apiRequest<ViewerDetail[]>(`/api/relations/followed/${currentUserId}?page=${pageParam}&limit=${16}`, {
-                method: "GET"
-            });
+            const request = await apiRequest<number>(endpoint, { method: "GET" });
             
-            return request.data ?? [];
+            return request.data ?? 0;
         },
-        queryKey: [`followed-${currentUserId}`]
-    });
-
-    const getAllCurrentUserFollowedTotal = useQuery({
-        enabled: !!currentUserId,
-        queryFn: async () => {
-            return await apiRequest(`/api/relations/followed/${currentUserId}/total`, {
-                method: "GET"
-            });
-        },
-        queryKey: [`followed-total-${currentUserId}`]
-    });
-
-    const getAllCurrentUserFollowers = useInfiniteQuery({
-        enabled: !!currentUserId,
-        getNextPageParam: (lastPage, allPages) => {
-            if (lastPage.length < 16) return;
-            return allPages.length + 1;
-        },
-        initialPageParam: 1,
-        queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            const request = await apiRequest<ViewerDetail[]>(`/api/relations/followers/${currentUserId}?page=${pageParam}&limit=${16}`, {
-                method: "GET"
-            });
-            
-            return request.data ?? [];
-        },
-        queryKey: [`followers-${currentUserId}`]
-    });
-
-    const getAllCurrentUserFollowersTotal = useQuery({
-        enabled: !!currentUserId,
-        queryFn: async () => {
-            return await apiRequest(`/api/relations/followers/${currentUserId}/total`, {
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                method: "GET"
-            });
-        },
-        queryKey: [`followers-total-${currentUserId}`]
+        queryKey: otherUserId ? [`followers-total-${otherUserId}`] : [`followers-total-${currentUserId}`]
     });
 
     const hasUserFollowed = useQuery({
@@ -176,8 +127,7 @@ export default function useRelationshipService() {
     const relationProcess = startFollowOneUserMt.isPending || unfollowOneUserMt.isPending;
 
     return {
-        getAllFollowers, getAllCurrentUserFollowed, getAllCurrentUserFollowedTotal, getAllFollowersTotal, 
-        getAllCurrentUserFollowers, getAllCurrentUserFollowersTotal, getAllFollowed, getAllFollowedTotal, 
+        getAllFollowers, getAllFollowed, getAllFollowedTotal, getAllFollowersTotal, 
         hasUserFollowed, relationProcess, startFollowOneUserMt, unfollowOneUserMt
     }
 }

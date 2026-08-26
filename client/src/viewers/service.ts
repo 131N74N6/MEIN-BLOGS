@@ -9,7 +9,6 @@ export default function useViewerService() {
     const queryClient = useQueryClient();
 
     const blogId = useBlogStore((state) => state.blogId);
-
     const setMessage = useStyleStore((state) => state.setMessage);
 
     const getAllBlogViewers = useInfiniteQuery({

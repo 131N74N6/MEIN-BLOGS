@@ -13,31 +13,31 @@ class UserRepository {
         return await Promise.all([
             this.viewers.updateMany({ user_id: new ObjectId(user.id) }, {
                 $set: {
-                    username: user.name,
-                    profile_picture: user.image
+                    name: user.name,
+                    image: user.image
                 }
             }),
             this.relations.updateMany({ user_id: new ObjectId(user.id) }, {
                 $set: { 
-                    profile_picture: user.image,
-                    username: user.name
+                    image: user.image,
+                    name: user.name
                 }
             }),
             this.relations.updateMany({ followed_user_id: new ObjectId(user.id) }, {
                 $set: { 
-                    profile_picture: user.image,
-                    username: user.name
+                    image: user.image,
+                    name: user.name
                 }
             }),
             this.comments.updateMany({ user_id: new ObjectId(user.id) }, { 
                 $set: { 
-                    profile_picture: user.image,
-                    username: user.name
+                    image: user.image,
+                    name: user.name
                 } 
             }),
             this.blogs.updateMany({ blog_owner_id: new ObjectId(user.id) }, {
                 $set: { 
-                    blog_owner_profile_picture: user.image,
+                    blog_owner_image: user.image,
                     blog_owner_name: user.name
                 }
             }),
@@ -47,12 +47,12 @@ class UserRepository {
 
     async deleteCurrentUserOldProfile(id: string) {
         return await Promise.all([
-            this.viewers.updateMany({ user_id: new ObjectId(id) }, { $set: { profile_picture: null } }),
-            this.relations.updateMany({ user_id: new ObjectId(id) }, { $set: { profile_picture: null } }),
-            this.relations.updateMany({ followed_user_id: new ObjectId(id) }, { $set: { profile_picture: null } }),
-            this.comments.updateMany({ user_id: new ObjectId(id) }, { $set: { profile_picture: null } }),
-            this.blogs.updateMany({ blog_owner_id: new ObjectId(id) }, { $set: { blog_owner_profile_picture: null } }),
-            this.users.updateOne({ _id: new ObjectId(id) }, { $set: { profile_picture: null } })
+            this.viewers.updateMany({ user_id: new ObjectId(id) }, { $set: { image: null } }),
+            this.relations.updateMany({ user_id: new ObjectId(id) }, { $set: { image: null } }),
+            this.relations.updateMany({ followed_user_id: new ObjectId(id) }, { $set: { image: null } }),
+            this.comments.updateMany({ user_id: new ObjectId(id) }, { $set: { image: null } }),
+            this.blogs.updateMany({ blog_owner_id: new ObjectId(id) }, { $set: { blog_owner_image: null } }),
+            this.users.updateOne({ _id: new ObjectId(id) }, { $set: { image: null } })
         ]);
     }
 

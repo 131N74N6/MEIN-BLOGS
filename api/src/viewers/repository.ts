@@ -18,7 +18,7 @@ class ViewerRepository {
 
     async getAllBlogViewers(query: Omit<TViewer["pagination"], "page">) {
         return await this.viewers.find(
-            { blog_id: new ObjectId(query.blog_id) }, { projection: { _id: 0, blog_id: 0 }}
+            { blog_id: new ObjectId(query.blog_id) }, { projection: { blog_id: 0 }}
         )
         .limit(query.limit)
         .skip(query.skip)
@@ -35,15 +35,15 @@ class ViewerRepository {
 
         const user = await this.users.find(
             { _id: new ObjectId(props.user_id) }, 
-            { projection: { password: 0, email: 0 }}
+            { projection: { image: 1, name: 1, _id: 1 }}
         ).toArray();
 
         return await this.viewers.insertOne({
             created_at: new Date(),
             blog_id: blog[0]._id, 
             user_id: user[0]._id, 
-            username: user[0].username,
-            profile_picture: user[0].profile_picture
+            username: user[0].name,
+            profile_picture: user[0].image || null
         });
     }
 }

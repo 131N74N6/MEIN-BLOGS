@@ -20,7 +20,7 @@ class CommentService {
         return trimmed;
     }
 
-    async createComment(new_comment: Omit<TComment["add"], "created_at" | "username" | "profile_picture">) {
+    async createComment(new_comment: TComment["add"]) {
         const blogId = this.checkIsIdValid(new_comment.blog_id, "blog id");
         const currentUserId = this.checkIsIdValid(new_comment.blog_owner_id, "current user id");
         const commentText = this.checkIsInputValid(new_comment.text, 1);

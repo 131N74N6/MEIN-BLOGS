@@ -1,9 +1,8 @@
-import { ObjectId } from "mongodb";
 import { TComment } from "./model";
 import commentService from "./service";
 
 class CommentController {
-    async createComment(new_comment: Omit<TComment["add"], "created_at" | "username" | "profile_picture">) {
+    async createComment(new_comment: TComment["add"]) {
         await commentService.createComment({
             blog_id: new_comment.blog_id,
             blog_owner_id: new_comment.blog_owner_id,

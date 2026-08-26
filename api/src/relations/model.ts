@@ -2,11 +2,8 @@ import { t, UnwrapSchema } from "elysia";
 
 export const relationSchema = {
     add: t.Object({
-        created_at: t.Date({ error: "invalid date" }),
         user_id: t.String({ format: "^[0-9a-fA-F]{24}$", error: "invalid data" }),
-        followed_user_id: t.String({ format: "^[0-9a-fA-F]{24}$", error: "invalid data"}),
-        username: t.String({ minLength: 1, error: "invalid username" }),
-        profile_picture: t.Union([t.String(), t.Null()]),
+        followed_user_id: t.String({ format: "^[0-9a-fA-F]{24}$", error: "invalid data"})
     }),
     pagination: t.Object({
         user_id: t.String({ format: "^[0-9a-fA-F]{24}$", error: "invalid data" }),

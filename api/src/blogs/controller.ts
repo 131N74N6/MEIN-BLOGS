@@ -2,7 +2,7 @@ import { TBlogs } from "./model";
 import blogService from "./service";
 
 class BlogController {
-    async changeOneBlog(body: Omit<TBlogs["change_raw"], "updated_at">) {
+    async changeOneBlog(body: TBlogs["change_raw"]) {
         await blogService.changeOneBlog({
             _id: body._id,
             blog_owner_id: body.blog_owner_id,
@@ -15,7 +15,7 @@ class BlogController {
         return { message: "one blog changed", success: true };
     }
 
-    async createNewBlog(body: Omit<TBlogs["add_raw"], "created_at" | "updated_at" | "blog_owner_name" | "blog_owner_profile_picture">) {
+    async createNewBlog(body: TBlogs["add_raw"]) {
         await blogService.createNewBlog({
             content: body.content,
             blog_owner_id: body.blog_owner_id,

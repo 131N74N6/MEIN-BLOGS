@@ -1,24 +1,24 @@
-import CommentData from "./CommentData";
-import type { CommentListDetail } from "./model";
+import type { ViewerListData } from "./model";
+import ViewerData from "./ViewerData";
 
-export default function CommentList(comments: CommentListDetail) {
+export default function ViewerList(viewers: ViewerListData) {
     return (
-        <main className="h-[90%] w-full flex p-2.5 gap-2.5 flex-col overflow-y-auto">
+        <section className="overflow-y-auto p-2.5 flex flex-col gap-2.5">
             <div className="flex flex-col gap-2.5">
-                {comments.data.map((comment) => (<CommentData {...comment}/>))}
+                {viewers.data.map((viewer) => <ViewerData {...viewer}/>)}
             </div>
-            {comments.data.length <= 16 ? null : comments.hasNextPage ? (
+            {viewers.data.length <= 16 ? null : viewers.has_next_page ? (
                 <section className="flex justify-center">
                     <button
                         className="cursor-pointer disabled:cursor-not-allowed bg-gray-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-gray-600 transition-colors"
-                        disabled={comments.isProcessing}
-                        onClick={() => comments.fetchNextPage()}
+                        disabled={viewers.is_processing}
+                        onClick={() => viewers.fetch_next_page()}
                         type="button"
                     >
                         Show more
                     </button>
                 </section>
-            ) : comments.isFetchingNextPage ? (
+            ) : viewers.is_fetching_next_page ? (
                 <section className="flex justify-center">
                     <div className="animate-spin border-t-2 border-b-2 rounded-full w-9 h-9 border-blue-900"></div>
                 </section>
@@ -27,6 +27,6 @@ export default function CommentList(comments: CommentListDetail) {
                     <div className="text-base text-gray-800 font-medium">You've reached the end</div>
                 </section>
             )}
-        </main>
-    )
+        </section>
+    );
 }

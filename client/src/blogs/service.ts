@@ -32,6 +32,7 @@ export default function useBlogService() {
     const setMessage = useStyleStore((state) => state.setMessage);
 
     const currentUserId = useUserStore((state) => state.currentUserId);
+    const otherUserId = useUserStore((state) => state.otherUserId);
 
     const blogMediaPrefiew = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -131,11 +132,13 @@ export default function useBlogService() {
 
     const generateNewBlogMt = useMutation({
         mutationFn: async () => {
+            const ingredients = JSON.stringify({
+                language: language.trim(),
+                title: title.trim(),
+            });
+
             return await apiRequest<string>(`/api/blogs/generate`, {
-                body: JSON.stringify({
-                    language: language.trim(),
-                    title: title.trim(),
-                }),
+                body: ingredients,
                 method: "POST"
             });
         },
@@ -156,27 +159,27 @@ export default function useBlogService() {
         initialPageParam: 1,
         queryKey: ["all-blogs"],
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
-            const request = await apiRequest<BlogDetail[]>(`/api/blogs?page=${pageParam}&limit=${16}`, {
-                method: "GET"
-            });
+            const url = `/api/blogs?page=${pageParam}&limit=${16}`;
+            const request = await apiRequest<BlogDetail[]>(url, { method: "GET" });
 
             return request.data ?? [];
         }
     });
 
     const getAllCurrentUserBlogs = useInfiniteQuery({
-        enabled: !!currentUserId,
+        enabled: !!currentUserId || !!otherUserId,
         getNextPageParam: (lastPage, allPages) => {
             if (lastPage.length < 16) return;
             return allPages.length + 1;
         },
         initialPageParam: 1,
-        queryKey: [`user-blogs-${currentUserId}`],
+        queryKey: otherUserId ? [`user-blogs-${otherUserId}`] : [`user-blogs-${currentUserId}`],
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
-            const request = await apiRequest<BlogDetail[]>(`/api/blogs/mine?page=${pageParam}&limit=${16}`, {
-                method: "GET"
-            });
+            const url = otherUserId ? 
+            `/api/blogs/user/${otherUserId}?page=${pageParam}&limit=${16}` :
+            `/api/blogs/user/${currentUserId}?page=${pageParam}&limit=${16}`;
 
+            const request = await apiRequest<BlogDetail[]>(url, { method: "GET" });
             return request.data ?? [];
         }
     });
@@ -185,10 +188,7 @@ export default function useBlogService() {
         enabled: !!blogId,
         queryKey: [`blog-content-${blogId}`],
         queryFn: async () => {
-            const request = await apiRequest<BlogDetail>(`/api/blogs/show/${blogId}`, {
-                method: "GET"
-            });
-
+            const request = await apiRequest<BlogDetail>(`/api/blogs/show/${blogId}`, { method: "GET" });
             return request.data ?? {};
         }
     });

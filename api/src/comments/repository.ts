@@ -6,13 +6,16 @@ class CommentRepository {
     private comments = db().collection("comments");
     private users = db().collection("user");
 
-    async createComment(new_comment: Omit<TComment["add"], "created_at" | "username" | "profile_picture">) {
-        const user = await this.users.find({ _id: new ObjectId(new_comment.user_id) }).toArray();
+    async createComment(new_comment: TComment["add"]) {
+        const user = await this.users.find(
+            { _id: new ObjectId(new_comment.user_id) },
+            { projection: { image: 1, name: 1, _id: 1 }}
+        ).toArray();
 
         return await this.comments.insertOne({
             blog_id: new ObjectId(new_comment.blog_id),
             blog_owner_id: new ObjectId(new_comment.blog_owner_id),
-            profile_picture: user[0].profile_picture,
+            profile_picture: user[0].image || null,
             created_at: new Date(),
             user_id: new ObjectId(user[0]._id),
             username: user[0].username,

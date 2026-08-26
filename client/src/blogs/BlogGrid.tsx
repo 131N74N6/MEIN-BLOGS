@@ -23,7 +23,7 @@ export default function BlogGrid(blogs: BlogGridData) {
                         onClick={() => blogs.fetchNextPage()}
                         type="button"
                     >
-                        Generate with AI
+                        Show more
                     </button>
                 </section>
             ) : blogs.isFetchingNextPage ? (

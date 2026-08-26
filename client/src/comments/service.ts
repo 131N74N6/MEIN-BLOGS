@@ -63,12 +63,12 @@ export default function useCommentSevice() {
         staleTime: Infinity
     });
 
-    const commentProcessing = createNewCommentMt.isPending;
+    const isProcessing = createNewCommentMt.isPending;
 
     return {
         createNewCommentMt,
-        commentProcessing,
         getAllCommentsInABlog,
-        getTotalCommentInABlog
+        getTotalCommentInABlog,
+        isProcessing,
     }
 }

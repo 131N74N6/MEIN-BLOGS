@@ -5,34 +5,36 @@ import { relationSchema } from "./model";
 
 const relationsRouters = new Elysia({ prefix: "/api/relations" })
 .use(authMiddleware)
-.delete("/:followed_user_id", async ({ params }) => await relationController.stopFollowingOneUser({
-    followed_user_id: params.followed_user_id
-}), {
+.delete("/:followed_user_id", async ({ params }) => {
+    return await relationController.stopFollowingOneUser({
+        followed_user_id: params.followed_user_id
+    });
+}, {
     params: t.Pick(relationSchema.params, ["followed_user_id"])
 })
 .get("/followers/:user_id", async ({ params, query }) => {
     return await relationController.getUserFollowers({
         user_id: params.user_id, page: query.page, limit: query.limit
-    })
+    });
 }, {
     params: t.Pick(relationSchema.params, ["user_id"]),
-    query: t.Omit(relationSchema.pagination, ["skip", "user_id", "followed_user_id"])
+    query: t.Pick(relationSchema.pagination, ["page", "limit"])
 })
 .get("/followed/:user_id", async ({ params, query }) => {
     return await relationController.getFollowedUser({
         user_id: params.user_id, page: query.page, limit: query.limit
-    })
+    });
 }, {
     params: t.Pick(relationSchema.params, ["user_id"]),
-    query: t.Omit(relationSchema.pagination, ["skip", "user_id", "followed_user_id"])
-})
-.get("/followers/:user_id/total", async ({ params }) => {
-    return await relationController.getFollowersTotal({ user_id: params.user_id });
-}, {
-    params: t.Pick(relationSchema.params, ["user_id"])
+    query: t.Pick(relationSchema.pagination, ["page", "limit"])
 })
 .get("/followed/:user_id/total", async ({ params }) => {
     return await relationController.getFollowedUserTotal({ user_id: params.user_id });
+}, {
+    params: t.Pick(relationSchema.params, ["user_id"])
+})
+.get("/followers/:user_id/total", async ({ params }) => {
+    return await relationController.getFollowersTotal({ user_id: params.user_id });
 }, {
     params: t.Pick(relationSchema.params, ["user_id"])
 })
