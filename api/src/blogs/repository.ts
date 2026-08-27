@@ -27,7 +27,7 @@ class BlogRepository {
         ).toArray();
 
         return await this.blogs.insertOne({
-            blog_owner_name: user[0].username,
+            blog_owner_name: user[0].name,
             blog_owner_profile_picture: user[0].image || null,
             blog_owner_id: user[0]._id,
             content: data.content,
