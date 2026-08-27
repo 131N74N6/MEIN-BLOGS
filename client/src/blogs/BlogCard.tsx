@@ -1,11 +1,22 @@
 import { useNavigate } from "react-router-dom";
 import type { BlogCardData } from "./model";
+import { useBlogStore } from "./store";
 
 export default function BlogCard(blog: BlogCardData) {
     const navigate = useNavigate();
+    const setBlogId = useBlogStore((state) => state.setBlogId);
+
+    const seeThisBlog = () => {
+        setBlogId(blog.data._id);
+        blog.seeOneBlogMt.mutate();
+        navigate(`/users/blogs/${blog.data._id}`);
+    }
 
     return (
-        <div className="flex flex-col gap-2.5 p-2.5 shadow-md shadow-gray-600" key={blog.data._id} onClick={() => navigate(`/users/blogs/${blog.data._id}`)}>
+        <div 
+            className="flex flex-col gap-2.5 p-2.5 shadow-md shadow-gray-600 rounded-md" 
+            key={blog.data._id} onClick={seeThisBlog}
+        >
             <div className="w-full h-full">
                 <img className="w-full h-full object-cover" src={blog.data.media.url}/>
             </div>

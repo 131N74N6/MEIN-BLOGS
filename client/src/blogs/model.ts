@@ -1,4 +1,5 @@
-import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from "@tanstack/react-query";
+import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult, UseMutationResult } from "@tanstack/react-query";
+import type { ApiResponse } from "../handler/api";
 
 export type BlogInfoState = {
     blogIdToggle: (blogIdParam: string) => void;
@@ -6,8 +7,8 @@ export type BlogInfoState = {
     chosenBlogsIds: string[];
     resetChosenBlogsIds: () => void;
 
-    content: string | undefined;
-    setContent: (content: string | undefined) => void;
+    content: string;
+    setContent: (content: string) => void;
 
     media: File | null;
     setMedia: (media: File | null) => void;
@@ -76,6 +77,7 @@ export type BlogTableData = {
 
 export type BlogCardData = {
     data: Omit<BlogDetail, "blog_owner_id" | "updated_at">;
+    seeOneBlogMt: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
 }
 
 export type BlogGridData = {
@@ -84,4 +86,5 @@ export type BlogGridData = {
     hasNextPage: boolean;
     isFetchingNextPage: boolean;
     isProcessing: boolean;
+    seeOneBlogMt: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
 }

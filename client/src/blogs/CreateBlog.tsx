@@ -78,8 +78,8 @@ export default function CreateBlog() {
         <section className="flex md:flex-row flex-col h-dvh relative z-10">
             <Navbar place="create blog" sign_out={auth.signOutMt} is_processing={blog.processing}/>
             {message ? <Alert message={message}/> : null}
-            <main className="h-full md:w-3/4 w-full flex flex-col overflow-y-auto">
-                <form className="flex flex-col p-2.5 gap-2.5" onSubmit={publishBlog}>
+            <form className="h-full md:w-3/4 w-full flex flex-col" onSubmit={publishBlog}>
+                <section className="flex flex-col overflow-y-auto px-2.5 pt-2.5 gap-2.5">
                     <div className="flex flex-col gap-1.5">
                         <label className="text-base font-semibold text-gray-600" htmlFor="media">Thumbnail</label>
                         <input className="hidden" id="media" name="media" onChange={blog.blogMediaPrefiew} ref={blog.blogMediaRef} type="file"/>
@@ -144,25 +144,25 @@ export default function CreateBlog() {
                             )}
                         </div>
                     </div>
-                    <div className="flex justify-end gap-2.5">
-                        <button
-                            className="cursor-pointer disabled:cursor-not-allowed bg-blue-700 text-white font-medium text-sm p-2 w-22 rounded-md hover:bg-blue-500 transition-colors"
-                            disabled={isProcessing}
-                            type="submit"
-                        >
-                            Publish
-                        </button>
-                        <button
-                            className="cursor-pointer disabled:cursor-not-allowed bg-gray-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-gray-600 transition-colors"
-                            disabled={isProcessing}
-                            onClick={() => blog.generateNewBlogMt.mutate()}
-                            type="button"
-                        >
-                            Generate with AI
-                        </button>
-                    </div>
-                </form>
-            </main>
+                </section>
+                <section className="flex justify-end p-2.5 gap-2.5">
+                    <button
+                        className="cursor-pointer disabled:cursor-not-allowed bg-blue-700 text-white font-medium text-sm p-2 w-22 rounded-md hover:bg-blue-500 transition-colors"
+                        disabled={isProcessing}
+                        type="submit"
+                    >
+                        Publish
+                    </button>
+                    <button
+                        className="cursor-pointer disabled:cursor-not-allowed bg-gray-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-gray-600 transition-colors"
+                        disabled={isProcessing}
+                        onClick={() => blog.generateNewBlogMt.mutate()}
+                        type="button"
+                    >
+                        Generate with AI
+                    </button>
+                </section>
+            </form>
         </section>
     );
 }

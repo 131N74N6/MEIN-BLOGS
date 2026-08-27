@@ -13,7 +13,7 @@ export default function BlogGrid(blogs: BlogGridData) {
     return (
         <section className="px-2.5 pb-2.5 overflow-y-auto h-full flex flex-col gap-2.5">
             <section className="grid gap-2.5 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1">
-                {blogs.data.map((blog) => (<BlogCard data={blog}/>))}
+                {blogs.data.map((blog) => (<BlogCard data={blog} seeOneBlogMt={blogs.seeOneBlogMt}/>))}
             </section>
             {blogs.data.length <= 16 ? null : blogs.hasNextPage ? (
                 <section className="flex justify-center">

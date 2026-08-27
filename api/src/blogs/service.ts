@@ -28,21 +28,13 @@ class BlogService {
     }
 
     async createNewBlog(props: TBlogs["add_raw"]) {
-        const blogContent = this.checkIsInputValid(props.content, "content", 1);
-        const currentUserId = this.checkIsIdValid(props.blog_owner_id, "current user id");
-        const blogLanguage = this.checkIsInputValid(props.language, "language", 1);
-        const blogTitle = this.checkIsInputValid(props.title, "title", 1);
-
-        const fileArrayBuffer = await props.media.arrayBuffer();
-        const fileBuffer = Buffer.from(fileArrayBuffer);
-
         if (!props.media) throw new BlogApiError(400, "file is required to make new blog");
-
+        
         if (!allowedFileType.includes(props.media.type)) {
             throw new BlogApiError(400, "this file is not allowed");
         }
-
-        if (!allowedLanguage.includes(blogLanguage)) {
+        
+        if (!allowedLanguage.includes(props.language)) {
             throw new BlogApiError(400, "this language is not supported yet");
         }
 
@@ -50,7 +42,14 @@ class BlogService {
             throw new BlogApiError(400, "file size is too large");
         }
 
-
+        const blogContent = this.checkIsInputValid(props.content, "content", 1);
+        const currentUserId = this.checkIsIdValid(props.blog_owner_id, "blog owner id");
+        const blogLanguage = this.checkIsInputValid(props.language, "language", 1);
+        const blogTitle = this.checkIsInputValid(props.title, "title", 1);
+        
+        const fileArrayBuffer = await props.media.arrayBuffer();
+        const fileBuffer = Buffer.from(fileArrayBuffer);
+        
         const newBlogMedia = await uploadToCloudinary({
             file_buffer: fileBuffer,
             foldername: "blogs_media",
@@ -69,20 +68,17 @@ class BlogService {
 
     async changeOneBlog(props: TBlogs["change_raw"]) {
         const blogContent = this.checkIsInputValid(props.content, "content", 1);
-        const currentUserId = this.checkIsIdValid(props.blog_owner_id, "current user id");
+        const currentUserId = this.checkIsIdValid(props.blog_owner_id, "blog owner id");
         const blogLanguage = this.checkIsInputValid(props.language, "language", 1);
         const blogTitle = this.checkIsInputValid(props.title, "title", 1);
-
-        const fileArrayBuffer = await props.media.arrayBuffer();
-        const fileBuffer = Buffer.from(fileArrayBuffer);
-
+        
         const blog = await blogRepository.getBlogContentById(props._id);
         if (!blog) throw new BlogApiError(404, "blog not found");
-
+        
         if (blog.blog_owner_id.toString() !== props.blog_owner_id) {
             throw new BlogApiError(403, "you are not allowed to edit this blog");
         }
-
+        
         if (props.media) {
             if (!allowedFileType.includes(props.media.type)) {
                 throw new BlogApiError(400, "this file is not allowed");
@@ -91,6 +87,9 @@ class BlogService {
             if (props.media.size > maxFileSize) {
                 throw new BlogApiError(400, "file size is too large");
             }
+
+            const fileArrayBuffer = await props.media.arrayBuffer();
+            const fileBuffer = Buffer.from(fileArrayBuffer);
 
             await v2.uploader.destroy(blog.media.public_id, {
                 resource_type: blog.media.resource_type
@@ -153,7 +152,7 @@ class BlogService {
 
     async deleteChosenBlogs(blogs_ids: string[], current_user_id: string, ) {
         const operations = [];
-        const currentUserId = this.checkIsIdValid(current_user_id, "current user id");
+        const currentUserId = this.checkIsIdValid(current_user_id, "blog owner id");
         const blogs = await blogRepository.getChosenCurrentUserBlogs(blogs_ids);
 
         if (blogs.length === 0) return;
@@ -196,7 +195,7 @@ class BlogService {
     }
 
     async getAllCurrentUserBlogs(page: Omit<TBlogs["pagination"], "page">) {
-        const currentUserId = this.checkIsIdValid(page.blog_owner_id, "current user id");
+        const currentUserId = this.checkIsIdValid(page.blog_owner_id, "blog owner id");
 
         return await blogRepository.getAllCurrentUserBlogsWithPagination({
             blog_owner_id: currentUserId,

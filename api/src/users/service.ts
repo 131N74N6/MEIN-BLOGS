@@ -77,8 +77,13 @@ class UserService {
         } else {
             await userRepository.changeUser({
                 id: user_data.id,
-                description: user_data.description,
-                name: user_data.name,
+                description: user.description || user_data.description || null,
+                image: user.image || null,
+                image_filename: user.image_filename || null,
+                image_filetype: user.image_filetype || null,
+                image_public_id: user.image_public_id || null,
+                image_resource_type: user.image_resource_type || null,
+                name: user.name,
                 updatedAt: new Date()
             });
         }

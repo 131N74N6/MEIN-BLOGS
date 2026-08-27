@@ -19,12 +19,9 @@ const commentRouters = new Elysia({ prefix: "/api/comments" })
     params: commentSchema.params
 })
 .post("/:blog_id", async ({ body, user, params }) => await commentController.createComment({
-    blog_id: params.blog_id,
-    blog_owner_id: body.blog_owner_id,
-    user_id: user.id,
-    text: body.text
+    blog_id: params.blog_id, user_id: user.id, ...body
 }), {
-    body: t.Omit(commentSchema.add, ["created_at", "username"]),
+    body: t.Omit(commentSchema.add, ["created_at", "blog_id", "user_id", "username"]),
     params: commentSchema.params
 });
 

@@ -3,14 +3,14 @@ import { t, UnwrapSchema } from "elysia";
 export const blogSchema = {
     add_raw: t.Object({
         blog_owner_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid owner id" }),
-        content: t.String({ minLenength: 1, error: "invalid content"}),
+        content: t.String({ minLength: 1, error: "invalid content"}),
         language: t.String({ minLength: 1, error: "invalid language"}),
         media: t.File({ maxSize: 6 * 1024 * 1024, type: "image/*", error: "invalid file" }),
         title: t.String({ minLength: 1, error: "invalid title"})
     }),
     add_result: t.Object({
         blog_owner_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid owner id" }),
-        content: t.String({ minLenength: 1, error: "invalid content"}),
+        content: t.String({ minLength: 1, error: "invalid content"}),
         language: t.String({ minLength: 1, error: "invalid language"}),
         media: t.Object({
             filename: t.String({ minLength: 1, error: "invalid filename"}),

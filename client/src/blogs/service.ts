@@ -48,10 +48,10 @@ export default function useBlogService() {
             const updateBlogForm = new FormData();
             updateBlogForm.append("language", language.trim());
             updateBlogForm.append("title", title.trim());
-            if (content) updateBlogForm.append("content", content);
+            updateBlogForm.append("content", content);
             if (media) updateBlogForm.append("media", media);
 
-            return await apiUpload(`/api/blogs/${id}`, updateBlogForm, "PUT");
+            return await apiUpload(`/api/blogs/remake/${id}`, updateBlogForm, "PUT");
         },
         onError: (error) => {
             setMessage(error.message);
@@ -69,10 +69,10 @@ export default function useBlogService() {
             const newBlogForm = new FormData();
             newBlogForm.append("language", language.trim());
             newBlogForm.append("title", title.trim());
-            if (content) newBlogForm.append("content", content);
+            newBlogForm.append("content", content);
             if (media) newBlogForm.append("media", media);
 
-            return await apiUpload(`/api/blogs`, newBlogForm, "POST");
+            return await apiUpload(`/api/blogs/create`, newBlogForm, "POST");
         },
         onError: (error) => {
             setMessage(error.message);
@@ -91,7 +91,7 @@ export default function useBlogService() {
 
     const deleteAllCurrentUserBlogsMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/api/blogs`, {
+            return await apiRequest(`/api/blogs/rm-all`, {
                 method: "DELETE"
             });
         },
@@ -111,7 +111,7 @@ export default function useBlogService() {
 
     const deleteChosenCurrentUserBlogMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/api/blogs/bulk`, {
+            return await apiRequest(`/api/blogs/rm-chosen`, {
                 body: JSON.stringify({ blogs_ids: chosenBlogsIds }),
                 method: "DELETE"
             });
@@ -146,7 +146,7 @@ export default function useBlogService() {
             setMessage(error.message);
         },
         onSuccess: (response) => {
-            setContent(response.data);
+            setContent(response.data!);
         }
     });
 
@@ -159,7 +159,7 @@ export default function useBlogService() {
         initialPageParam: 1,
         queryKey: ["all-blogs"],
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
-            const url = `/api/blogs?page=${pageParam}&limit=${16}`;
+            const url = `/api/blogs/show-all?page=${pageParam}&limit=${16}`;
             const request = await apiRequest<BlogDetail[]>(url, { method: "GET" });
 
             return request.data ?? [];

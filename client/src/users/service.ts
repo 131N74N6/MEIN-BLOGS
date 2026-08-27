@@ -72,11 +72,14 @@ export default function useUserService() {
     });
     
     const getOtherUser = useQuery({
+        enabled: !!otherUserId,
         queryKey: [`other-user`],
         queryFn: async () => {
-            return await apiRequest(`/api/users/${otherUserId}`, {
+            const request = await apiRequest(`/api/users/${otherUserId}`, {
                 method: "GET"
             });
+
+            return request.data;
         },
         retry: false
     });
@@ -92,8 +95,8 @@ export default function useUserService() {
     const updateUserMt = useMutation({
         mutationFn: async () => {
             const changeUserForm = new FormData();
-            changeUserForm.append("username", newUserName.trim());
-            if (newProfilePcture) changeUserForm.append("profile_picture", newProfilePcture);
+            changeUserForm.append("name", newUserName.trim());
+            if (newProfilePcture) changeUserForm.append("image", newProfilePcture);
 
             return await apiUpload(`/api/users`, changeUserForm, "PUT");
         },

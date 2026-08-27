@@ -13,31 +13,31 @@ class UserRepository {
         return await Promise.all([
             this.viewers.updateMany({ user_id: new ObjectId(user.id) }, {
                 $set: {
-                    name: user.name,
-                    image: user.image
+                    username: user.name,
+                    profile_picture: user.image
                 }
             }),
             this.relations.updateMany({ user_id: new ObjectId(user.id) }, {
                 $set: { 
-                    image: user.image,
-                    name: user.name
+                    profile_picture: user.image,
+                    username: user.name
                 }
             }),
             this.relations.updateMany({ followed_user_id: new ObjectId(user.id) }, {
                 $set: { 
-                    image: user.image,
-                    name: user.name
+                    profile_picture: user.image,
+                    username: user.name
                 }
             }),
             this.comments.updateMany({ user_id: new ObjectId(user.id) }, { 
                 $set: { 
-                    image: user.image,
-                    name: user.name
+                    profile_picture: user.image,
+                    username: user.name
                 } 
             }),
             this.blogs.updateMany({ blog_owner_id: new ObjectId(user.id) }, {
                 $set: { 
-                    blog_owner_image: user.image,
+                    blog_owner_profile_picture: user.image,
                     blog_owner_name: user.name
                 }
             }),
@@ -52,7 +52,15 @@ class UserRepository {
             this.relations.updateMany({ followed_user_id: new ObjectId(id) }, { $set: { image: null } }),
             this.comments.updateMany({ user_id: new ObjectId(id) }, { $set: { image: null } }),
             this.blogs.updateMany({ blog_owner_id: new ObjectId(id) }, { $set: { blog_owner_image: null } }),
-            this.users.updateOne({ _id: new ObjectId(id) }, { $set: { image: null } })
+            this.users.updateOne({ _id: new ObjectId(id) }, { 
+                $set: { 
+                    image: null,
+                    image_public_id: null,
+                    image_filename: null,
+                    image_filetype: null,
+                    image_resource_type: null
+                } 
+            })
         ]);
     }
 
@@ -68,12 +76,18 @@ class UserRepository {
     }
 
     async getCurrentUser(current_user_id: string) {
-        const user = await this.users.findOne({ _id: new ObjectId(current_user_id) }, { projection: { password: 0 } });
+        const user = await this.users.findOne(
+            { _id: new ObjectId(current_user_id) }, 
+            { projection: { createdAt: 1, email: 1, image:1, name: 1 } }
+        );
         return user;
     }
 
     async getOthertUser(user_id: string) {
-        const user = await this.users.findOne({ _id: new ObjectId(user_id) }, { projection: { password: 0 } });
+        const user = await this.users.findOne(
+            { _id: new ObjectId(user_id) }, 
+            { projection: { createdAt: 1, email: 1, image:1, name: 1 } }
+        );
         return user;
     }
 

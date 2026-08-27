@@ -5,9 +5,7 @@ import { useStyleStore } from "../styles/store";
 import type { ViewerDetail } from "./model";
 
 export default function useViewerService() {
-    const baseUrl = `${import.meta.env.VITE_BASE_API_URL}/api/viewers`;
     const queryClient = useQueryClient();
-
     const blogId = useBlogStore((state) => state.blogId);
     const setMessage = useStyleStore((state) => state.setMessage);
 
@@ -19,7 +17,7 @@ export default function useViewerService() {
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            const request = await apiRequest<ViewerDetail[]>(`${baseUrl}/${blogId}?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<ViewerDetail[]>(`/api/viewers/${blogId}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
 
@@ -31,7 +29,7 @@ export default function useViewerService() {
     const getAllBlogViewersTotal = useQuery({
         enabled: !!blogId,
         queryFn: async () => {
-            const request = await apiRequest<number>(`${baseUrl}/${blogId}/total`, {
+            const request = await apiRequest<number>(`/api/viewers/${blogId}/total`, {
                 method: "GET"
             });
 
@@ -42,7 +40,7 @@ export default function useViewerService() {
 
     const seeOneBlogMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`${baseUrl}/${blogId}`, {
+            return await apiRequest(`/api/viewers/${blogId}`, {
                 method: "POST"
             });
         },

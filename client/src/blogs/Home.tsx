@@ -5,12 +5,14 @@ import BlogGrid from "./BlogGrid";
 import useBlogService from "./service";
 import { useEffect } from "react";
 import { useUserStore } from "../users/store";
+import useViewerService from "../viewers/service";
 
 export default function Home() {
     const navigate = useNavigate();
 
     const auth = useAuthService();
     const blog = useBlogService();
+    const viewer = useViewerService();
         
     const currentUserId = useUserStore((state) => state.currentUserId);
 
@@ -33,6 +35,7 @@ export default function Home() {
                     hasNextPage={blog.getAllBlogs.hasNextPage}
                     isFetchingNextPage={blog.getAllBlogs.isFetchingNextPage}
                     isProcessing={isProcessing}
+                    seeOneBlogMt={viewer.seeOneBlogMt}
                 />
             </main>
         </section>
