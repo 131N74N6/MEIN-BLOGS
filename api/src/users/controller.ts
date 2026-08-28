@@ -19,7 +19,7 @@ class UserController {
 
     async getOthertUser(user_id: string) {
         const user = await userService.getOthertUser(user_id);
-        return { data: user, success: true };
+        return { data: user, message: "user data retrieved successfully", success: true };
     }
 }
 

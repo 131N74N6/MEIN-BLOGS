@@ -14,7 +14,7 @@ export default function useCommentSevice() {
 
     const createNewCommentMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/api/comments/${blogId}`, {
+            return await apiRequest(`/api/comments/create/${blogId}`, {
                 body: JSON.stringify({
                     blog_id: blogId,
                     blog_owner_id: blogOwnerId,
@@ -41,7 +41,7 @@ export default function useCommentSevice() {
         initialPageParam: 1,
         queryKey: [`blog-comments-${blogId}`],
         queryFn: async ({ pageParam = 1}: { pageParam?: number}) => {
-            const request = await apiRequest<CommentDetail[]>(`/api/comments/${blogId}?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<CommentDetail[]>(`/api/comments/show/${blogId}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
 
@@ -54,7 +54,7 @@ export default function useCommentSevice() {
         enabled: !!blogId,
         queryKey: [`blog-comments-total-${blogId}`],
         queryFn: async () => {
-            const request = await apiRequest<number>(`/api/comments/${blogId}/total`, {
+            const request = await apiRequest<number>(`/api/comments/show/total/${blogId}`, {
                 method: "GET"
             });
 

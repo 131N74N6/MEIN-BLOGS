@@ -11,7 +11,7 @@ class RelationController {
             user_id: query.user_id, page: page, limit: limit, skip: skip
         });
 
-        return { data: followers, success: true };
+        return { data: followers, message: "followers retrieved successfully", success: true };
     }
 
     async getFollowedUser(query: Omit<TRelation["pagination"], "skip" | "followed_user_id">) {
@@ -23,17 +23,17 @@ class RelationController {
             user_id: query.user_id, page: page, limit: limit, skip: skip
         });
 
-        return { data: following, success: true };
+        return { data: following, message: "followed user retrieved successfully", success: true };
     }
 
     async getFollowersTotal(params: Pick<TRelation["add"], "user_id">) {
         const total = await relationService.getFollowersTotal({ user_id: params.user_id });
-        return { data: total, success: true };
+        return { data: total, message: "followers total retrieved successfully", success: true };
     }
 
     async getFollowedUserTotal(params: Pick<TRelation["add"], "user_id">) {
         const total = await relationService.getFollowedUserTotal({ user_id: params.user_id });
-        return { data: total, success: true };
+        return { data: total, message: "followed total retrieved successfully", success: true };
     }
 
     async hasUserFollowed(props: Pick<TRelation["add"], "user_id" | "followed_user_id">) {
@@ -41,7 +41,7 @@ class RelationController {
             user_id: props.user_id, followed_user_id: props.followed_user_id
         });
 
-        return { data: hasUserFollowed, success: true };
+        return { data: hasUserFollowed, message: "verification retrieved successfully", success: true };
     }
 
     async startFollowedOneUser(body: TRelation["add"]) {

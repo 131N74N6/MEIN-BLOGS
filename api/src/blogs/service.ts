@@ -191,18 +191,35 @@ class BlogService {
         return generatedContent.contents;
     }
 
-    async getAllBlogs(page: Omit<TBlogs["pagination"], "page" | "blog_owner_id">) {
-        return await blogRepository.getAllBlogsWithPagination(page);
+    async getAllBlogsWithPagination(page: Omit<TBlogs["pagination"], "page" | "blog_owner_id">) {
+        if (page.title === undefined) {
+            return await blogRepository.getAllBlogsWithPagination({ 
+                limit: page.limit, skip: page.skip 
+            });
+        } else {
+            return await blogRepository.getAllBlogsWithPagination({ 
+                limit: page.limit, skip: page.skip, title: page.title 
+            });
+        }
     }
 
-    async getAllCurrentUserBlogs(page: Omit<TBlogs["pagination"], "page">) {
+    async getAllCurrentUserBlogsWithPagination(page: Omit<TBlogs["pagination"], "page">) {
         const currentUserId = this.checkIsIdValid(page.blog_owner_id, "blog owner id");
 
-        return await blogRepository.getAllCurrentUserBlogsWithPagination({
-            blog_owner_id: currentUserId,
-            limit: page.limit,
-            skip: page.skip
-        });
+        if (page.title === undefined) {
+            return await blogRepository.getAllCurrentUserBlogsWithPagination({
+                blog_owner_id: currentUserId,
+                limit: page.limit,
+                skip: page.skip
+            });
+        } else {
+            return await blogRepository.getAllCurrentUserBlogsWithPagination({
+                blog_owner_id: currentUserId,
+                limit: page.limit,
+                skip: page.skip,
+                title: page.title
+            });
+        }
     }
 
     async getBlogContentById(id: string) {

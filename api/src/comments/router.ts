@@ -13,7 +13,7 @@ const commentRouters = new Elysia({ prefix: "/api/comments" })
     params: commentSchema.params,
     query: t.Omit(commentSchema.pagination, ["blog_id", "skip"])
 })
-.get("/show/:blog_id/total", async ({ params }) => {
+.get("/show/total/:blog_id", async ({ params }) => {
     return await commentController.getCommentsTotalInOneBlog(params.blog_id)
 }, {
     params: commentSchema.params

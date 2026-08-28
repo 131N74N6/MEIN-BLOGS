@@ -24,8 +24,8 @@ const blogRouters = new Elysia({ prefix: "/api/blogs" })
     body: blogSchema.bulkDelete
 })
 .get("/show-all", async ({ query }) => {
-    return await blogController.getAllBlogs({
-        limit: query.limit, page: query.page
+    return await blogController.getAllBlogsWithPagination({
+        limit: query.limit, page: query.page, title: query.title
     });
 }, {
     query: t.Omit(blogSchema.pagination, ["skip", "blog_owner_id"])
@@ -36,8 +36,8 @@ const blogRouters = new Elysia({ prefix: "/api/blogs" })
     params: t.Pick(blogSchema.params, ["_id"])
 })
 .get("/user/:user_id", async ({ params, query }) => {
-    return await blogController.getAllCurrentUserBlogs({
-        page: query.page, limit: query.limit, blog_owner_id: params.user_id
+    return await blogController.getAllCurrentUserBlogsWithPagination({
+        ...query, blog_owner_id: params.user_id
     });
 }, {
     params: t.Pick(blogSchema.params, ["user_id"]),

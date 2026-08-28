@@ -6,8 +6,7 @@ import { BlogApiError } from "./message";
 export class CustomError extends Error {
     constructor(
         public statusCode: number,
-        public message: string,
-        public field?: string
+        public message: string
     ) {
         super(message);
     }
@@ -24,8 +23,7 @@ export function setupErrorHandler(app: Elysia) {
             set.status = error.statusCode;
             return {
                 success: false,
-                message: error.message,
-                field: error.field ?? null
+                message: error.message
             };
         }
 
@@ -35,8 +33,7 @@ export function setupErrorHandler(app: Elysia) {
             const validationError = error as ValidationError;
             return {
                 success: false,
-                message: validationError.message || "invalid input data",
-                field: null
+                message: validationError.message || "invalid input data"
             };
         }
 
@@ -44,8 +41,7 @@ export function setupErrorHandler(app: Elysia) {
         set.status = 500;
         return {
             success: false,
-            message: "something went wrong",
-            field: null
+            message: "something went wrong"
         };
     });
 }

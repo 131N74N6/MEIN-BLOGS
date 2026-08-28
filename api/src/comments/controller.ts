@@ -22,12 +22,12 @@ class CommentController {
             blog_id: query.blog_id, limit: limit, skip: skip
         });
 
-        return { data: comments, success: true };
+        return { data: comments, message: "comments retrieved successfully", success: true };
     }
 
     async getCommentsTotalInOneBlog(blog_id: string) {
         const total = await commentService.getCommentsTotalInOneBlog(blog_id);
-        return { data: total, success: true};
+        return { data: total, message: "comments total retrieved successfully", success: true};
     }
 }
 

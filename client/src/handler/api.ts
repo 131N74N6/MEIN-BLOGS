@@ -4,7 +4,6 @@ export interface ApiResponse<T = unknown> {
     success: boolean;
     message?: string;
     data?: T;
-    field?: string | null;
 }
 
 export async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {

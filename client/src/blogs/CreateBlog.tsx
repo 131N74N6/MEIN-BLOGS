@@ -80,7 +80,7 @@ export default function CreateBlog() {
             <Navbar place="create blog" sign_out={auth.signOutMt} is_processing={blog.processing}/>
             {message ? <Alert message={message}/> : null}
             <form className="h-full md:w-3/4 w-full flex flex-col overflow-y-auto" onSubmit={publishBlog}>
-                <section className="flex flex-col overflow-y-auto h-[90%] px-2.5 pt-2.5 gap-2.5">
+                <section className="flex flex-col overflow-y-auto h-full px-2.5 pt-2.5 gap-2.5">
                     <div className="flex flex-col gap-1.5">
                         <label className="text-base font-semibold text-gray-600" htmlFor="media">Thumbnail</label>
                         <input className="hidden" id="media" name="media" onChange={blog.blogMediaPrefiew} ref={blog.blogMediaRef} type="file"/>
@@ -152,7 +152,7 @@ export default function CreateBlog() {
                         </div>
                     </div>
                 </section>
-                <section className="flex h-[10%] justify-end p-2.5 gap-2.5">
+                <section className="flex justify-end p-2.5 gap-2.5">
                     <button
                         className="cursor-pointer disabled:cursor-not-allowed bg-blue-700 text-white font-medium text-sm p-2 w-22 rounded-md hover:bg-blue-500 transition-colors"
                         disabled={isProcessing}

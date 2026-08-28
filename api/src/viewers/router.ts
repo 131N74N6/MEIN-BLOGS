@@ -13,7 +13,7 @@ const viewerRouters = new Elysia({ prefix: "/api/viewers"})
     params: viewerSchema.params,
     query: t.Omit(viewerSchema.pagination, ["blog_id", "skip"])
 })
-.get("/show/:blog_id/total", async ({ params }) => {
+.get("/show/total/:blog_id", async ({ params }) => {
     return await viewerController.getAllBlogViewersTotal({ blog_id: params.blog_id });
 }, {
     params: viewerSchema.params

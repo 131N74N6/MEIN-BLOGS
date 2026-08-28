@@ -17,7 +17,7 @@ export default function useViewerService() {
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
-            const request = await apiRequest<ViewerDetail[]>(`/api/viewers/${blogId}?page=${pageParam}&limit=${16}`, {
+            const request = await apiRequest<ViewerDetail[]>(`/api/viewers/show/${blogId}?page=${pageParam}&limit=${16}`, {
                 method: "GET"
             });
 
@@ -29,7 +29,7 @@ export default function useViewerService() {
     const getAllBlogViewersTotal = useQuery({
         enabled: !!blogId,
         queryFn: async () => {
-            const request = await apiRequest<number>(`/api/viewers/${blogId}/total`, {
+            const request = await apiRequest<number>(`/api/viewers/show/total/${blogId}`, {
                 method: "GET"
             });
 
@@ -40,7 +40,7 @@ export default function useViewerService() {
 
     const seeOneBlogMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/api/viewers/${blogId}`, {
+            return await apiRequest(`/api/viewers/see/${blogId}`, {
                 method: "POST"
             });
         },

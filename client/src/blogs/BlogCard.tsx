@@ -79,8 +79,8 @@ export default function BlogCard(blog: BlogCardData) {
                     {sanitizedAnswer()}
                 </ReactMarkdown>
             </p>
-            <p className="text-small font-normal text-gray-800">Published at {new Date(blog.data.created_at).toLocaleString()}</p>
-            <p className="text-base font-normal text-gray-800">Language {blog.data.language}</p>
+            <p className="text-small font-normal text-gray-800">Published at: {new Date(blog.data.created_at).toLocaleString()}</p>
+            <p className="text-base font-normal text-gray-800">Language: {blog.data.language}</p>
         </div>
     );
 }

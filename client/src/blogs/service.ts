@@ -190,7 +190,7 @@ export default function useBlogService() {
         queryKey: [`blog-content-${blogId}`],
         queryFn: async () => {
             const request = await apiRequest<BlogDetail>(`/api/blogs/show/${blogId}`, { method: "GET" });
-            return request.data ?? {};
+            return request.data;
         }
     });
 

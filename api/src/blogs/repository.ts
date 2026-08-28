@@ -70,18 +70,44 @@ class BlogRepository {
         return await this.blogs.find({ _id: { $in: ids } }).toArray();
     }
 
-    async getAllCurrentUserBlogsWithPagination(page: Omit<TBlogs["pagination"], "page">) {
-        return await this.blogs.find({ blog_owner_id: new ObjectId(page.blog_owner_id) })
-        .limit(page.limit)
-        .skip(page.skip)
-        .toArray();
+    async getAllBlogsWithPagination(page: Omit<TBlogs["pagination"], "blog_owner_id" | "page">) {
+        if (page.title === undefined) {
+            const blogs = await this.blogs.find({})
+            .limit(page.limit)
+            .skip(page.skip)
+            .toArray();
+
+            return blogs;
+        } else {
+            const regexPattern = new RegExp(page.title, 'i');
+            const blogs = await this.blogs.find({ title: regexPattern })
+            .limit(page.limit)
+            .skip(page.skip)
+            .toArray();
+
+            return blogs
+        }
     }
 
-    async getAllBlogsWithPagination(page: Omit<TBlogs["pagination"], "blog_owner_id" | "page">) {
-        return await this.blogs.find({})
-        .limit(page.limit)
-        .skip(page.skip)
-        .toArray();
+    async getAllCurrentUserBlogsWithPagination(page: Omit<TBlogs["pagination"], "page">) {
+        if (page.title === undefined) {
+            const blog = await this.blogs.find({ blog_owner_id: new ObjectId(page.blog_owner_id) })
+            .limit(page.limit)
+            .skip(page.skip)
+            .toArray();
+
+            return blog;
+        } else {
+            const regexPattern = new RegExp(page.title, 'i');
+            const blog = await this.blogs.find({ 
+                blog_owner_id: new ObjectId(page.blog_owner_id), title: regexPattern 
+            })
+            .limit(page.limit)
+            .skip(page.skip)
+            .toArray();
+
+            return blog;
+        }
     }
 
     async getBlogContentById(blog_id: string) {

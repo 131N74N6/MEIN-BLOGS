@@ -11,12 +11,12 @@ class ViewerController {
             blog_id: query.blog_id, limit: limit, skip: skip
         });
 
-        return { data: viewers, success: true };
+        return { data: viewers, message: "viewers retrieved successfully", success: true };
     }
 
     async getAllBlogViewersTotal(params: Pick<TViewer["data"], "blog_id">) {
         const total = await viewerService.getAllBlogViewersTotal({ blog_id: params.blog_id });
-        return { data: total, success: true };
+        return { data: total, message: "viewers total retrieved successfully", success: true };
     }
 
     async seeOneBlog(props: Omit<TViewer["data"], "created_at" | "username" | "profile_picture">) {

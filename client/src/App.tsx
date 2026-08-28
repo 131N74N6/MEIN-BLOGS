@@ -13,6 +13,8 @@ import BlogDetail from "./blogs/BlogDetail";
 import CreateBlog from "./blogs/CreateBlog";
 import EditBlog from "./blogs/EditBlog";
 import Profile from "./users/Profile";
+import Comments from "./comments/Comments";
+import Viewers from "./viewers/Viewers";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -34,8 +36,10 @@ export default function App() {
                     <Route path="/sign-up" element={<SignUp/>}/>
                     <Route path="/home" element={<ProtectedRoute><Home/></ProtectedRoute>}/>
                     <Route path="/users/blogs" element={<ProtectedRoute><UserBlog/></ProtectedRoute>}/>
-                    <Route path="/users/blogs/create" element={<ProtectedRoute><CreateBlog/></ProtectedRoute>}/>
                     <Route path="/users/blogs/:_id" element={<ProtectedRoute><BlogDetail/></ProtectedRoute>}/>
+                    <Route path="/users/blogs/:_id/comments" element={<ProtectedRoute><Comments/></ProtectedRoute>}/>
+                    <Route path="/users/blogs/:_id/viewers" element={<ProtectedRoute><Viewers/></ProtectedRoute>}/>
+                    <Route path="/users/blogs/create" element={<ProtectedRoute><CreateBlog/></ProtectedRoute>}/>
                     <Route path="/users/blogs/edit/:_id" element={<ProtectedRoute><EditBlog/></ProtectedRoute>}/>
                     <Route path="/users/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>}/>
                     <Route path="/users/:_id" element={<ProtectedRoute><Profile/></ProtectedRoute>}/>

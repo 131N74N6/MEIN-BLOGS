@@ -5,7 +5,7 @@ export default function ViewerData(viewer: ViewerDetail) {
     const navigate = useNavigate();
 
     return (
-        <div className="bg-zinc-100 p-2 flex flex-col gap-2" key={`viewer-${viewer._id}`}>
+        <div className="bg-zinc-100 p-2 rounded-lg flex flex-row items-center gap-2" key={`viewer-${viewer._id}`}>
             {viewer.profile_picture !== null ? (
                 <div 
                     className="w-8 h-8 rounded-full bg-purple-600 text-white font-medium text-sm" 
@@ -14,7 +14,7 @@ export default function ViewerData(viewer: ViewerDetail) {
                     <img className="w-full h-full object-cover rounded-full" alt={`profile-picture-${viewer.user_id}`}/>
                 </div>) : (
                 <div 
-                    className="w-8 h-8 rounded-full bg-purple-600 text-white font-medium text-sm" 
+                    className="w-8 h-8 flex justify-center items-center rounded-full bg-purple-600 text-white font-medium text-sm" 
                     onClick={() => navigate(`/users/${viewer.user_id}`)}
                 >
                     {viewer.username[0]}

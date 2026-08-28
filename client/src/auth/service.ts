@@ -82,11 +82,11 @@ export default function useAuthService() {
             });
 
             if (request.error) throw new Error(request.error.message);
-
             return request.data.user;
         },
         onError: (error) => {
-            setMessage(error.message);
+            const errorMessage = parseAuthError(error);
+            setMessage(errorMessage);
         },
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ["current-user"] });
@@ -133,7 +133,8 @@ export default function useAuthService() {
             return request.data.user;
         },
         onError: (error) => {
-            setMessage(error.message);
+            const errorMessage = parseAuthError(error);
+            setMessage(errorMessage);
         },
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ["current-user"] });
@@ -141,6 +142,27 @@ export default function useAuthService() {
             navigate("/home", { replace: true });
         }
     });
+
+    function parseAuthError(error: any): string {
+        const message = error.message || "";
+        
+        if (message.includes("Invalid email address")) return "invalid email";
+        
+        if (message.includes("Too small: expected string to have >=1 characters")) {
+            if (message.includes("password")) return "Password is required";
+            if (message.includes("email")) return "Email is required";
+        }
+
+        if (message.includes("password") && message.includes("minPasswordLength")) {
+            return "Password length must be 8 character";
+        }
+
+        if (message.includes("email") && message.includes("already exists")) {
+            return "Email already exist";
+        }
+        
+        return message || "something went wrong. try again later";
+    };
 
     const isProcessing = signInMt.isPending || signOutMt.isPending || signUpMt.isPending;
 
