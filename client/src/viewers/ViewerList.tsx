@@ -2,6 +2,14 @@ import type { ViewerListData } from "./model";
 import ViewerData from "./ViewerData";
 
 export default function ViewerList(viewers: ViewerListData) {
+    if (viewers.data.length === 0) {
+        return (
+            <section className="flex justify-center items-center h-full">
+                <div className="text-xl text-gray-800 font-medium">This blog hasn't visited yet</div>
+            </section>
+        );
+    }
+
     return (
         <section className="overflow-y-auto p-2.5 flex flex-col gap-2.5">
             <div className="flex flex-col gap-2.5">

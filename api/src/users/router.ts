@@ -13,7 +13,7 @@ const userRouters = new Elysia({ prefix: "/api/users" })
     params: userSchema["other_user"]
 })
 .put("/", async ({ body, user }) => await userController.changeUser({
-    id: user.id, description: body.description, image: body.image, name: body.name
+    id: user.id, ...body
 }), {
     body: t.Omit(userSchema["change_raw"], ["id"])
 });

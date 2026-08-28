@@ -47,15 +47,16 @@ class RelationRepository {
 
     async startFollowedOneUser(data: TRelation["add"]) {
         const user = await this.users.find(
-            { _id: new ObjectId(data.user_id) }, { projection: { email: 0, password: 0 }}
+            { _id: new ObjectId(data.user_id) }, 
+            { projection: { image: 1, name: 1, _id: 1 }}
         ).toArray();
 
         return await this.relations.insertOne({
             created_at: new Date(),
             user_id: user[0]._id,
             followed_user_id: new ObjectId(data.followed_user_id),
-            username: user[0].username,
-            profile_picture: user[0].profile_picture
+            username: user[0].name,
+            profile_picture: user[0].image
         });
     }
     

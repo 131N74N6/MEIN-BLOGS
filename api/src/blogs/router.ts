@@ -5,6 +5,18 @@ import { authMiddleware } from "../auth/middleware";
 
 const blogRouters = new Elysia({ prefix: "/api/blogs" })
 .use(authMiddleware)
+.post("/create", async ({ body, user }) => await blogController.createNewBlog({
+    blog_owner_id: user.id, ...body
+}), {
+    body: t.Omit(blogSchema.add_raw, ["blog_owner_id"])
+})
+.post("/generate", async ({ body }) => {
+    return await blogController.generateNewBlog({
+        language: body.language, title: body.title
+    });
+}, {
+    body: blogSchema.generate
+})
 .delete("/rm-all", async ({ user }) => await blogController.deleteAllBlogs(user.id))
 .delete("/rm-chosen", async({ body, user }) => {
     return await blogController.deleteChosenBlogs(body.blogs_ids, user.id);
@@ -24,25 +36,12 @@ const blogRouters = new Elysia({ prefix: "/api/blogs" })
     params: t.Pick(blogSchema.params, ["_id"])
 })
 .get("/user/:user_id", async ({ params, query }) => {
-    return await blogController.getAllUserBlogs({
+    return await blogController.getAllCurrentUserBlogs({
         page: query.page, limit: query.limit, blog_owner_id: params.user_id
     });
 }, {
     params: t.Pick(blogSchema.params, ["user_id"]),
     query: t.Omit(blogSchema.pagination, ["skip", "blog_owner_id"])
-})
-.post("/create", async ({ body, user }) => await blogController.createNewBlog({
-    blog_owner_id: user.id, ...body
-}), {
-    body: t.Omit(blogSchema.add_raw, ["blog_owner_id"]),
-    type: "multipart/form-data"
-})
-.post("/generate", async ({ body }) => {
-    return await blogController.generateNewBlog({
-        language: body.language, title: body.title
-    });
-}, {
-    body: blogSchema.generate
 })
 .put("/remake/:_id", async ({ body, params, user }) => await blogController.changeOneBlog({
     _id: params._id, blog_owner_id: user.id, ...body

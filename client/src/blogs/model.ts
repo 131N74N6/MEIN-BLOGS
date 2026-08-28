@@ -48,7 +48,7 @@ export type BlogDetail = {
     blog_owner_id: string;
     blog_owner_profile_picture: string | null;
     blog_owner_name: string;
-    created_at: string;
+    created_at: Date;
     content: string;
     language: string;
     title: string;
@@ -59,7 +59,7 @@ export type BlogDetail = {
         resource_type: string;
         url: string;
     };
-    updated_at: string;
+    updated_at: Date;
 }
 
 export type BlogRowData = {

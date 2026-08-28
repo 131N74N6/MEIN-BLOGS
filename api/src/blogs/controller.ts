@@ -51,10 +51,15 @@ class BlogController {
         const skip = (page - 1) * limit;
 
         const blogs = await blogService.getAllBlogs({ limit: limit, skip: skip });
-        return blogs;
+        
+        return {
+            success: true,
+            data: blogs,
+            message: "Blogs retrieved successfully"
+        };
     }
 
-    async getAllUserBlogs(query: Omit<TBlogs["pagination"], "skip">) {
+    async getAllCurrentUserBlogs(query: Omit<TBlogs["pagination"], "skip">) {
         const page = query.page;
         const limit = query.limit;
         const skip = (page - 1) * limit;
@@ -63,12 +68,20 @@ class BlogController {
             blog_owner_id: query.blog_owner_id, limit: limit, skip: skip
         });
 
-        return blogs;
+        return {
+            success: true,
+            data: blogs,
+            message: "Blogs retrieved successfully"
+        };
     }
 
     async getBlogContentById(id: string) {
-        const blogContent = await blogService.getBlogContentById(id);
-        return blogContent;
+        const blog = await blogService.getBlogContentById(id);
+        return {
+            success: true,
+            data: blog,
+            message: "Blogs retrieved successfully"
+        };
     }
 }
 

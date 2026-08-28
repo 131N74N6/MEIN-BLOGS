@@ -46,9 +46,9 @@ export default function useBlogService() {
     const changeOneBlogMt = useMutation({
         mutationFn: async (id: string) => {
             const updateBlogForm = new FormData();
-            updateBlogForm.append("language", language.trim());
+            updateBlogForm.append("language", language.trim().toLowerCase());
             updateBlogForm.append("title", title.trim());
-            updateBlogForm.append("content", content);
+            updateBlogForm.append("content", content.trim());
             if (media) updateBlogForm.append("media", media);
 
             return await apiUpload(`/api/blogs/remake/${id}`, updateBlogForm, "PUT");
@@ -67,15 +67,16 @@ export default function useBlogService() {
     const createNewBlogMt = useMutation({
         mutationFn: async () => {
             const newBlogForm = new FormData();
-            newBlogForm.append("language", language.trim());
+            newBlogForm.append("language", language.trim().toLowerCase());
             newBlogForm.append("title", title.trim());
-            newBlogForm.append("content", content);
+            newBlogForm.append("content", content.trim());
             if (media) newBlogForm.append("media", media);
 
             return await apiUpload(`/api/blogs/create`, newBlogForm, "POST");
         },
         onError: (error) => {
             setMessage(error.message);
+            console.error("❌ [Frontend Error] Gagal membuat blog:", error);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["all-blogs"] });

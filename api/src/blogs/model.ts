@@ -52,9 +52,9 @@ export const blogSchema = {
     }),
     pagination: t.Object({
         blog_owner_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid owner id" }),
-        limit: t.Number({ maximum: 30, default: 16, error: "Invalid data" }),
+        limit: t.Number({ maximum: 30, error: "Invalid data" }),
         page: t.Number({ default: 1, minimum: 1, error: "Invalid data" }),
-        skip: t.Number({ maximum: 30, default: 16, error: "Invalid data" })
+        skip: t.Number({ maximum: 30, error: "Invalid data" })
     }),
     params: t.Object({
         _id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "Invalid id" }),

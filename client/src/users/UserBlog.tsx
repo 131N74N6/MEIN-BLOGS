@@ -41,6 +41,7 @@ export default function UserBlog() {
     }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
     const isProcessing = blogs.processing || user.isProcessing;
+    console.log(blogs.getAllCurrentUserBlogs.error);
 
     return (
         <section className="flex md:flex-row flex-col h-dvh relative">

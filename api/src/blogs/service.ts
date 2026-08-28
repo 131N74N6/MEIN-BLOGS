@@ -67,17 +67,18 @@ class BlogService {
     }
 
     async changeOneBlog(props: TBlogs["change_raw"]) {
-        const blogContent = this.checkIsInputValid(props.content, "content", 1);
-        const currentUserId = this.checkIsIdValid(props.blog_owner_id, "blog owner id");
-        const blogLanguage = this.checkIsInputValid(props.language, "language", 1);
-        const blogTitle = this.checkIsInputValid(props.title, "title", 1);
-        
         const blog = await blogRepository.getBlogContentById(props._id);
         if (!blog) throw new BlogApiError(404, "blog not found");
         
         if (blog.blog_owner_id.toString() !== props.blog_owner_id) {
             throw new BlogApiError(403, "you are not allowed to edit this blog");
         }
+        
+        const blogContent = this.checkIsInputValid(props.content, "content", 1);
+        const currentUserId = this.checkIsIdValid(props.blog_owner_id, "blog owner id");
+        const blogLanguage = this.checkIsInputValid(props.language, "language", 1);
+        const blogTitle = this.checkIsInputValid(props.title, "title", 1);
+        
         
         if (props.media) {
             if (!allowedFileType.includes(props.media.type)) {

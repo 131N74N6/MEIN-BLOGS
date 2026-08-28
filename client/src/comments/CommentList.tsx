@@ -2,6 +2,14 @@ import CommentData from "./CommentData";
 import type { CommentListDetail } from "./model";
 
 export default function CommentList(comments: CommentListDetail) {
+    if (comments.data.length === 0) {
+        return (
+            <section className="flex justify-center items-center h-full">
+                <div className="text-xl text-gray-800 font-medium">No comment found in this blog</div>
+            </section>
+        );
+    }
+
     return (
         <main className="h-[90%] w-full flex p-2.5 gap-2.5 flex-col overflow-y-auto">
             <div className="flex flex-col gap-2.5">

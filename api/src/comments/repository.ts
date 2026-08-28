@@ -18,7 +18,7 @@ class CommentRepository {
             profile_picture: user[0].image || null,
             created_at: new Date(),
             user_id: new ObjectId(user[0]._id),
-            username: user[0].username,
+            username: user[0].name,
             text: new_comment.text,
         });
     }

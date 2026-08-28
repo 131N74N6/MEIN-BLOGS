@@ -26,12 +26,17 @@ class BlogRepository {
             { projection: { image: 1, name: 1, _id: 1 }}
         ).toArray();
 
+        if (!user || user.length === 0) {
+            throw new Error(`User dengan ID ${data.blog_owner_id} tidak ditemukan di database`);
+        }
+
         return await this.blogs.insertOne({
             blog_owner_name: user[0].name,
             blog_owner_profile_picture: user[0].image || null,
             blog_owner_id: user[0]._id,
             content: data.content,
             created_at: new Date(),
+            language: data.language,
             media: data.media,
             title: data.title,
             updated_at: new Date(),

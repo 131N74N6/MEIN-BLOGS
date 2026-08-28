@@ -18,6 +18,7 @@ export default function CreateBlog() {
     const content = useBlogStore((state) => state.content);
     const setContent = useBlogStore((state) => state.setContent);
 
+    const language = useBlogStore((state) => state.language);
     const setLanguage = useBlogStore((state) => state.setLanguage);
     
     const setMedia = useBlogStore((state) => state.setMedia);
@@ -78,8 +79,8 @@ export default function CreateBlog() {
         <section className="flex md:flex-row flex-col h-dvh relative z-10">
             <Navbar place="create blog" sign_out={auth.signOutMt} is_processing={blog.processing}/>
             {message ? <Alert message={message}/> : null}
-            <form className="h-full md:w-3/4 w-full flex flex-col" onSubmit={publishBlog}>
-                <section className="flex flex-col overflow-y-auto px-2.5 pt-2.5 gap-2.5">
+            <form className="h-full md:w-3/4 w-full flex flex-col overflow-y-auto" onSubmit={publishBlog}>
+                <section className="flex flex-col overflow-y-auto h-[90%] px-2.5 pt-2.5 gap-2.5">
                     <div className="flex flex-col gap-1.5">
                         <label className="text-base font-semibold text-gray-600" htmlFor="media">Thumbnail</label>
                         <input className="hidden" id="media" name="media" onChange={blog.blogMediaPrefiew} ref={blog.blogMediaRef} type="file"/>
@@ -125,7 +126,13 @@ export default function CreateBlog() {
                     </div>
                     <div className="flex flex-col gap-1.5">
                         <label className="text-base font-semibold text-gray-600" htmlFor="language">Language</label>
-                        <select className="border border-zinc-500 p-1.5 text-sm font-medium outline-0 rounded-e-md" onChange={(event) => setLanguage(event.target.value)}>
+                        <select 
+                            className="border border-zinc-500 p-1.5 text-sm font-medium outline-0 rounded-e-md" 
+                            id="language"
+                            onChange={(event) => setLanguage(event.target.value)}
+                            value={language}
+                        >
+                            <option value="" disabled>-- Select language --</option>
                             <option value="indonesia">Indonesia</option>
                             <option value="inggris">English</option>
                             <option value="jepang">Japanese</option>
@@ -137,7 +144,7 @@ export default function CreateBlog() {
                         <div className="h-[50dvh] flex flex-col">
                             {isProcessing ? (
                                 <div className="flex justify-center items-center h-full">
-                                    <div className="text-base font-medium text-gray-700">Please wait</div>
+                                    <div className="text-base text-center font-medium text-gray-700">Please wait</div>
                                 </div>
                             ) : (
                                 <div ref={editorTextRef} className="h-full overflow-y-auto border-x border-b border-gray-400 rounded-b-md"/>
@@ -145,7 +152,7 @@ export default function CreateBlog() {
                         </div>
                     </div>
                 </section>
-                <section className="flex justify-end p-2.5 gap-2.5">
+                <section className="flex h-[10%] justify-end p-2.5 gap-2.5">
                     <button
                         className="cursor-pointer disabled:cursor-not-allowed bg-blue-700 text-white font-medium text-sm p-2 w-22 rounded-md hover:bg-blue-500 transition-colors"
                         disabled={isProcessing}
