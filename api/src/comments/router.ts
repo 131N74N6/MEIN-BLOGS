@@ -18,9 +18,11 @@ const commentRouters = new Elysia({ prefix: "/api/comments" })
 }, {
     params: commentSchema.params
 })
-.post("/create/:blog_id", async ({ body, user, params }) => await commentController.createComment({
-    blog_id: params.blog_id, user_id: user.id, ...body
-}), {
+.post("/create/:blog_id", async ({ body, user, params }) => {
+    return await commentController.createComment({
+        blog_id: params.blog_id, user_id: user.id, ...body
+    });
+}, {
     body: t.Omit(commentSchema.add, ["created_at", "blog_id", "user_id", "username"]),
     params: commentSchema.params
 });

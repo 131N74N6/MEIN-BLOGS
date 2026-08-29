@@ -29,8 +29,8 @@ const app = new Elysia()
 .use(relationsRouters)
 .use(viewerRouters)
 .use(userRouters)
-.get("/", () => "Hello, this is Elysia")
-.get("/api", () => "Elysia API is ready");
+.get("/", () => "🦊 Hello, this is Elysia")
+.get("/api", () => "🦊 Elysia API is ready");
 
 app.listen(port, () => console.log(`🦊 Elysia is running at http://localhost:${port}`));
 

@@ -6,6 +6,7 @@ import { apiRequest, apiUpload } from "../handler/api";
 import type { BlogDetail } from "./model";
 import { useStyleStore } from "../styles/store";
 import { useNavigate } from "react-router-dom";
+import { useDebounce } from "./hooks";
 
 export default function useBlogService() {
     const navigate = useNavigate();
@@ -25,6 +26,9 @@ export default function useBlogService() {
 
     const title = useBlogStore((state) => state.title);
     const setTitle = useBlogStore((state) => state.setTitle);
+
+    const searched = useBlogStore((state) => state.searched);
+    const titleSearch = useDebounce<string>(searched.trim(), 500);
     
     const blogId = useBlogStore((state) => state.blogId);
     const chosenBlogsIds = useBlogStore((state) => state.chosenBlogsIds);
@@ -58,7 +62,9 @@ export default function useBlogService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`blog-content-${blogId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-blogs-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
             navigate("/users/blogs");
         }
@@ -79,7 +85,9 @@ export default function useBlogService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
+            queryClient.invalidateQueries({ queryKey: [`all-blogs-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
             setContent("");
             setMedia(null);
             setMediaUrl(null);
@@ -100,10 +108,12 @@ export default function useBlogService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
+            queryClient.invalidateQueries({ queryKey: [`all-blogs-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`blog-comments-${blogId}`] });
+            queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
             setContent("");
             setMedia(null);
+            setMediaUrl(null);
             setLanguage("");
             setTitle("");
         },
@@ -121,10 +131,12 @@ export default function useBlogService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
+            queryClient.invalidateQueries({ queryKey: [`all-blogs-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`blog-comments-${blogId}`] });
+            queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
             setContent("");
             setMedia(null);
+            setMediaUrl(null);
             setLanguage("");
             setTitle("");
         },
@@ -157,9 +169,12 @@ export default function useBlogService() {
             return allPages.length + 1;
         },
         initialPageParam: 1,
-        queryKey: ["all-blogs"],
+        queryKey: titleSearch ? [`all-blogs-${titleSearch}`] : ["all-blogs"],
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
-            const url = `/api/blogs/show-all?page=${pageParam}&limit=${16}`;
+            const url = titleSearch ? 
+            `/api/blogs/show-all?page=${pageParam}&limit=${16}&title=${titleSearch}` : 
+            `/api/blogs/show-all?page=${pageParam}&limit=${16}`;
+            
             const request = await apiRequest<BlogDetail[]>(url, { method: "GET" });
 
             return request.data ?? [];
@@ -173,11 +188,28 @@ export default function useBlogService() {
             return allPages.length + 1;
         },
         initialPageParam: 1,
-        queryKey: otherUserId ? [`user-blogs-${otherUserId}`] : [`user-blogs-${currentUserId}`],
+
+        queryKey: otherUserId ? [`user-blogs-${otherUserId}`] : 
+        otherUserId && titleSearch ? [`user-blogs-${otherUserId}-${titleSearch}`] :
+        currentUserId && titleSearch ? [`user-blogs-${currentUserId}-${titleSearch}`] : 
+        [`user-blogs-${currentUserId}`],
+
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
-            const url = otherUserId ? 
-            `/api/blogs/user/${otherUserId}?page=${pageParam}&limit=${16}` :
-            `/api/blogs/user/${currentUserId}?page=${pageParam}&limit=${16}`;
+            let url = `/api/blogs/user/${currentUserId}?page=${pageParam}&limit=${16}`;
+
+            if (otherUserId) {
+                if (titleSearch !== "") {
+                    url = `/api/blogs/user/${otherUserId}?page=${pageParam}&limit=${16}&title=${titleSearch}`;
+                } else {
+                    url = `/api/blogs/user/${otherUserId}?page=${pageParam}&limit=${16}`;
+                }
+            } else {
+                if (titleSearch !== "") {
+                    url = `/api/blogs/user/${currentUserId}?page=${pageParam}&limit=${16}&title=${titleSearch}`;
+                } else {
+                    url = `/api/blogs/user/${currentUserId}?page=${pageParam}&limit=${16}`;
+                }
+            }
 
             const request = await apiRequest<BlogDetail[]>(url, { method: "GET" });
             return request.data ?? [];

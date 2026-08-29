@@ -21,6 +21,9 @@ export type BlogInfoState = {
 
     resetBlogInfoState: () => void;
 
+    searched: string;
+    setSearched: (searched: string) => void;
+
     selectMode: boolean;
     setSelectMode: (selectMode: boolean) => void;
 
@@ -63,25 +66,27 @@ export type BlogDetail = {
 }
 
 export type BlogRowData = {
-    data: Pick<BlogDetail, "_id" | "title" | "created_at" | "language">;
+    data: Pick<BlogDetail, "_id" | "blog_owner_id" | "title" | "created_at" | "language">;
     is_processing: boolean;
+    see_one_blog_mt: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
 }
 
 export type BlogTableData = {
-    data: Pick<BlogDetail, "_id" | "title" | "created_at" | "language">[];
+    data: Pick<BlogDetail, "_id" | "blog_owner_id" | "title" | "created_at" | "language">[];
     fetch_next_page: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>
     has_next_page: boolean;
     is_fetching_next_page: boolean;
     is_processing: boolean;
+    see_one_blog_mt: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>
 }
 
 export type BlogCardData = {
-    data: Omit<BlogDetail, "blog_owner_id" | "updated_at">;
+    data: Omit<BlogDetail, "updated_at">;
     seeOneBlogMt: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
 }
 
 export type BlogGridData = {
-    data: Omit<BlogDetail, "blog_owner_id" | "updated_at">[];
+    data: Omit<BlogDetail, "updated_at">[];
     fetchNextPage: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<BlogDetail[], unknown>, Error>>;
     hasNextPage: boolean;
     isFetchingNextPage: boolean;

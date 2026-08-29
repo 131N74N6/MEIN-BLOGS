@@ -31,13 +31,19 @@ export function setupErrorHandler(app: Elysia) {
                 set.status = 400;
 
                 const firstError = error.all && error.all.length > 0 ? error.all[0] : null;
-                let customMessage = "Data yang dikirim tidak valid";
+                let customMessage = "invalid required data";
 
                 if (firstError) {
                     const fieldName = firstError.path.replace('/', '');
+                    const cloudinaryError = firstError.message.includes("public id") || 
+                    firstError.message.includes("resource type") || 
+                    firstError.message.includes("url");
                     
                     if (firstError.message.includes("Expected kind 'File'") || firstError.message.includes("Expected Object")) {
                         customMessage = `${fieldName} field is required.`;
+                    } else if (cloudinaryError) {
+                        console.error("⚠️ Cloudinary Schema Validation Error:", firstError.message);
+                        customMessage = "failed to process your file. try again later";
                     } else if (firstError.message.includes("Expected string")) {
                         customMessage = `${fieldName} field is required.`;
                     } else {

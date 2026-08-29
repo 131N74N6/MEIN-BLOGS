@@ -10,6 +10,7 @@ import Alert from "../styles/Alert";
 import { useUserStore } from "./store";
 import useAuthService from "../auth/service";
 import { useNavigate } from "react-router-dom";
+import useViewerService from "../viewers/service";
 
 export default function UserBlog() {
     const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function UserBlog() {
     const auth = useAuthService();
     const user = useUserService();
     const blogs = useBlogService();
+    const viewers = useViewerService();
     
     const message = useStyleStore((state) => state.message);
     const setMessage = useStyleStore((state) => state.setMessage);
@@ -41,7 +43,6 @@ export default function UserBlog() {
     }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
     const isProcessing = blogs.processing || user.isProcessing;
-    console.log(blogs.getAllCurrentUserBlogs.error);
 
     return (
         <section className="flex md:flex-row flex-col h-dvh relative">
@@ -110,6 +111,7 @@ export default function UserBlog() {
                     has_next_page={blogs.getAllCurrentUserBlogs.hasNextPage}
                     is_fetching_next_page={blogs.getAllCurrentUserBlogs.isFetchingNextPage}
                     is_processing={blogs.processing}
+                    see_one_blog_mt={viewers.seeOneBlogMt}
                 />
             </main>
         </section>

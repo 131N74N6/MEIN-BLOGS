@@ -8,7 +8,9 @@ import rehypeRaw from "rehype-raw";
 
 export default function BlogCard(blog: BlogCardData) {
     const navigate = useNavigate();
+    
     const setBlogId = useBlogStore((state) => state.setBlogId);
+    const setBlogOwnerId = useBlogStore((state) => state.setBlogOwnerId);
 
     const sanitizedAnswer = () => {
         if (!blog.data.content) return;
@@ -24,13 +26,14 @@ export default function BlogCard(blog: BlogCardData) {
 
     const seeThisBlog = () => {
         setBlogId(blog.data._id);
+        setBlogOwnerId(blog.data.blog_owner_id);
         blog.seeOneBlogMt.mutate();
         navigate(`/users/blogs/${blog.data._id}`);
     };
 
     return (
         <div 
-            className="flex flex-col gap-2.5 p-2.5 shadow-md shadow-gray-600 rounded-md" 
+            className="flex flex-col cursor-pointer gap-2.5 p-2.5 shadow-md shadow-gray-600 rounded-md" 
             key={blog.data._id} onClick={seeThisBlog}
         >
             <div className="w-full h-full">

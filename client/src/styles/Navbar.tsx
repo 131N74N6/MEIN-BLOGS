@@ -3,6 +3,7 @@ import { useStyleStore } from "./store";
 import type { UseMutationResult } from "@tanstack/react-query";
 import { ChartBar, File, Home, Menu, PlusSquare, Power, User } from "lucide-react";
 import { cn } from "./utils";
+import { useUserStore } from "../users/store";
 
 type NavbarIntrf = {
     is_processing: boolean;
@@ -10,19 +11,23 @@ type NavbarIntrf = {
     sign_out: UseMutationResult<any, Error, void, unknown>
 }
 
-const asideItems = [
-    { label: "Home", path: "/home", place: "home", icon: Home },
-    { label: "Create Blog", path: "/users/blogs/create", place: "create blog", icon: PlusSquare },
-    { label: "Blogs", path: "/users/blogs", place: "your blogs", icon: File },
-    { label: "Profile", path: "/users", place: "your profile", icon: User },
-    { label: "Dashboard", path: "/users/dashboard", place: "your dashboard", icon: ChartBar },
-];
-
 export default function Navbar(info: NavbarIntrf) {
     const navigate = useNavigate();
+
+    const currentUserId = useUserStore((state) => state.currentUserId);
+
     const isOpen = useStyleStore((state) => state.isOpen);
     const setIsOpen = useStyleStore((state) => state.setIsOpen);
+
     const navbarToggle = () => setIsOpen(!isOpen);
+
+    const asideItems = [
+        { label: "Home", path: "/home", place: "home", icon: Home },
+        { label: "Create Blog", path: "/users/blogs/create", place: "create blog", icon: PlusSquare },
+        { label: "Blogs", path: "/users/blogs", place: "your blogs", icon: File },
+        { label: "Profile", path: `/users/${currentUserId}`, place: "your profile", icon: User },
+        { label: "Dashboard", path: "/users/dashboard", place: "your dashboard", icon: ChartBar },
+    ];
 
     return (
         <>

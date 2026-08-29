@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { StateCreator } from "zustand";
-import type { CommenInputState, CommentMessageState, Union } from "./model";
+import type { CommenInputState, Union } from "./model";
 
 const commentInputSlice: StateCreator<CommenInputState> = (set) => ({
     text: "",
@@ -11,12 +11,6 @@ const commentInputSlice: StateCreator<CommenInputState> = (set) => ({
     }),
 });
 
-const commentMessageSlice: StateCreator<CommentMessageState> = (set) => ({
-    commentMessage: null,
-    setCommentMessage: (commentMessage: string | null) => set({ commentMessage }),
-});
-
 export const useCommentStore = create<Union>()((...x) => ({
-    ...commentInputSlice(...x),
-    ...commentMessageSlice(...x)
+    ...commentInputSlice(...x)
 }));

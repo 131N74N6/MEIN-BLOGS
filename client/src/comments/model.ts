@@ -7,12 +7,7 @@ export type CommenInputState = {
     resetCommentState: () => void;
 }
 
-export type CommentMessageState = {
-    commentMessage: string | null;
-    setCommentMessage: (commentMessage: string | null) => void;
-}
-
-export type Union = CommenInputState & CommentMessageState;
+export type Union = CommenInputState;
 
 export type CommentDetail = {
     _id: string;

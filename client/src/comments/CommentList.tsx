@@ -5,13 +5,15 @@ export default function CommentList(comments: CommentListDetail) {
     if (comments.data.length === 0) {
         return (
             <section className="flex justify-center items-center h-full">
-                <div className="text-xl text-gray-800 font-medium">No comment found in this blog</div>
+                <h3 className="text-xl text-center text-gray-800 font-medium">
+                    No comment found in this blog
+                </h3>
             </section>
         );
     }
 
     return (
-        <main className="h-[90%] w-full flex p-2.5 gap-2.5 flex-col overflow-y-auto">
+        <section className="h-[80dvh] w-full flex px-2.5 pt-2.5 gap-2.5 flex-col overflow-y-auto">
             <div className="flex flex-col gap-2.5">
                 {comments.data.map((comment) => (<CommentData {...comment}/>))}
             </div>
@@ -35,6 +37,6 @@ export default function CommentList(comments: CommentListDetail) {
                     <div className="text-base text-gray-800 font-medium">You've reached the end</div>
                 </section>
             )}
-        </main>
+        </section>
     )
 }

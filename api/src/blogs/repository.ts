@@ -75,7 +75,7 @@ class BlogRepository {
     }
 
     async getAllBlogsWithPagination(page: Omit<TBlogs["pagination"], "blog_owner_id" | "page">) {
-        if (page.title === undefined) {
+        if (page.title === undefined || page.title === "") {
             const blogs = await this.blogs.find({})
             .limit(page.limit)
             .skip(page.skip)
@@ -96,7 +96,7 @@ class BlogRepository {
     }
 
     async getAllCurrentUserBlogsWithPagination(page: Omit<TBlogs["pagination"], "page">) {
-        if (page.title === undefined) {
+        if (page.title === undefined || page.title === "") {
             const blog = await this.blogs.find({ blog_owner_id: new ObjectId(page.blog_owner_id) })
             .limit(page.limit)
             .skip(page.skip)

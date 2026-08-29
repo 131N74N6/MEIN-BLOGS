@@ -50,7 +50,7 @@ class BlogController {
         const limit = query.limit;
         const skip = (page - 1) * limit;
 
-        if (query.title === undefined) {
+        if (query.title === undefined || query.title === "") {
             const blogs = await blogService.getAllBlogsWithPagination({ limit: limit, skip: skip });
         
             return {
@@ -76,15 +76,27 @@ class BlogController {
         const limit = query.limit;
         const skip = (page - 1) * limit;
 
-        const blogs = await blogService.getAllCurrentUserBlogsWithPagination({
-            blog_owner_id: query.blog_owner_id, limit: limit, skip: skip
-        });
-
-        return {
-            success: true,
-            data: blogs,
-            message: "Blogs retrieved successfully"
-        };
+        if (query.title === undefined || query.title === "") {
+            const blogs = await blogService.getAllCurrentUserBlogsWithPagination({
+                blog_owner_id: query.blog_owner_id, limit: limit, skip: skip
+            });
+    
+            return {
+                success: true,
+                data: blogs,
+                message: "Blogs retrieved successfully"
+            };
+        } else {
+            const blogs = await blogService.getAllCurrentUserBlogsWithPagination({
+                blog_owner_id: query.blog_owner_id, limit: limit, skip: skip, title: query.title
+            });
+    
+            return {
+                success: true,
+                data: blogs,
+                message: "Blogs retrieved successfully"
+            };
+        }
     }
 
     async getBlogContentById(id: string) {

@@ -17,7 +17,11 @@ export default function BlogTable(blogs: BlogTableData) {
                 </thead>
                 <tbody>
                     {blogs.data.map((blog) => (
-                        <BlogRow data={blog} is_processing={blogs.is_processing}/>
+                        <BlogRow 
+                            data={blog} 
+                            is_processing={blogs.is_processing} 
+                            see_one_blog_mt={blogs.see_one_blog_mt}
+                        />
                     ))}
                     {blogs.data.length <= 16 ? null : (
                         <tr>

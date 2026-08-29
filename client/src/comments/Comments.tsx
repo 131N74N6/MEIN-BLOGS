@@ -1,4 +1,4 @@
-import { Send } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import useAuthService from "../auth/service";
 import Navbar from "../styles/Navbar";
 import useCommentSevice from "./service";
@@ -34,7 +34,7 @@ export default function Comments() {
                     </h3>
                 </section>
             ) : (
-                <main className="flex flex-col h-full w-full md:w-3/4">
+                <main className="flex flex-col h-full w-full md:w-3/4 p-2.5 overflow-y-auto">
                     <CommentList
                         data={comment.getAllCommentsInABlog.data?.pages.flat() ?? []}
                         fetchNextPage={comment.getAllCommentsInABlog.fetchNextPage}
@@ -42,18 +42,18 @@ export default function Comments() {
                         isFetchingNextPage={comment.getAllCommentsInABlog.isFetchingNextPage}
                         isProcessing={isProcessing}
                     />
-                    <form className="h-[10%] border border-gray-700 w-full flex gap-2.5" onSubmit={sendComment}>
+                    <form className="h-[20dvh]  bg-zinc-100 p-2.5 items-center rounded-md w-full flex gap-2.5" onSubmit={sendComment}>
                         <textarea 
-                            className="resize-none h-full overflow-y-auto text-sm font-medium text-gray-700"
+                            className="resize-none outline-0 w-full h-full overflow-y-auto text-sm font-medium text-gray-700"
                             onChange={(event) => setText(event.target.value)}
                             value={text}
                         />
                         <button 
-                            className="bg-purple-700 text-white text-sm font-medium cursor-pointer disabled:cursor-not-allowed w-8 h-8 rounded-full"
+                            className="bg-purple-700 hover:bg-purple-500 transition-colors flex justify-center items-center text-white text-sm font-medium cursor-pointer disabled:cursor-not-allowed w-8 h-8 rounded-full"
                             disabled={isProcessing}
                             type="submit"
                         >
-                            <Send size={18}/>
+                            <ArrowUp size={18}/>
                         </button>
                     </form>
                 </main>

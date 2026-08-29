@@ -3,7 +3,7 @@ import { User } from "../auth/model";
 
 export const userSchema = {
     change_raw: t.Object({
-        id: t.String({ error: "invalid data", format: "^[0-9a-fA-F]{24}$" }),
+        id: t.String({ error: "invalid data", pattern: "^[0-9a-fA-F]{24}$" }),
         description: t.Optional(t.Union([t.String({ error: "invalid data" }), t.Null(), t.Undefined()])),
         name: t.String({ minLength: 1, error: "invalid username" }),
         image: t.Union([
@@ -13,7 +13,7 @@ export const userSchema = {
         updatedAt: t.Date({ error: "invalid date" })
     }),
     change_result: t.Object({
-        id: t.String({ error: "invalid data", format: "^[0-9a-fA-F]{24}$" }),
+        id: t.String({ error: "invalid data", pattern: "^[0-9a-fA-F]{24}$" }),
         description: t.Optional(t.Union([t.String({ error: "invalid data" }), t.Null(), t.Undefined()])),
         name: t.String({ minLength: 1, error: "invalid username" }),
         image: t.String({ error: "invalid file" }),
@@ -25,7 +25,7 @@ export const userSchema = {
     }),
     data: t.Unsafe<User>({ error: "invalid data" }),
     other_user: t.Object({
-        user_id: t.String({ error: "invalid data", format: "^[0-9a-fA-F]{24}$" })
+        user_id: t.String({ error: "invalid data", pattern: "^[0-9a-fA-F]{24}$" })
     })
 }
 

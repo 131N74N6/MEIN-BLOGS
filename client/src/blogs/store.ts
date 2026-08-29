@@ -33,8 +33,12 @@ const blogInfoSlice: StateCreator<BlogInfoState> = (set) => ({
         media: null,
         mediaUrl: null,
         language: "",
+        searched: "",
         title: ""
     }),
+
+    searched: "",
+    setSearched: (searched: string) => set({ searched }),
 
     selectMode: false,
     setSelectMode: (selectMode: boolean) => set({ selectMode }),

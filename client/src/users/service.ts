@@ -53,6 +53,9 @@ export default function useUserService() {
             resetUserProfileState();
             resetUserIdState();
             resetNavbarState();
+            useBlogStore.persist.clearStorage();
+            useRelationStore.persist.clearStorage();
+            useUserStore.persist.clearStorage();
             navigate("/sign-in");
         }
     });

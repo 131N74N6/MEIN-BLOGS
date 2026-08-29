@@ -22,14 +22,12 @@ class CommentService {
 
     async createComment(new_comment: TComment["add"]) {
         const blogId = this.checkIsIdValid(new_comment.blog_id, "blog id");
-        const currentUserId = this.checkIsIdValid(new_comment.blog_owner_id, "current user id");
+        const blogOwnerId = this.checkIsIdValid(new_comment.blog_owner_id, "blog owner id");
         const commentText = this.checkIsInputValid(new_comment.text, 1);
-        
-        const created_at = new Date();
 
         await commentRepository.createComment({
             blog_id: blogId, 
-            blog_owner_id: currentUserId,
+            blog_owner_id: blogOwnerId,
             text: commentText,
             user_id: new_comment.user_id
         });
