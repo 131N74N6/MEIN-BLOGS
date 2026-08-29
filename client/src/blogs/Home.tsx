@@ -28,7 +28,14 @@ export default function Home() {
         <section className="flex md:flex-row flex-col h-dvh">
             <Navbar place="home" sign_out={auth.signOutMt} is_processing={blog.processing}/>
             <main className="h-full md:w-3/4 w-full flex flex-col">
-                <header className="px-2.5 pt-2.5"></header>
+                <header className="px-2.5 pt-2.5">
+                    <input
+                        className="outline-0 border border-zinc-700 text-zinc-700 text-base"
+                        id="search blog title"
+                        placeholder="find blog title here"
+                        type="text"
+                    />
+                </header>
                 <BlogGrid 
                     data={blog.getAllBlogs.data?.pages.flat() ?? []}
                     fetchNextPage={blog.getAllBlogs.fetchNextPage}

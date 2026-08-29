@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import commentRepository from "./repository";
 import { TComment } from "./model";
-import { BlogApiError } from "../error/message";
+import { BlogApiError } from "../error/handler";
 
 class CommentService {
     private checkIsIdValid(value: unknown, fieldName: string) {

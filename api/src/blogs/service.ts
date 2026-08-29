@@ -4,7 +4,7 @@ import { v2 } from "cloudinary";
 import { uploadToCloudinary } from "../cloudinary/service";
 import { ObjectId } from "mongodb";
 import { TBlogs } from "./model";
-import { BlogApiError } from "../error/message";
+import { BlogApiError } from "../error/handler";
 
 export const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 export const allowedLanguage = ["indonesia", "inggris", "jepang", "jerman"];
@@ -227,7 +227,6 @@ class BlogService {
         const blogContent = await blogRepository.getBlogContentById(blogId);
 
         if (!blogContent) return;
-        
         return blogContent;
     }
 }

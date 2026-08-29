@@ -10,6 +10,7 @@ export type ViewerUnion = ViewerMessage;
 export type ViewerDetail = {
     _id: string;
     created_at: Date;
+    is_processing: boolean;
     profile_picture: string | null;
     user_id: string;
     username: string;

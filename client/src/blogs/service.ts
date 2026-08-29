@@ -54,7 +54,7 @@ export default function useBlogService() {
             return await apiUpload(`/api/blogs/remake/${id}`, updateBlogForm, "PUT");
         },
         onError: (error) => {
-            setMessage(error.message);
+            setMessage(error.message || "failed to edit and save blog. try again later");
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
@@ -75,8 +75,7 @@ export default function useBlogService() {
             return await apiUpload(`/api/blogs/create`, newBlogForm, "POST");
         },
         onError: (error) => {
-            setMessage(error.message);
-            console.error("❌ [Frontend Error] Gagal membuat blog:", error);
+            setMessage(error.message || "failed to upload blog. try again later");
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["all-blogs"] });

@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { authService } from "./service";
-import { BlogApiError } from "../error/message";
+import { BlogApiError } from "../error/handler";
 
 export const authMiddleware = (app: Elysia) => {
     return app.derive(async ({ request }) => {

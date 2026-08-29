@@ -1,11 +1,12 @@
 import { ObjectId } from "mongodb";
 import relationRepository from "./repository";
 import { TRelation } from "./model";
+import { BlogApiError } from "../error/handler";
 
 class RelationService {
     private checkIsIdValid(fieldName: string, value: unknown) {
         const isNotValid = value === "" || typeof value !== "string" || !ObjectId.isValid(value);
-        if (isNotValid) throw new Error(`invalid ${fieldName}`);
+        if (isNotValid) throw new BlogApiError(400, `invalid ${fieldName}`);
 
         return value;
     }

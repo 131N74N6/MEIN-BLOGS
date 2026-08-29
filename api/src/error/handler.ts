@@ -1,47 +1,54 @@
-// src/errors/handler.ts
-import { Elysia, ValidationError } from "elysia";
-import { BlogApiError } from "./message";
+import { Elysia } from "elysia";
 
-// Definisikan custom error untuk Elysia
-export class CustomError extends Error {
-    constructor(
-        public statusCode: number,
-        public message: string
-    ) {
+export class BlogApiError extends Error {
+    public readonly statusCode: number;
+
+    constructor(statusCode: number, message: string) {
         super(message);
+        this.statusCode = statusCode;
+        this.name = "BlogApiError";
     }
 }
 
 export function setupErrorHandler(app: Elysia) {
-    // 1. Daftarkan error kustom ke Elysia
     return app.error({ BlogApiError })
-        
-    // 2. Handler global untuk semua error
     .onError(({ code, error, set }) => {
-        // A. Tangani BlogApiError dari service/controller
-        if (error instanceof BlogApiError) {
-            set.status = error.statusCode;
-            return {
-                success: false,
-                message: error.message
+
+        if (code === 'BlogApiError' || error instanceof BlogApiError) {
+            const apiError = error as BlogApiError;
+            set.status = apiError.statusCode || 400;
+            return { 
+                success: false, 
+                message: apiError.message 
             };
         }
 
-        // B. Tangani validasi TypeBox (schema) yang gagal
-        if (code === "VALIDATION") {
-            set.status = 400;
-            const validationError = error as ValidationError;
-            return {
-                success: false,
-                message: validationError.message || "invalid input data"
-            };
-        }
+        switch (code) {
+            case 'NOT_FOUND':
+                set.status = 404;
+                return { success: false, message: error.message };
+            case 'VALIDATION':
+                set.status = 400;
 
-        // C. Tangani error tidak terduga (500)
-        set.status = 500;
-        return {
-            success: false,
-            message: "something went wrong"
-        };
+                const firstError = error.all && error.all.length > 0 ? error.all[0] : null;
+                let customMessage = "Data yang dikirim tidak valid";
+
+                if (firstError) {
+                    const fieldName = firstError.path.replace('/', '');
+                    
+                    if (firstError.message.includes("Expected kind 'File'") || firstError.message.includes("Expected Object")) {
+                        customMessage = `${fieldName} field is required.`;
+                    } else if (firstError.message.includes("Expected string")) {
+                        customMessage = `${fieldName} field is required.`;
+                    } else {
+                        customMessage = firstError.message;
+                    }
+                }
+                return { success: false, message: customMessage, details: error.all };
+            default:
+                set.status = 500;
+                console.error(error);
+                return { success: false, message: "something went wrong" };
+        }
     });
 }

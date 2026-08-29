@@ -48,7 +48,7 @@ export default function CreateBlog() {
             const timer = setTimeout(() => setMessage(null), 1800);
             return () => clearTimeout(timer);
         }
-    }, [message, setMessage]);
+    }, [message]);
 
     useEffect(() => {
         if (!quillRef.current && editorTextRef.current) {

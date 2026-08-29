@@ -5,7 +5,7 @@ export default function ViewerList(viewers: ViewerListData) {
     if (viewers.data.length === 0) {
         return (
             <section className="flex justify-center items-center h-full">
-                <div className="text-xl text-gray-800 font-medium">This blog hasn't visited yet</div>
+                <h3 className="text-xl text-gray-800 font-medium">This blog hasn't visited yet</h3>
             </section>
         );
     }

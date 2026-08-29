@@ -42,7 +42,7 @@ class BlogController {
             language: body.language, title: body.title
         });
 
-        return { data: newGeneratedBlog, success: true };
+        return { data: newGeneratedBlog, message: "blog generated successfully", success: true };
     }
 
     async getAllBlogsWithPagination(query: Omit<TBlogs["pagination"], "skip" | "blog_owner_id">) {

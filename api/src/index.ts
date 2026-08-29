@@ -18,18 +18,19 @@ v2.config({
 });
 
 const app = new Elysia()
+.use(setupErrorHandler)
 .use(cors({
     credentials: true,
     origin: ["http://localhost:5173", "http://localhost:3000"]
 }))
-.use(setupErrorHandler)
 .all("/api/auth/*", async (ctx) => { return await authService.handler(ctx.request); })
 .use(blogRouters)
 .use(commentRouters)
 .use(relationsRouters)
 .use(viewerRouters)
 .use(userRouters)
-.get("/", () => "Hello Elysia");
+.get("/", () => "Hello, this is Elysia")
+.get("/api", () => "Elysia API is ready");
 
 app.listen(port, () => console.log(`🦊 Elysia is running at http://localhost:${port}`));
 
