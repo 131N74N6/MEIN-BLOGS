@@ -8,6 +8,10 @@ class BlogRepository {
     private viewers = db().collection("viewers");
     private users = db().collection("user");
 
+    private escapeRegex(text: string): string {
+        return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+    }
+
     async changeOneBlog(blog: TBlogs["change_result"]) {
         return await this.blogs.updateOne({ _id: new ObjectId(blog._id) }, {
             $set: {
@@ -79,7 +83,9 @@ class BlogRepository {
 
             return blogs;
         } else {
-            const regexPattern = new RegExp(page.title, 'i');
+            const safeTitleInput = this.escapeRegex(page.title);
+            const regexPattern = new RegExp(safeTitleInput, 'i');
+
             const blogs = await this.blogs.find({ title: regexPattern })
             .limit(page.limit)
             .skip(page.skip)
@@ -98,7 +104,9 @@ class BlogRepository {
 
             return blog;
         } else {
-            const regexPattern = new RegExp(page.title, 'i');
+            const safeTitleInput = this.escapeRegex(page.title);
+            const regexPattern = new RegExp(safeTitleInput, 'i');
+            
             const blog = await this.blogs.find({ 
                 blog_owner_id: new ObjectId(page.blog_owner_id), title: regexPattern 
             })
