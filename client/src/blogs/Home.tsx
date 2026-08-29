@@ -30,7 +30,7 @@ export default function Home() {
             <main className="h-full md:w-3/4 w-full flex flex-col">
                 <header className="px-2.5 pt-2.5">
                     <input
-                        className="outline-0 border border-zinc-700 text-zinc-700 text-base"
+                        className="outline-0 border p-1.5 rounded-md border-zinc-700 text-zinc-700 text-base"
                         id="search blog title"
                         placeholder="find blog title here"
                         type="text"
