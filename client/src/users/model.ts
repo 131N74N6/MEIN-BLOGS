@@ -8,18 +8,16 @@ export type UserIdInput = {
     resetUserIdState: () => void;
 }
 
-export type UserIntrf = {
-    created_at: string;
+export type OtherUserData = {
+    created_at: Date;
+    description: string;
     email: string;
     profile_picture: {
-        filename: string;
-        filetype: string;
         public_id: string;
-        resource_type: string;
         url: string;
     } | null;
     user_id: string;
-    username: string;
+    user_name: string;
 }
 
 export type ProfilePictureHeaderIntrf = {

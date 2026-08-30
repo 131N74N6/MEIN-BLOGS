@@ -6,6 +6,7 @@ import { useCommentStore } from "../comments/store";
 import { useUserStore } from "./store";
 import { useStyleStore } from "../styles/store";
 import { apiRequest, apiUpload } from "../handler/api";
+import type { OtherUserData } from "./model";
 
 export default function useUserService() {
     const navigate = useNavigate();
@@ -98,8 +99,7 @@ export default function useUserService() {
         enabled: !!otherUserId,
         queryKey: [`other-user`],
         queryFn: async () => {
-            const request = await apiRequest(`/api/users/show/${otherUserId}`, { method: "GET" });
-
+            const request = await apiRequest<OtherUserData>(`/api/users/show/${otherUserId}`, { method: "GET" });
             return request.data;
         },
         retry: false

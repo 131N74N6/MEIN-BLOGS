@@ -152,7 +152,7 @@ class UserService {
                 public_id: user.image_public_id,
                 url: user.image,
             },
-            user_id: user.id,
+            user_id: user._id,
             user_name: user.name
         };
     }
