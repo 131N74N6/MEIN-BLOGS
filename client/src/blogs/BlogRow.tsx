@@ -21,7 +21,7 @@ export default function BlogRow(blog: BlogRowData) {
     const setBlogId = useBlogStore((state) => state.setBlogId);
     const setBlogOwnerId = useBlogStore((state) => state.setBlogOwnerId);
 
-    const isOwner = otherUserId === currentUserId || otherUserId === undefined;;
+    const isOwner = otherUserId === currentUserId;
 
     const seeThisBlog = () => {
         setBlogId(blog.data._id);

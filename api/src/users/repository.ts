@@ -76,10 +76,13 @@ class UserRepository {
     }
 
     async getCurrentUser(current_user_id: string) {
-        return await this.users.findOne(
+        const user = await this.users.findOne(
             { _id: new ObjectId(current_user_id) }, 
             { projection: { createdAt: 1, email: 1, image:1, name: 1 } }
         );
+
+        console.log(user);
+        return user;
     }
 
     async getCurrentUserBlogs(userId: string) {

@@ -80,16 +80,17 @@ export default function useRelationService() {
     const hasUserFollowed = useQuery({
         enabled: !!currentUserId && !!otherUserId,
         queryFn: async () => {
-            return await apiRequest<boolean>(`/api/relations/has-followed/${currentUserId}/${otherUserId}`, {
-                method: "GET"
-            });
+            const endpoint = `/api/relations/has-followed/${currentUserId}/${otherUserId}`;
+            const request = await apiRequest<boolean>(endpoint, { method: "GET" });
+            
+            return request.data ?? false;
         },
         queryKey: [`has-followed-${currentUserId}-${otherUserId}`]
     });
 
     const startFollowOneUserMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/api/relations/${otherUserId}`, { method: "POST" });
+            return await apiRequest(`/api/relations/follow/${otherUserId}`, { method: "POST" });
         },
         onError: (error) => {
             setMessage(error.message);

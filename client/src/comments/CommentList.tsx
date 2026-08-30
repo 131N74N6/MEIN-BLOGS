@@ -15,7 +15,7 @@ export default function CommentList(comments: CommentListDetail) {
     return (
         <section className="h-[80dvh] w-full flex px-2.5 pt-2.5 gap-2.5 flex-col overflow-y-auto">
             <div className="flex flex-col gap-2.5">
-                {comments.data.map((comment) => (<CommentData {...comment}/>))}
+                {comments.data.map((comment) => (<CommentData key={`comment-${comment._id}`} {...comment}/>))}
             </div>
             {comments.data.length <= 16 ? null : comments.hasNextPage ? (
                 <section className="flex justify-center">

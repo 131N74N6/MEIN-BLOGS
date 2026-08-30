@@ -182,34 +182,39 @@ export default function useBlogService() {
     });
 
     const getAllCurrentUserBlogs = useInfiniteQuery({
-        enabled: !!currentUserId || !!otherUserId,
+        enabled: !!currentUserId,
         getNextPageParam: (lastPage, allPages) => {
             if (lastPage.length < 16) return;
             return allPages.length + 1;
         },
         initialPageParam: 1,
 
-        queryKey: otherUserId ? [`user-blogs-${otherUserId}`] : 
-        otherUserId && titleSearch ? [`user-blogs-${otherUserId}-${titleSearch}`] :
-        currentUserId && titleSearch ? [`user-blogs-${currentUserId}-${titleSearch}`] : 
-        [`user-blogs-${currentUserId}`],
+        queryKey: titleSearch ? [`user-blogs-${currentUserId}-${titleSearch}`] : [`user-blogs-${currentUserId}`],
 
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
-            let url = `/api/blogs/user/${currentUserId}?page=${pageParam}&limit=${16}`;
+            const url = titleSearch ? 
+            `/api/blogs/user/${currentUserId}?page=${pageParam}&limit=${16}&title=${titleSearch}` :
+            `/api/blogs/user/${currentUserId}?page=${pageParam}&limit=${16}`;
 
-            if (otherUserId) {
-                if (titleSearch !== "") {
-                    url = `/api/blogs/user/${otherUserId}?page=${pageParam}&limit=${16}&title=${titleSearch}`;
-                } else {
-                    url = `/api/blogs/user/${otherUserId}?page=${pageParam}&limit=${16}`;
-                }
-            } else {
-                if (titleSearch !== "") {
-                    url = `/api/blogs/user/${currentUserId}?page=${pageParam}&limit=${16}&title=${titleSearch}`;
-                } else {
-                    url = `/api/blogs/user/${currentUserId}?page=${pageParam}&limit=${16}`;
-                }
-            }
+            const request = await apiRequest<BlogDetail[]>(url, { method: "GET" });
+            return request.data ?? [];
+        }
+    });
+
+    const getAllOtherUserBlogs = useInfiniteQuery({
+        enabled: !!otherUserId && otherUserId !== currentUserId,
+        getNextPageParam: (lastPage, allPages) => {
+            if (lastPage.length < 16) return;
+            return allPages.length + 1;
+        },
+        initialPageParam: 1,
+
+        queryKey: titleSearch ? [`user-blogs-${otherUserId}-${titleSearch}`] : [`user-blogs-${otherUserId}`],
+
+        queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
+            const url = titleSearch ? 
+            `/api/blogs/user/${otherUserId}?page=${pageParam}&limit=${16}&title=${titleSearch}` :
+            `/api/blogs/user/${otherUserId}?page=${pageParam}&limit=${16}`;
 
             const request = await apiRequest<BlogDetail[]>(url, { method: "GET" });
             return request.data ?? [];
@@ -217,7 +222,7 @@ export default function useBlogService() {
     });
 
     const getAllCurrentUserBlogsTotal = useQuery({
-        enabled: !!currentUserId || !!otherUserId,
+        enabled: !!currentUserId,
         queryFn: async () => {
             const url = otherUserId ? `/api/blogs/user/total/${otherUserId}` : 
             `/api/blogs/user/total/${currentUserId}`;
@@ -225,7 +230,19 @@ export default function useBlogService() {
             const request = await apiRequest<number>(url, { method: "GET" });
             return request.data ?? 0;
         },
-        queryKey: otherUserId ? [`user-blogs-total-${otherUserId}`] : [`user-blogs-total-${currentUserId}`]
+        queryKey: [`user-blogs-total-${currentUserId}`]
+    });
+
+    const getAllOtherUserBlogsTotal = useQuery({
+        enabled: !!otherUserId && otherUserId !== currentUserId,
+        queryFn: async () => {
+            const url = otherUserId ? `/api/blogs/user/total/${otherUserId}` : 
+            `/api/blogs/user/total/${currentUserId}`;
+
+            const request = await apiRequest<number>(url, { method: "GET" });
+            return request.data ?? 0;
+        },
+        queryKey: [`user-blogs-total-${otherUserId}`]
     });
 
     const getOneBlogContent = useQuery({
@@ -250,6 +267,8 @@ export default function useBlogService() {
         getAllBlogs,
         getAllCurrentUserBlogs,
         getAllCurrentUserBlogsTotal,
+        getAllOtherUserBlogs,
+        getAllOtherUserBlogsTotal,
         getOneBlogContent,
         processing,
         changeOneBlogMt,

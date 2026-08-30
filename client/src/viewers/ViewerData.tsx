@@ -1,8 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import type { ViewerDetail } from "./model";
+import { useUserStore } from "../users/store";
 
 export default function ViewerData(viewer: ViewerDetail) {
     const navigate = useNavigate();
+
+    const currentUserId = useUserStore((state) => state.currentUserId);
+    const setOtherUserId = useUserStore((state) => state.setOtherUserId);
+
+    const isOwner = viewer.user_id === currentUserId;
+
+    const visitUser = () => {
+        if (isOwner) {
+            navigate("/users");
+        } else {
+            setOtherUserId(viewer.user_id);
+            navigate(`/users/others/${viewer.user_id}`);
+        }
+    };
 
     return (
         <div className="bg-zinc-100 p-2 rounded-lg flex flex-row items-center gap-2" key={`viewer-${viewer._id}`}>
@@ -10,7 +25,7 @@ export default function ViewerData(viewer: ViewerDetail) {
                 <button 
                     className="w-8 h-8 cursor-pointer disabled:cursor-not-allowed rounded-full bg-purple-600 text-white font-medium text-sm"
                     disabled={viewer.is_processing}
-                    onClick={() => navigate(`/users/${viewer.user_id}`)}
+                    onClick={visitUser}
                     type="button"
                 >
                     <img 
@@ -23,7 +38,7 @@ export default function ViewerData(viewer: ViewerDetail) {
                 <button 
                     className="w-8 h-8 cursor-pointer disabled:cursor-not-allowed flex justify-center items-center rounded-full bg-purple-600 text-white font-medium text-sm"
                     disabled={viewer.is_processing}
-                    onClick={() => navigate(`/users/${viewer.user_id}`)}
+                    onClick={visitUser}
                     type="button"
                 >
                     {viewer.username[0]}

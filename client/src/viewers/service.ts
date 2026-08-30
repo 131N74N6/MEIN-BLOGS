@@ -50,7 +50,9 @@ export default function useViewerService() {
         }
     });
 
+    const isProcessing = seeOneBlogMt.isPending;
+
     return {
-        getAllBlogViewers, getAllBlogViewersTotal, seeOneBlogMt
+        getAllBlogViewers, getAllBlogViewersTotal, isProcessing, seeOneBlogMt
     }
 }

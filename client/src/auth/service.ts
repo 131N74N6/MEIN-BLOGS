@@ -33,6 +33,7 @@ export default function useAuthService() {
 
     const resetUserProfileState = useUserStore((state) => state.resetUserProfileState);
     const resetUserIdState = useUserStore((state) => state.resetUserIdState);
+    
     const setCurrentUserId = useUserStore((state) => state.setCurrentUserId);
     
     const authClient = createAuthClient({

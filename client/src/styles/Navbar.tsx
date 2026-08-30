@@ -3,7 +3,6 @@ import { useStyleStore } from "./store";
 import type { UseMutationResult } from "@tanstack/react-query";
 import { Settings, File, Home, Menu, PlusSquare, Power, User } from "lucide-react";
 import { cn } from "./utils";
-import { useUserStore } from "../users/store";
 
 type NavbarIntrf = {
     is_processing: boolean;
@@ -11,24 +10,22 @@ type NavbarIntrf = {
     sign_out: UseMutationResult<any, Error, void, unknown>
 }
 
+const asideItems = [
+    { label: "Home", path: "/home", place: "home", icon: Home },
+    { label: "Create Blog", path: "/users/blogs/create", place: "create blog", icon: PlusSquare },
+    { label: "Blogs", path: "/users/blogs", place: "your blogs", icon: File },
+    { label: "Profile", path: "/users", place: "your profile", icon: User },
+    { label: "Settings", path: "/users/settings", place: "your settings", icon: Settings },
+];
+
 export default function Navbar(info: NavbarIntrf) {
     const navigate = useNavigate();
-
-    const currentUserId = useUserStore((state) => state.currentUserId);
 
     const isOpen = useStyleStore((state) => state.isOpen);
     const setIsOpen = useStyleStore((state) => state.setIsOpen);
 
     const navbarToggle = () => setIsOpen(!isOpen);
-
-    const asideItems = [
-        { label: "Home", path: "/home", place: "home", icon: Home },
-        { label: "Create Blog", path: "/users/blogs/create", place: "create blog", icon: PlusSquare },
-        { label: "Blogs", path: `/users/blogs/${currentUserId}`, place: "your blogs", icon: File },
-        { label: "Profile", path: `/users/${currentUserId}`, place: "your profile", icon: User },
-        { label: "Settings", path: "/users/settings", place: "your settings", icon: Settings },
-    ];
-
+    
     return (
         <>
             <aside className="md:w-1/4 bg-zinc-700 md:flex flex-col gap-2.5 p-2.5 hidden h-full">
@@ -44,7 +41,9 @@ export default function Navbar(info: NavbarIntrf) {
                             )}
                             disabled={info.is_processing}
                             key={item.path}
-                            onClick={() => navigate(item.path)}
+                            onClick={() => {
+                                navigate(item.path);
+                            }}
                             type="button"
                         >
                             <Icon size={22} />

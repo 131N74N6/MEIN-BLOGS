@@ -49,8 +49,7 @@ export default function useCommentSevice() {
             });
 
             return request.data ?? [];
-        },
-        staleTime: Infinity
+        }
     });
 
     const getTotalCommentInABlog = useQuery({

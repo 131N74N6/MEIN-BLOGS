@@ -15,6 +15,7 @@ export default function useUserService() {
 
     const setMessage = useStyleStore((state) => state.setMessage);
 
+    const currentUserId = useUserStore((state) => state.currentUserId);
     const otherUserId = useUserStore((state) => state.otherUserId);
 
     const newUserName = useUserStore((state) => state.newUserName);
@@ -96,13 +97,12 @@ export default function useUserService() {
     });
     
     const getCurrentUser = useQuery({
-        enabled: !!otherUserId,
-        queryKey: [`other-user`],
+        enabled: !!otherUserId && otherUserId !== currentUserId,
         queryFn: async () => {
             const request = await apiRequest<OtherUserData>(`/api/users/show/${otherUserId}`, { method: "GET" });
             return request.data;
         },
-        retry: false
+        queryKey: [`other-user-${otherUserId}`]
     });
 
     const handleUserProfilePicture = (event: React.ChangeEvent<HTMLInputElement>) => {

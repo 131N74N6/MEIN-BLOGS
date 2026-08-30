@@ -9,6 +9,7 @@ import Loading from "../styles/Loading";
 import { useNavigate } from "react-router-dom";
 import { Eye } from "lucide-react";
 import useViewerService from "../viewers/service";
+import { useUserStore } from "../users/store";
 
 export default function BlogDetail() {
     const navigate = useNavigate();
@@ -16,7 +17,11 @@ export default function BlogDetail() {
     const blog = useBlogService();
     const viewer = useViewerService();
 
+    const currentUserId = useUserStore((state) => state.currentUserId);
+    const setOtherUserId = useUserStore((state) => state.setOtherUserId);
+
     const isProcessing = auth.isProcessing || blog.processing || blog.getOneBlogContent.isLoading;
+    const isOwner = blog.getOneBlogContent.data && blog.getOneBlogContent.data.blog_owner_id === currentUserId;
 
     const sanitizedAnswer = () => {
         if (!blog.getOneBlogContent.data?.content) return;
@@ -28,6 +33,15 @@ export default function BlogDetail() {
             ],
             ALLOWED_ATTR: ["class", "style"]
         });
+    };
+
+    const visitUser = () => {
+        if (isOwner) {
+            navigate("/users");
+        } else {
+            setOtherUserId(blog.getOneBlogContent.data?.blog_owner_id);
+            navigate(`/users/others/${blog.getOneBlogContent.data?.blog_owner_id}`);
+        }
     };
 
     return (
@@ -52,7 +66,7 @@ export default function BlogDetail() {
                         <button
                             className="cursor-pointer flex flex-row gap-2.5 items-center disabled:cursor-not-allowed"
                             disabled={isProcessing}
-                            onClick={() => navigate(`/users/${blog.getOneBlogContent.data?.blog_owner_id}`)}
+                            onClick={visitUser}
                         >
                             <div className="text-gray-800 font-normal text-base">{blog.getOneBlogContent.data?.blog_owner_name}</div>
                             {blog.getOneBlogContent.data?.blog_owner_profile_picture ? (

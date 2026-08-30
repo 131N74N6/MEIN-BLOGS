@@ -1,8 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import type { RelationDetail } from "./model";
+import { useUserStore } from "../users/store";
 
 export default function RelationData(relation: RelationDetail) {
     const navigate = useNavigate();
+
+    const currentUserId = useUserStore((state) => state.currentUserId);
+    const setOtherUserId = useUserStore((state) => state.setOtherUserId);
+
+    const isOwner = currentUserId === relation.user_id;
+
+    const visitUser = () => {
+        if (isOwner) {
+            navigate("/users");
+        } else {
+            setOtherUserId(relation.user_id);
+            navigate(`/users/others/${relation.user_id}`);
+        }
+    }
 
     return (
         <div className="flex cursor-pointer flex-row p-2 rounded-lg bg-zinc-100 gap-2" key={`relation-${relation._id}`}>
@@ -10,7 +25,7 @@ export default function RelationData(relation: RelationDetail) {
                 <button 
                     className="w-8 h-8 rounded-full bg-purple-600 text-white font-medium text-sm" 
                     disabled={relation.is_processing}
-                    onClick={() => (`/users/${relation.user_id}`)}
+                    onClick={visitUser}
                     type="button"
                 >
                     <img 
@@ -22,7 +37,7 @@ export default function RelationData(relation: RelationDetail) {
                 <button 
                     className="w-8 h-8 rounded-full bg-purple-600 text-white font-medium text-sm" 
                     disabled={relation.is_processing}
-                    onClick={() => navigate(`/users/${relation.user_id}`)}
+                    onClick={visitUser}
                     type="button"
                 >
                     {relation.username[0]}
