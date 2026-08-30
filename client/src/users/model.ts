@@ -3,7 +3,7 @@ export type UserIdInput = {
     setCurrentUserId: (currentUserId: string | undefined) => void;
 
     otherUserId: string | undefined;
-    setotherUserId: (otherUserId: string | undefined) => void;
+    setOtherUserId: (otherUserId: string | undefined) => void;
 
     resetUserIdState: () => void;
 }
@@ -76,9 +76,5 @@ export type UserProfileState = {
     setNewUserName: (newUserName: string) => void;
 }
 
-export type UserMessage = {
-    userMessage: string | null;
-    setUserMessage: (userMessage: string | null) => void;
-}
 
-export type Union = UserProfileState & UserMessage & UserIdInput;
+export type Union = UserProfileState & UserIdInput;

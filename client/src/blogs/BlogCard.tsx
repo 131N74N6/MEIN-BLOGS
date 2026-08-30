@@ -5,9 +5,11 @@ import DOMPurify from "dompurify";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import { useUserStore } from "../users/store";
 
 export default function BlogCard(blog: BlogCardData) {
     const navigate = useNavigate();
+    const setOtherUserId = useUserStore((state) => state.setOtherUserId);
     
     const setBlogId = useBlogStore((state) => state.setBlogId);
     const setBlogOwnerId = useBlogStore((state) => state.setBlogOwnerId);
@@ -27,14 +29,15 @@ export default function BlogCard(blog: BlogCardData) {
     const seeThisBlog = () => {
         setBlogId(blog.data._id);
         setBlogOwnerId(blog.data.blog_owner_id);
+        setOtherUserId(blog.data.blog_owner_id);
         blog.seeOneBlogMt.mutate();
-        navigate(`/users/blogs/${blog.data._id}`);
+        navigate(`/users/blogs/contains/${blog.data._id}`);
     };
 
     return (
         <div 
             className="flex flex-col cursor-pointer gap-2.5 p-2.5 shadow-md shadow-gray-600 rounded-md" 
-            key={blog.data._id} onClick={seeThisBlog}
+            onClick={seeThisBlog}
         >
             <div className="w-full h-full">
                 <img className="w-full h-full object-cover" src={blog.data.media.url}/>

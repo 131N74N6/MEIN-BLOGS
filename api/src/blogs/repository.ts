@@ -118,6 +118,11 @@ class BlogRepository {
         }
     }
 
+    async getAllCurrentUserBlogsTotal(current_user_id: string) {
+        const blog = await this.blogs.find({ blog_owner_id: new ObjectId(current_user_id) }).toArray();
+        return blog.length;
+    }
+
     async getBlogContentById(blog_id: string) {
         return await this.blogs.findOne({ _id: new ObjectId(blog_id) });
     }

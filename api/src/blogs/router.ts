@@ -43,6 +43,11 @@ const blogRouters = new Elysia({ prefix: "/api/blogs" })
     params: t.Pick(blogSchema.params, ["user_id"]),
     query: t.Omit(blogSchema.pagination, ["skip", "blog_owner_id"])
 })
+.get("/user/total/:user_id", async ({ params }) => {
+    return await blogController.getAllCurrentUserBlogsTotal(params.user_id);
+}, {
+    params: t.Pick(blogSchema.params, ["user_id"])
+})
 .put("/remake/:_id", async ({ body, params, user }) => await blogController.changeOneBlog({
     _id: params._id, blog_owner_id: user.id, ...body
 }), {

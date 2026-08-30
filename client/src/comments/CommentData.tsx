@@ -11,18 +11,26 @@ export default function CommentData(comment: CommentDetail) {
     return (
         <div className="flex flex-row gap-2.5 bg-zinc-100 p-2.5 rounded-lg" key={`comment-${comment._id}`}>
             {comment.profile_picture !== null ? (
-                <div 
-                    className="w-8 h-8 rounded-full bg-purple-600 text-white font-medium text-sm" 
+                <button 
+                    className="w-8 h-8 cursor-pointer disabled:cursor-not-allowed rounded-full bg-purple-600 text-white font-medium text-sm" 
+                    disabled={comment.isProcessing}
                     onClick={seeThisUser}
+                    type="button"
                 >
-                    <img className="w-full h-full object-cover rounded-full" alt={`profile-picture-${comment.user_id}`}/>
-                </div>) : (
-                <div 
-                    className="w-8 h-8 flex justify-center items-center rounded-full bg-purple-600 text-white font-medium text-sm" 
+                    <img 
+                        className="w-full h-full object-cover rounded-full" 
+                        alt={`profile-picture-${comment.user_id}`}
+                        src={comment.profile_picture}
+                    />
+                </button>) : (
+                <button 
+                    className="w-8 h-8 cursor-pointer disabled:cursor-not-allowed flex justify-center items-center rounded-full bg-purple-600 text-white font-medium text-sm" 
+                    disabled={comment.isProcessing}
                     onClick={seeThisUser}
+                    type="button"
                 >
                     {comment.username[0]}
-                </div>
+                </button>
             )}
             <div className="flex flex-col gap-1.5">
                 <div className="flex flex-row gap-2.5">

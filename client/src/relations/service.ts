@@ -1,16 +1,15 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRelationStore } from "./store";
 import { useUserStore } from "../users/store";
 import { apiRequest } from "../handler/api";
 import { useStyleStore } from "../styles/store";
-import type { ViewerDetail } from "./model";
+import type { RelationDetail } from "./model";
 
-export default function useRelationshipService() {
+export default function useRelationService() {
     const queryClient = useQueryClient();
     const setMessage = useStyleStore((state) => state.setMessage);
 
     const currentUserId = useUserStore((state) => state.currentUserId);
-    const otherUserId = useRelationStore((state) => state.otherUserId);
+    const otherUserId = useUserStore((state) => state.otherUserId);
 
     const getAllFollowed = useInfiniteQuery({
         enabled: !! currentUserId || !!otherUserId,
@@ -24,7 +23,7 @@ export default function useRelationshipService() {
             `/api/relations/followed/${otherUserId}?page=${pageParam}&limit=${16}` :
             `/api/relations/followed/${currentUserId}?page=${pageParam}&limit=${16}`;
 
-            const request = await apiRequest<ViewerDetail[]>(endpoint, { method: "GET" });
+            const request = await apiRequest<RelationDetail[]>(endpoint, { method: "GET" });
             
             return request.data ?? [];
         },
@@ -43,7 +42,7 @@ export default function useRelationshipService() {
             `/api/relations/followers/${otherUserId}?page=${pageParam}&limit=${16}` :
             `/api/relations/followers/${currentUserId}?page=${pageParam}&limit=${16}`;
 
-            const request = await apiRequest<ViewerDetail[]>(endpoint, { method: "GET" });
+            const request = await apiRequest<RelationDetail[]>(endpoint, { method: "GET" });
             
             return request.data ?? [];
         },
@@ -81,7 +80,7 @@ export default function useRelationshipService() {
     const hasUserFollowed = useQuery({
         enabled: !!currentUserId && !!otherUserId,
         queryFn: async () => {
-            return await apiRequest(`/api/relations/has-followed/${currentUserId}/${otherUserId}`, {
+            return await apiRequest<boolean>(`/api/relations/has-followed/${currentUserId}/${otherUserId}`, {
                 method: "GET"
             });
         },
@@ -90,9 +89,7 @@ export default function useRelationshipService() {
 
     const startFollowOneUserMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/api/relations/${otherUserId}`, {
-                method: "POST"
-            });
+            return await apiRequest(`/api/relations/${otherUserId}`, { method: "POST" });
         },
         onError: (error) => {
             setMessage(error.message);
@@ -108,9 +105,7 @@ export default function useRelationshipService() {
 
     const unfollowOneUserMt = useMutation({
         mutationFn: async (followed_user_id: string) => {
-            return await apiRequest(`/api/relations/${followed_user_id}`, {
-                method: "DELETE"
-            });
+            return await apiRequest(`/api/relations/${followed_user_id}`, { method: "DELETE" });
         },
         onError: (error) => {
             setMessage(error.message);
@@ -124,10 +119,10 @@ export default function useRelationshipService() {
         },
     });
 
-    const relationProcess = startFollowOneUserMt.isPending || unfollowOneUserMt.isPending;
+    const isProcessing = startFollowOneUserMt.isPending || unfollowOneUserMt.isPending;
 
     return {
         getAllFollowers, getAllFollowed, getAllFollowedTotal, getAllFollowersTotal, 
-        hasUserFollowed, relationProcess, startFollowOneUserMt, unfollowOneUserMt
+        hasUserFollowed, isProcessing, startFollowOneUserMt, unfollowOneUserMt
     }
 }

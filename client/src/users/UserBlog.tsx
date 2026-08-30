@@ -24,10 +24,12 @@ export default function UserBlog() {
     const setMessage = useStyleStore((state) => state.setMessage);
     
     const resetChosenBlogsIds = useBlogStore((state) => state.resetChosenBlogsIds);
+    
     const selectMode = useBlogStore((state) => state.selectMode);
     const setSelectMode = useBlogStore((state) => state.setSelectMode);
 
     const currentUserId = useUserStore((state) => state.currentUserId);
+    const otherUserId = useUserStore((state) => state.otherUserId);
 
     useEffect(() => {
         if (message) {
@@ -43,6 +45,7 @@ export default function UserBlog() {
     }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
     const isProcessing = blogs.processing || user.isProcessing;
+    const isOwner = otherUserId === currentUserId || otherUserId === undefined;
 
     return (
         <section className="flex md:flex-row flex-col h-dvh relative">
@@ -50,7 +53,7 @@ export default function UserBlog() {
             {message ? <Alert message={message}/> : null}
             <main className="h-full flex flex-col w-full md:w-3/4">
                 <header className="">
-                    {selectMode ? (
+                    {isOwner ? selectMode ? (
                         <header className="flex justify-end gap-2.5 px-2.5 pt-2.5">
                             <button
                                 className="cursor-pointer disabled:cursor-not-allowed bg-blue-700 text-white font-medium text-sm p-2 w-32 rounded-md hover:bg-blue-500 transition-colors"
@@ -103,7 +106,7 @@ export default function UserBlog() {
                                 </div>
                             </button>
                         </header>
-                    )}
+                    ) : null}
                 </header>
                 <BlogTable 
                     data={blogs.getAllCurrentUserBlogs.data?.pages.flat() ?? []}

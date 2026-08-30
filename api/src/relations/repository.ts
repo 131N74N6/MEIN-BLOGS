@@ -6,24 +6,54 @@ class RelationRepository {
     private relations = db().collection("relations");
     private users = db().collection("user");
 
+    private escapeRegex(text: string): string {
+        return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+    }
+
     async getUserFollowers(props: Omit<TRelation["pagination"], "followed_user_id" | "page">) {
-        return await this.relations.find(
-            { followed_user_id: new ObjectId(props.user_id) }, 
-            { projection: { followed_user_id: 0 }}
-        )
-        .limit(props.limit)
-        .skip(props.skip)
-        .toArray();
+        if (props.username === undefined || props.username === "") {
+            return await this.relations.find(
+                { followed_user_id: new ObjectId(props.user_id) }, 
+                { projection: { followed_user_id: 0 }}
+            )
+            .limit(props.limit)
+            .skip(props.skip)
+            .toArray();
+        } else {
+            const sanitizeUserName = this.escapeRegex(props.username);
+            const regexPattern = new RegExp(sanitizeUserName, 'i');
+
+            return await this.relations.find(
+                { followed_user_id: new ObjectId(props.user_id), username: regexPattern }, 
+                { projection: { followed_user_id: 0 }}
+            )
+            .limit(props.limit)
+            .skip(props.skip)
+            .toArray();
+        }
     }
 
     async getFollowedUsers(props: Omit<TRelation["pagination"], "followed_user_id" | "page">) {
-        return await this.relations.find(
-            { user_id: new ObjectId(props.user_id) }, 
-            { projection: { followed_user_id: 0 }}
-        )
-        .limit(props.limit)
-        .skip(props.skip)
-        .toArray();
+        if (props.username === undefined || props.username === "") {
+            return await this.relations.find(
+                { user_id: new ObjectId(props.user_id) }, 
+                { projection: { followed_user_id: 0 }}
+            )
+            .limit(props.limit)
+            .skip(props.skip)
+            .toArray();
+        } else {
+            const sanitizeUserName = this.escapeRegex(props.username);
+            const regexPattern = new RegExp(sanitizeUserName, 'i');
+
+            return await this.relations.find(
+                { user_id: new ObjectId(props.user_id), username: regexPattern }, 
+                { projection: { followed_user_id: 0 }}
+            )
+            .limit(props.limit)
+            .skip(props.skip)
+            .toArray();
+        }
     }
 
     async getFollowersTotal(props: Pick<TRelation["add"], "user_id">) {

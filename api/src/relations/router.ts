@@ -14,19 +14,19 @@ const relationsRouters = new Elysia({ prefix: "/api/relations" })
 })
 .get("/followers/:user_id", async ({ params, query }) => {
     return await relationController.getUserFollowers({
-        user_id: params.user_id, page: query.page, limit: query.limit
+        user_id: params.user_id, page: query.page, limit: query.limit, username: query.username
     });
 }, {
     params: t.Pick(relationSchema.params, ["user_id"]),
-    query: t.Pick(relationSchema.pagination, ["page", "limit"])
+    query: t.Pick(relationSchema.pagination, ["page", "limit", "username"])
 })
 .get("/followed/:user_id", async ({ params, query }) => {
     return await relationController.getFollowedUser({
-        user_id: params.user_id, page: query.page, limit: query.limit
+        user_id: params.user_id, page: query.page, limit: query.limit, username: query.username
     });
 }, {
     params: t.Pick(relationSchema.params, ["user_id"]),
-    query: t.Pick(relationSchema.pagination, ["page", "limit"])
+    query: t.Pick(relationSchema.pagination, ["page", "limit", "username"])
 })
 .get("/followed/:user_id/total", async ({ params }) => {
     return await relationController.getFollowedUserTotal({ user_id: params.user_id });

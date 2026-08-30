@@ -31,7 +31,7 @@ export default function Home() {
     return (
         <section className="flex md:flex-row flex-col h-dvh">
             <Navbar place="home" sign_out={auth.signOutMt} is_processing={blog.processing}/>
-            <main className="h-full md:w-3/4 w-full flex flex-col gap-2.5">
+            <main className="h-full overflow-y-auto md:w-3/4 w-full flex flex-col gap-2.5">
                 <header className="px-2.5 pt-2.5">
                     <input
                         className="outline-0 border w-full p-1.5 rounded-md border-zinc-700 text-zinc-700 text-base"

@@ -52,7 +52,7 @@ export default function BlogDetail() {
                         <button
                             className="cursor-pointer flex flex-row gap-2.5 items-center disabled:cursor-not-allowed"
                             disabled={isProcessing}
-                            onClick={() => navigate(`/user/${blog.getOneBlogContent.data?.blog_owner_id}`)}
+                            onClick={() => navigate(`/users/${blog.getOneBlogContent.data?.blog_owner_id}`)}
                         >
                             <div className="text-gray-800 font-normal text-base">{blog.getOneBlogContent.data?.blog_owner_name}</div>
                             {blog.getOneBlogContent.data?.blog_owner_profile_picture ? (
@@ -69,7 +69,7 @@ export default function BlogDetail() {
                         <button 
                             className="flex items-center gap-2.5 cursor-pointer disabled:cursor-not-allowed"
                             disabled={isProcessing}
-                            onClick={() => navigate(`/users/blogs/${blog.getOneBlogContent.data?._id}/viewers`)}
+                            onClick={() => navigate(`/users/blogs/contains/${blog.getOneBlogContent.data?._id}/viewers`)}
                             type="button"
                         >
                             <Eye size={22}/>
@@ -116,7 +116,7 @@ export default function BlogDetail() {
                     <button
                         className="cursor-pointer disabled:cursor-not-allowed bg-gray-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-gray-600 transition-colors"
                         disabled={isProcessing}
-                        onClick={() => navigate(`/users/blogs/${blog.getOneBlogContent.data?._id}/comments/`)}
+                        onClick={() => navigate(`/users/blogs/contains/${blog.getOneBlogContent.data?._id}/comments/`)}
                         type="button"
                     >
                         Send Comments

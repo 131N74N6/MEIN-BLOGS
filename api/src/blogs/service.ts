@@ -222,6 +222,11 @@ class BlogService {
         }
     }
 
+    async getAllCurrentUserBlogsTotal(current_user_id: string) {
+        const currentUserId = this.checkIsIdValid(current_user_id, "user id");
+        return await blogRepository.getAllCurrentUserBlogsTotal(currentUserId);
+    }
+
     async getBlogContentById(id: string) {
         const blogId = this.checkIsIdValid(id, "blog id");
         const blogContent = await blogRepository.getBlogContentById(blogId);

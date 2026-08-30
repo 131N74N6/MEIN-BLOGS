@@ -8,7 +8,7 @@ class RelationController {
         const skip = (page - 1) * limit;
 
         const followers = await relationService.getUserFollowers({
-            user_id: query.user_id, page: page, limit: limit, skip: skip
+            user_id: query.user_id, page: page, limit: limit, skip: skip, username: query.username
         });
 
         return { data: followers, message: "followers retrieved successfully", success: true };
@@ -20,7 +20,7 @@ class RelationController {
         const skip = (page - 1) * limit;
 
         const following = await relationService.getFollowedUser({
-            user_id: query.user_id, page: page, limit: limit, skip: skip
+            user_id: query.user_id, page: page, limit: limit, skip: skip, username: query.username
         });
 
         return { data: following, message: "followed user retrieved successfully", success: true };

@@ -29,10 +29,7 @@ export default function useViewerService() {
     const getAllBlogViewersTotal = useQuery({
         enabled: !!blogId,
         queryFn: async () => {
-            const request = await apiRequest<number>(`/api/viewers/show/total/${blogId}`, {
-                method: "GET"
-            });
-
+            const request = await apiRequest<number>(`/api/viewers/show/total/${blogId}`, { method: "GET" });
             return request.data ?? 0;
         },
         queryKey: [`blog-viewers-total-${blogId}`]

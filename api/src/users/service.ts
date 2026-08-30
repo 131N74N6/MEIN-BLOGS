@@ -138,11 +138,23 @@ class UserService {
         ]);
     }
 
-    async getOthertUser(user_id: string) {
-        const user = await userRepository.getOthertUser(user_id);
-        if (!user) throw new BlogApiError(404, "user not found");
+    async getCurrentUser(current_user_id: string) {
+        const currentUserId = this.checkIsUserIdValid(current_user_id);
+        const user = await userRepository.getCurrentUser(currentUserId);
 
-        return user;
+        if (!user) throw new BlogApiError(404, "user not found");
+        
+        return {
+            created_at: user.createdAt,
+            description: user.description,
+            email: user.email, 
+            profile_picture: {
+                public_id: user.image_public_id,
+                url: user.image,
+            },
+            user_id: user.id,
+            user_name: user.name
+        };
     }
 }
 

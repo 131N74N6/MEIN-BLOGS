@@ -3,9 +3,14 @@ import type { BlogRowData } from "./model";
 import { useNavigate } from "react-router-dom";
 import { cn } from "../styles/utils";
 import { useBlogStore } from "./store";
+import { useUserStore } from "../users/store";
 
 export default function BlogRow(blog: BlogRowData) {
     const navigate = useNavigate();
+    const currentUserId = useUserStore((state) => state.currentUserId);
+
+    const otherUserId = useUserStore((state) => state.otherUserId);
+    const setOtherUserId = useUserStore((state) => state.setOtherUserId);
 
     const chosenBlogsIds = useBlogStore((state) => state.chosenBlogsIds);
     const hasSelected = chosenBlogsIds.includes(blog.data._id);
@@ -16,15 +21,18 @@ export default function BlogRow(blog: BlogRowData) {
     const setBlogId = useBlogStore((state) => state.setBlogId);
     const setBlogOwnerId = useBlogStore((state) => state.setBlogOwnerId);
 
+    const isOwner = otherUserId === currentUserId || otherUserId === undefined;;
+
     const seeThisBlog = () => {
         setBlogId(blog.data._id);
         setBlogOwnerId(blog.data.blog_owner_id);
+        setOtherUserId(blog.data.blog_owner_id);
         blog.see_one_blog_mt.mutate();
         navigate(`/users/blogs/${blog.data._id}`);
     };
     
     return (
-        <tr key={blog.data._id} className="hover:bg-gray-50">
+        <tr className="hover:bg-gray-50">
             <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                 {new Date(blog.data.created_at).toLocaleString()}
             </td>
@@ -43,7 +51,7 @@ export default function BlogRow(blog: BlogRowData) {
                     >
                         <Eye size={20}/>
                     </button>
-                    {selectMode ? (
+                    {isOwner ? selectMode ? (
                         <button 
                             className={cn(
                                 "text-blue-500 hover:text-blue-700 transition-colors inline-flex", 
@@ -69,7 +77,7 @@ export default function BlogRow(blog: BlogRowData) {
                         >
                             <Pencil size={20}/>
                         </button>
-                    )}
+                    ) : null}
                 </span>
             </td>
         </tr>

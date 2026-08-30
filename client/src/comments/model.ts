@@ -12,6 +12,7 @@ export type Union = CommenInputState;
 export type CommentDetail = {
     _id: string;
     created_at: Date;
+    isProcessing: boolean;
     profile_picture: string | null;
     text: string;
     user_id: string;

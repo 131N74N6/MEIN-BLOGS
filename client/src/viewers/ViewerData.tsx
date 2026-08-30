@@ -6,22 +6,29 @@ export default function ViewerData(viewer: ViewerDetail) {
 
     return (
         <div className="bg-zinc-100 p-2 rounded-lg flex flex-row items-center gap-2" key={`viewer-${viewer._id}`}>
-            <button
-                className="cursor-pointer disabled:cursor-not-allowed"
-                disabled={viewer.is_processing}
-                onClick={() => navigate(`/users/${viewer.user_id}`)}
-                type="button"
-            >
-                {viewer.profile_picture !== null ? (
-                    <div className="w-8 h-8 rounded-full bg-purple-600 text-white font-medium text-sm">
-                        <img className="w-full h-full object-cover rounded-full" alt={`profile-picture-${viewer.user_id}`}/>
-                    </div>
-                ) : (
-                    <div className="w-8 h-8 flex justify-center items-center rounded-full bg-purple-600 text-white font-medium text-sm">
-                        {viewer.username[0]}
-                    </div>
-                )}
-            </button>
+            {viewer.profile_picture !== null ? (
+                <button 
+                    className="w-8 h-8 cursor-pointer disabled:cursor-not-allowed rounded-full bg-purple-600 text-white font-medium text-sm"
+                    disabled={viewer.is_processing}
+                    onClick={() => navigate(`/users/${viewer.user_id}`)}
+                    type="button"
+                >
+                    <img 
+                        src={viewer.profile_picture} 
+                        className="w-full h-full object-cover rounded-full" 
+                        alt={`profile-picture-${viewer.user_id}`}
+                    />
+                </button>
+            ) : (
+                <button 
+                    className="w-8 h-8 cursor-pointer disabled:cursor-not-allowed flex justify-center items-center rounded-full bg-purple-600 text-white font-medium text-sm"
+                    disabled={viewer.is_processing}
+                    onClick={() => navigate(`/users/${viewer.user_id}`)}
+                    type="button"
+                >
+                    {viewer.username[0]}
+                </button>
+            )}
             <p className="text-base font-normal text-gray-700">{viewer.username} visited your blog at {new Date(viewer.created_at).toLocaleString()}</p>
         </div>
     );

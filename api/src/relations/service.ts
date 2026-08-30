@@ -15,7 +15,7 @@ class RelationService {
         const userId = this.checkIsIdValid("user id", props.user_id);
 
         return await relationRepository.getUserFollowers({
-            user_id: userId, limit: props.limit, skip: props.skip
+            user_id: userId, limit: props.limit, skip: props.skip, username: props.username
         });
     }
 
@@ -23,7 +23,7 @@ class RelationService {
         const userId = this.checkIsIdValid("user id", props.user_id);
 
         return await relationRepository.getFollowedUsers({
-            user_id: userId, limit: props.limit, skip: props.skip
+            user_id: userId, limit: props.limit, skip: props.skip, username: props.username
         });
     }
 

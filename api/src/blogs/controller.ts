@@ -99,6 +99,15 @@ class BlogController {
         }
     }
 
+    async getAllCurrentUserBlogsTotal(current_user_id: string) {
+        const total = await blogService.getAllCurrentUserBlogsTotal(current_user_id);
+        return {
+            success: true,
+            data: total,
+            message: "Current user blogs total retrieved successfully"
+        };
+    }
+
     async getBlogContentById(id: string) {
         const blog = await blogService.getBlogContentById(id);
         return {

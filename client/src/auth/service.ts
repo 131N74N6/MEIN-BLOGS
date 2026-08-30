@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "./store";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useBlogStore } from "../blogs/store";
-import { useRelationStore } from "../relations/store";
 import { useCommentStore } from "../comments/store";
 import { useStyleStore } from "../styles/store";
 import { useUserStore } from "../users/store";
@@ -26,8 +25,6 @@ export default function useAuthService() {
     
     const resetBlogInfoState = useBlogStore((state) => state.resetBlogInfoState);
     const resetBlogWindowState = useBlogStore((state) => state.resetBlogWindowState);
-
-    const resetRelationShipState = useRelationStore((state) => state.resetRelationShipState);
 
     const resetCommentState = useCommentStore((state) => state.resetCommentState);
     
@@ -113,12 +110,10 @@ export default function useAuthService() {
             resetBlogInfoState();
             resetBlogWindowState();
             resetCommentState();
-            resetRelationShipState();
             resetUserProfileState();
             resetUserIdState();
             resetNavbarState();
             useBlogStore.persist.clearStorage();
-            useRelationStore.persist.clearStorage();
             useUserStore.persist.clearStorage();
             navigate("/sign-in");
         }

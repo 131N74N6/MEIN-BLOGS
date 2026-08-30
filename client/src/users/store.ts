@@ -1,24 +1,19 @@
 import { create } from "zustand";
 import type { StateCreator } from "zustand";
-import type { Union, UserIdInput, UserMessage, UserProfileState } from "./model";
+import type { Union, UserIdInput, UserProfileState } from "./model";
 import { persist } from "zustand/middleware";
 
-const userIdSlice: StateCreator<UserIdInput> = (set) => ({
+const userWindowSlice: StateCreator<UserIdInput> = (set) => ({
     currentUserId: undefined,
     setCurrentUserId: (currentUserId) => set({ currentUserId }),
 
     otherUserId: undefined,
-    setotherUserId: (otherUserId: string | undefined) => set({ otherUserId }),
+    setOtherUserId: (otherUserId: string | undefined) => set({ otherUserId }),
 
     resetUserIdState: () => set({
         currentUserId: undefined,
         otherUserId: undefined
     })
-});
-
-const userMessageSlice: StateCreator<UserMessage> = (set) => ({
-    userMessage: null,
-    setUserMessage: (userMessage: string | null) => set({ userMessage })
 });
 
 const userProfileSlice: StateCreator<UserProfileState> = (set) => ({
@@ -59,10 +54,12 @@ const userProfileSlice: StateCreator<UserProfileState> = (set) => ({
 });
 
 export const useUserStore = create<Union>()(persist((...x) => ({
-    ...userMessageSlice(...x),
     ...userProfileSlice(...x),
-    ...userIdSlice(...x)
+    ...userWindowSlice(...x)
 }), {
     name: "user",
-    partialize: (state) => ({ otherUserId: state.otherUserId })
+    partialize: (state) => ({ 
+        currentUserId: state.currentUserId,
+        otherUserId: state.otherUserId 
+    })
 }));

@@ -20,6 +20,7 @@ export default function BlogTable(blogs: BlogTableData) {
                         <BlogRow 
                             data={blog} 
                             is_processing={blogs.is_processing} 
+                            key={`blog-row-${blog._id}`}
                             see_one_blog_mt={blogs.see_one_blog_mt}
                         />
                     ))}

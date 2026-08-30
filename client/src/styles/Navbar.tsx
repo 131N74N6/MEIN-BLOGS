@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import { useStyleStore } from "./store";
 import type { UseMutationResult } from "@tanstack/react-query";
-import { ChartBar, File, Home, Menu, PlusSquare, Power, User } from "lucide-react";
+import { Settings, File, Home, Menu, PlusSquare, Power, User } from "lucide-react";
 import { cn } from "./utils";
 import { useUserStore } from "../users/store";
 
@@ -24,9 +24,9 @@ export default function Navbar(info: NavbarIntrf) {
     const asideItems = [
         { label: "Home", path: "/home", place: "home", icon: Home },
         { label: "Create Blog", path: "/users/blogs/create", place: "create blog", icon: PlusSquare },
-        { label: "Blogs", path: "/users/blogs", place: "your blogs", icon: File },
+        { label: "Blogs", path: `/users/blogs/${currentUserId}`, place: "your blogs", icon: File },
         { label: "Profile", path: `/users/${currentUserId}`, place: "your profile", icon: User },
-        { label: "Dashboard", path: "/users/dashboard", place: "your dashboard", icon: ChartBar },
+        { label: "Settings", path: "/users/settings", place: "your settings", icon: Settings },
     ];
 
     return (
@@ -98,7 +98,10 @@ export default function Navbar(info: NavbarIntrf) {
                             )}
                             disabled={info.is_processing}
                             key={item.path}
-                            onClick={() => navigate(item.path)}
+                            onClick={() => {
+                                navigate(item.path);
+                                setIsOpen(false);
+                            }}
                             type="button"
                         >
                             <Icon size={22} />
@@ -113,7 +116,10 @@ export default function Navbar(info: NavbarIntrf) {
                         "disabled:cursor-not-allowed transition-colors cursor-pointer", 
                     )}
                     disabled={info.is_processing}
-                    onClick={() => info.sign_out.mutate()}
+                    onClick={() => {
+                        info.sign_out.mutate();
+                        setIsOpen(false);
+                    }}
                     type="button"
                 >
                     <Power size={22}/>

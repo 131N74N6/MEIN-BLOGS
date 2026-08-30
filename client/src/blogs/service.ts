@@ -88,6 +88,7 @@ export default function useBlogService() {
             queryClient.invalidateQueries({ queryKey: [`all-blogs-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
+            queryClient.invalidateQueries({ queryKey: [`user-blogs-total-${currentUserId}`] });
             setContent("");
             setMedia(null);
             setMediaUrl(null);
@@ -111,6 +112,7 @@ export default function useBlogService() {
             queryClient.invalidateQueries({ queryKey: [`all-blogs-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
+            queryClient.invalidateQueries({ queryKey: [`user-blogs-total-${currentUserId}`] });
             setContent("");
             setMedia(null);
             setMediaUrl(null);
@@ -134,6 +136,7 @@ export default function useBlogService() {
             queryClient.invalidateQueries({ queryKey: [`all-blogs-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
+            queryClient.invalidateQueries({ queryKey: [`user-blogs-total-${currentUserId}`] });
             setContent("");
             setMedia(null);
             setMediaUrl(null);
@@ -144,10 +147,7 @@ export default function useBlogService() {
 
     const generateNewBlogMt = useMutation({
         mutationFn: async () => {
-            const ingredients = JSON.stringify({
-                language: language.trim(),
-                title: title.trim(),
-            });
+            const ingredients = JSON.stringify({ language: language.trim(), title: title.trim() });
 
             return await apiRequest<string>(`/api/blogs/generate`, {
                 body: ingredients,
@@ -216,13 +216,25 @@ export default function useBlogService() {
         }
     });
 
+    const getAllCurrentUserBlogsTotal = useQuery({
+        enabled: !!currentUserId || !!otherUserId,
+        queryFn: async () => {
+            const url = otherUserId ? `/api/blogs/user/total/${otherUserId}` : 
+            `/api/blogs/user/total/${currentUserId}`;
+
+            const request = await apiRequest<number>(url, { method: "GET" });
+            return request.data ?? 0;
+        },
+        queryKey: otherUserId ? [`user-blogs-total-${otherUserId}`] : [`user-blogs-total-${currentUserId}`]
+    });
+
     const getOneBlogContent = useQuery({
         enabled: !!blogId,
-        queryKey: [`blog-content-${blogId}`],
         queryFn: async () => {
             const request = await apiRequest<BlogDetail>(`/api/blogs/show/${blogId}`, { method: "GET" });
             return request.data;
-        }
+        },
+        queryKey: [`blog-content-${blogId}`]
     });
 
     const processing = deleteAllCurrentUserBlogsMt.isPending || deleteChosenCurrentUserBlogMt.isPending ||
@@ -237,6 +249,7 @@ export default function useBlogService() {
         generateNewBlogMt,
         getAllBlogs,
         getAllCurrentUserBlogs,
+        getAllCurrentUserBlogsTotal,
         getOneBlogContent,
         processing,
         changeOneBlogMt,
