@@ -15,7 +15,7 @@ export default function ViewerData(viewer: ViewerDetail) {
             navigate("/users");
         } else {
             setOtherUserId(viewer.user_id);
-            navigate(`/users/others/${viewer.user_id}`);
+            navigate(`/users/${viewer.user_id}`);
         }
     };
 
@@ -44,7 +44,7 @@ export default function ViewerData(viewer: ViewerDetail) {
                     {viewer.username[0]}
                 </button>
             )}
-            <p className="text-base font-normal text-gray-700">{viewer.username} visited your blog at {new Date(viewer.created_at).toLocaleString()}</p>
+            <p className="text-base font-normal text-gray-700">{viewer.username} visited this blog at {new Date(viewer.created_at).toLocaleString()}</p>
         </div>
     );
 }

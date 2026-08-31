@@ -3,9 +3,11 @@ import { db } from "../mongodb/service";
 import { TUser } from "./model";
 
 class UserRepository {
+    private accounts = db().collection("account");
     private blogs = db().collection("blogs");
     private comments = db().collection("comments");
     private relations = db().collection("relations");
+    private sessions = db().collection("session");
     private users = db().collection("user");
     private viewers = db().collection("viewers");
     
@@ -41,7 +43,15 @@ class UserRepository {
                     blog_owner_name: user.name
                 }
             }),
-            this.users.updateOne({ _id: new ObjectId(user.id) }, { $set: user })
+            this.users.updateOne({ _id: new ObjectId(user.id) }, { $set: {
+                description: user.description,
+                name: user.name,
+                image_public_id: user.image_public_id,
+                image_filename: user.image_filename,
+                image_filetype: user.image_filetype,
+                image_resource_type: user.image_resource_type,
+                updatedAt: new Date()
+            }})
         ]);
     }
 
@@ -71,6 +81,8 @@ class UserRepository {
             this.relations.deleteMany({ followed_user_id: new ObjectId(id) }),
             this.comments.deleteMany({ user_id: new ObjectId(id) }),
             this.blogs.deleteMany({ blog_owner_id: new ObjectId(id) }),
+            this.sessions.deleteMany({ userId: new ObjectId(id) }),
+            this.accounts.deleteOne({ userId: new ObjectId(id) }),
             this.users.deleteOne({ _id: new ObjectId(id) })
         ]);
     }
@@ -81,7 +93,6 @@ class UserRepository {
             { projection: { createdAt: 1, email: 1, image:1, name: 1 } }
         );
 
-        console.log(user);
         return user;
     }
 

@@ -2,7 +2,7 @@ import { TUser } from "./model";
 import userService from "./service";
 
 class UserController {
-    async changeUser(user_data: Omit<Partial<TUser["change_raw"]>, "created_at">) {
+    async changeUser(user_data: Partial<TUser["change_raw"]>) {
         await userService.changeUserService(user_data);
         return { message: "this user profile has changed", success: true };
     }

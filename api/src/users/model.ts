@@ -9,8 +9,7 @@ export const userSchema = {
         image: t.Union([
             t.File({ type: "image/*", maxSize: 6 * 1024 * 1024, error: "invalid file" }),
             t.Null(), t.Undefined()
-        ]),
-        updatedAt: t.Date({ error: "invalid date" })
+        ])
     }),
     change_result: t.Object({
         id: t.String({ error: "invalid data", pattern: "^[0-9a-fA-F]{24}$" }),
@@ -20,8 +19,7 @@ export const userSchema = {
         image_public_id: t.Optional(t.Union([t.String(), t.Null(), t.Undefined()])),
         image_filename: t.Optional(t.Union([t.String(), t.Null(), t.Undefined()])),
         image_filetype: t.Optional(t.Union([t.String(), t.Null(), t.Undefined()])),
-        image_resource_type: t.Optional(t.Union([t.String(), t.Null(), t.Undefined()])),
-        updatedAt: t.Date({ error: "invalid date" })
+        image_resource_type: t.Optional(t.Union([t.String(), t.Null(), t.Undefined()]))
     }),
     data: t.Unsafe<User>({ error: "invalid data" }),
     other_user: t.Object({

@@ -9,7 +9,6 @@ export default function BlogRow(blog: BlogRowData) {
     const navigate = useNavigate();
     const currentUserId = useUserStore((state) => state.currentUserId);
 
-    const otherUserId = useUserStore((state) => state.otherUserId);
     const setOtherUserId = useUserStore((state) => state.setOtherUserId);
 
     const chosenBlogsIds = useBlogStore((state) => state.chosenBlogsIds);
@@ -21,15 +20,22 @@ export default function BlogRow(blog: BlogRowData) {
     const setBlogId = useBlogStore((state) => state.setBlogId);
     const setBlogOwnerId = useBlogStore((state) => state.setBlogOwnerId);
 
-    const isOwner = otherUserId === currentUserId;
+    const isOwner = blog.data.blog_owner_id === currentUserId;
 
     const seeThisBlog = () => {
-        setBlogId(blog.data._id);
-        setBlogOwnerId(blog.data.blog_owner_id);
-        setOtherUserId(blog.data.blog_owner_id);
-        blog.see_one_blog_mt.mutate();
-        navigate(`/users/blogs/${blog.data._id}`);
-    };
+        if (isOwner) {
+            setBlogId(blog.data._id);
+            setBlogOwnerId(blog.data.blog_owner_id);
+            blog.see_one_blog_mt.mutate();
+        } else {
+            setBlogId(blog.data._id);
+            setBlogOwnerId(blog.data.blog_owner_id);
+            setOtherUserId(blog.data.blog_owner_id);
+            blog.see_one_blog_mt.mutate();
+        }
+        
+        navigate(`/users/blogs/contains/${blog.data._id}`);
+    }
     
     return (
         <tr className="hover:bg-gray-50">

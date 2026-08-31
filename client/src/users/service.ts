@@ -7,6 +7,7 @@ import { useUserStore } from "./store";
 import { useStyleStore } from "../styles/store";
 import { apiRequest, apiUpload } from "../handler/api";
 import type { OtherUserData } from "./model";
+import { useRelationStore } from "../relations/store";
 
 export default function useUserService() {
     const navigate = useNavigate();
@@ -17,6 +18,9 @@ export default function useUserService() {
 
     const currentUserId = useUserStore((state) => state.currentUserId);
     const otherUserId = useUserStore((state) => state.otherUserId);
+
+    const newDescription = useUserStore((state) => state.newDescription);
+    const setNewDescription = useUserStore((state) => state.setNewDescription);
 
     const newUserName = useUserStore((state) => state.newUserName);
     const setNewUserName = useUserStore((state) => state.setNewUserName);
@@ -34,6 +38,7 @@ export default function useUserService() {
     const resetBlogWindowState = useBlogStore((state) => state.resetBlogWindowState);
 
     const resetCommentState = useCommentStore((state) => state.resetCommentState);
+    const resetRelationState = useRelationStore((state) => state.resetRelationState);
 
     const resetNavbarState = useStyleStore((state) => state.resetNavbarState);
     
@@ -41,6 +46,7 @@ export default function useUserService() {
         mutationFn: async () => {
             const changeUserForm = new FormData();
             changeUserForm.append("name", newUserName.trim());
+            if (newDescription) changeUserForm.append("description", newDescription.trim())
             if (newProfilePcture) changeUserForm.append("image", newProfilePcture);
 
             return await apiUpload(`/api/users/remake`, changeUserForm, "PUT");
@@ -53,7 +59,9 @@ export default function useUserService() {
             queryClient.invalidateQueries({ queryKey: [`blog-comments-${blogId}`] });
             resetUserProfileState();
             setNewUserName("");
+            setNewDescription("");
             if (profilePictureRef.current) profilePictureRef.current.value = "";
+            navigate("/users");
         }
     });
 
@@ -73,6 +81,7 @@ export default function useUserService() {
             resetBlogInfoState();
             resetBlogWindowState();
             resetCommentState();
+            resetRelationState();
             resetUserProfileState();
             resetUserIdState();
             resetNavbarState();

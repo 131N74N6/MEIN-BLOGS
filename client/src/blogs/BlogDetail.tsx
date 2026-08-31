@@ -40,7 +40,7 @@ export default function BlogDetail() {
             navigate("/users");
         } else {
             setOtherUserId(blog.getOneBlogContent.data?.blog_owner_id);
-            navigate(`/users/others/${blog.getOneBlogContent.data?.blog_owner_id}`);
+            navigate(`/users/${blog.getOneBlogContent.data?.blog_owner_id}`);
         }
     };
 

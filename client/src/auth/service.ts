@@ -9,6 +9,7 @@ import { useUserStore } from "../users/store";
 import type { AuthServiceApi } from "../../../api/src/auth/model";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 import { useEffect } from "react";
+import { useRelationStore } from "../relations/store";
 
 export default function useAuthService() {
     const navigate = useNavigate();
@@ -27,6 +28,8 @@ export default function useAuthService() {
     const resetBlogWindowState = useBlogStore((state) => state.resetBlogWindowState);
 
     const resetCommentState = useCommentStore((state) => state.resetCommentState);
+
+    const resetRelationState = useRelationStore((state) => state.resetRelationState);
     
     const resetNavbarState = useStyleStore((state) => state.resetNavbarState);
     const setMessage = useStyleStore((state) => state.setMessage);
@@ -110,6 +113,7 @@ export default function useAuthService() {
             resetSignUpInput();
             resetBlogInfoState();
             resetBlogWindowState();
+            resetRelationState();
             resetCommentState();
             resetUserProfileState();
             resetUserIdState();

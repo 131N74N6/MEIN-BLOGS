@@ -13,8 +13,8 @@ type NavbarIntrf = {
 const asideItems = [
     { label: "Home", path: "/home", place: "home", icon: Home },
     { label: "Create Blog", path: "/users/blogs/create", place: "create blog", icon: PlusSquare },
-    { label: "Blogs", path: "/users/blogs", place: "your blogs", icon: File },
-    { label: "Profile", path: "/users", place: "your profile", icon: User },
+    { label: "Your Blogs", path: "/users/blogs", place: "your blogs", icon: File },
+    { label: "Your Profile", path: "/users", place: "your profile", icon: User },
     { label: "Settings", path: "/users/settings", place: "your settings", icon: Settings },
 ];
 

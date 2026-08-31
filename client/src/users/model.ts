@@ -47,6 +47,9 @@ export type UserProfileState = {
         url: string;
     } | null) => void;
 
+    newDescription: string;
+    setNewDescription: (newDescription: string) => void;
+
     newProfilePcture: File | null;
     setNewProfilePcture: (newProfilePcture: File | null) => void;
 

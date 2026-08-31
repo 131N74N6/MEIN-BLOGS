@@ -17,8 +17,10 @@ import Setting from "./settings/Setting";
 import CurrentUser from "./auth/CurrentUser";
 import OtherUser from "./users/OtherUser";
 import OtherUserBlogs from "./users/OtherUserBlogs";
-import Followers from "./relations/Followers";
-import Following from "./relations/Following";
+import YourFollowers from "./relations/YourFollowers";
+import YourFollowed from "./relations/YourFollowed";
+import OtherFollowers from "./relations/OtherFollowers";
+import OtherFollowed from "./relations/OtherFollowed";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -40,6 +42,7 @@ export default function App() {
                     <Route path="/sign-up" element={<SignUp/>}/>
                     <Route path="/home" element={<ProtectedRoute><Home/></ProtectedRoute>}/>
                     <Route path="/users" element={<ProtectedRoute><CurrentUser/></ProtectedRoute>}/>
+                    <Route path="/users/:_id" element={<ProtectedRoute><OtherUser/></ProtectedRoute>}/>
                     <Route path="/users/edit" element={<ProtectedRoute><EditProfile/></ProtectedRoute>}/>
                     <Route path="/users/settings" element={<ProtectedRoute><Setting/></ProtectedRoute>}/>
                     <Route path="/users/blogs" element={<ProtectedRoute><CurrentUserBlog/></ProtectedRoute>}/>
@@ -49,9 +52,10 @@ export default function App() {
                     <Route path="/users/blogs/contains/:_id/viewers" element={<ProtectedRoute><Viewers/></ProtectedRoute>}/>
                     <Route path="/users/blogs/create" element={<ProtectedRoute><CreateBlog/></ProtectedRoute>}/>
                     <Route path="/users/blogs/edit/:_id" element={<ProtectedRoute><EditBlog/></ProtectedRoute>}/>
-                    <Route path="/users/followers/:user_id" element={<ProtectedRoute><Followers/></ProtectedRoute>}/>
-                    <Route path="/users/following/:user_id" element={<ProtectedRoute><Following/></ProtectedRoute>}/>
-                    <Route path="/users/others/:_id" element={<ProtectedRoute><OtherUser/></ProtectedRoute>}/>
+                    <Route path="/users/followers" element={<ProtectedRoute><YourFollowers/></ProtectedRoute>}/>
+                    <Route path="/users/following" element={<ProtectedRoute><YourFollowed/></ProtectedRoute>}/>
+                    <Route path="/users/followers/:user_id" element={<ProtectedRoute><OtherFollowers/></ProtectedRoute>}/>
+                    <Route path="/users/following/:user_id" element={<ProtectedRoute><OtherFollowed/></ProtectedRoute>}/>
                     <Route path="*" element={<Navigate to="/sign-in" replace/>}/>
                 </Routes>
             </BrowserRouter>

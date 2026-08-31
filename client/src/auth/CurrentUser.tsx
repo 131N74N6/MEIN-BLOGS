@@ -4,7 +4,6 @@ import Navbar from "../styles/Navbar";
 import useRelationService from "../relations/service";
 import useAuthService from "./service";
 import useBlogService from "../blogs/service";
-import { useUserStore } from "../users/store";
 
 export default function CurrentUser() {
     const navigate = useNavigate();
@@ -12,8 +11,6 @@ export default function CurrentUser() {
     const auth = useAuthService();
     const blog = useBlogService();
     const relation = useRelationService();
-    
-    const currentUserId = useUserStore((state) => state.currentUserId);
 
     const isProcessing = auth.isProcessing || blog.processing || relation.isProcessing;
     const hasPicture = auth.getCurrentUser.data && auth.getCurrentUser.data.profile_picture.public_id;
@@ -23,7 +20,7 @@ export default function CurrentUser() {
             <Navbar is_processing={isProcessing} place="your profile" sign_out={auth.signOutMt}/>
             <main className="h-full w-full md:w-3/4 flex flex-col gap-2.5 p-2.5">
                 <section className="grid md:grid-cols-2 grid-cols-1 gap-2.5">
-                    <div className="flex flex-row gap-2 rounded-md bg-green-100 p-2">
+                    <div className="flex bg-blue-100 flex-row gap-2 rounded-md bg-bg-blue-100 p-2">
                         {hasPicture ? (
                             <div className="w-8 h-8 rounded-full bg-purple-600 text-white font-medium text-sm">
                                 <img 
@@ -55,28 +52,38 @@ export default function CurrentUser() {
                         </div>
                     </div>
                     <div className="flex flex-col gap-2">
-                        <div className="bg-olive-300 rounded-md flex flex-row gap-3 items-center p-2">
+                        <button 
+                            className="bg-blue-100 rounded-md flex flex-row gap-3 items-center p-2 cursor-pointer disabled:cursor-not-allowed"
+                            disabled={isProcessing}
+                            onClick={() => navigate("/users/followers")}
+                            type="button"
+                        >
                             <div className="text-gray-700"><UserPlus size={30}/></div>
                             <div>
-                                <h3 className="text-gray-700 text-base font-medium">Followers</h3>
-                                <h2 className="text-gray-700 text-lg font-medium">
-                                    {relation.getAllFollowersTotal.data ?? 0}
+                                <h3 className="text-gray-700 text-base font-medium text-left">Followers</h3>
+                                <h2 className="text-gray-700 text-lg font-medium text-left">
+                                    {relation.getAllYourFollowersTotal.data ?? 0}
                                 </h2>
                             </div>
-                        </div>
-                        <div className="bg-olive-300 rounded-md flex flex-row gap-3 items-center p-2">
+                        </button>
+                        <button 
+                            className="bg-blue-100 rounded-md flex flex-row gap-3 items-center p-2 cursor-pointer disabled:cursor-not-allowed"
+                            disabled={isProcessing}
+                            onClick={() => navigate("/users/following")}
+                            type="button"
+                        >
                             <div className="text-gray-700"><UserCheck size={30}/></div>
                             <div>
-                                <h3 className="text-gray-700 text-base font-medium">Following</h3>
-                                <h2 className="text-gray-700 text-lg font-medium">
-                                    {relation.getAllFollowedTotal.data ?? 0}
+                                <h3 className="text-gray-700 text-base font-medium text-left">Following</h3>
+                                <h2 className="text-gray-700 text-lg font-medium text-left">
+                                    {relation.getAllYourFollowedTotal.data ?? 0}
                                 </h2>
                             </div>
-                        </div>
+                        </button>
                         <button 
-                            className="bg-olive-300 rounded-md flex items-center gap-3 flex-row p-2 cursor-pointer disabled:cursor-not-allowed"
+                            className="bg-blue-100 rounded-md flex items-center gap-3 flex-row p-2 cursor-pointer disabled:cursor-not-allowed"
                             disabled={isProcessing}
-                            onClick={() => navigate(`/users/blogs/${currentUserId}`)}
+                            onClick={() => navigate("/users/blogs")}
                             type="button"
                         >
                             <div className="text-gray-700"><File size={30}/></div>
@@ -90,7 +97,7 @@ export default function CurrentUser() {
                     </div>
                 </section>
                 <section className="md:grid-cols-2 grid grid-cols-1 gap-2.5">
-                    <div className="bg-cyan-100 rounded-md p-2 flex flex-row items-center gap-3">
+                    <div className="bg-blue-100 rounded-md p-2 flex flex-row items-center gap-3">
                         <div className="text-gray-700"><MessageCircle size={30}/></div>
                         <div>
                             <h3 className="text-gray-700 text-base font-medium">Comment received total</h3>
@@ -99,7 +106,7 @@ export default function CurrentUser() {
                             </h2>
                         </div>
                     </div>
-                    <div className="bg-cyan-100 rounded-md p-2 flex flex-row items-center gap-3">
+                    <div className="bg-blue-100 rounded-md p-2 flex flex-row items-center gap-3">
                         <div className="text-gray-700"><Eye size={30}/></div>
                         <div>
                             <h3 className="text-gray-700 text-base font-medium">Viewers total</h3>

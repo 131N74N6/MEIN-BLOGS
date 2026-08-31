@@ -1,5 +1,12 @@
 import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from "@tanstack/react-query";
 
+export type RelationState = {
+    searchUser: string;
+    setSearchUser: (searchUser: string) => void;
+    
+    resetRelationState: () => void;
+}
+
 export type RelationDetail = {
     _id: string;
     created_at: Date;

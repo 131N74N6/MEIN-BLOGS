@@ -25,7 +25,7 @@ class UserService {
         return trimmed;
     }
     
-    async changeUserService(user_data: Omit<Partial<TUser["change_raw"]>, "created_at">) {
+    async changeUserService(user_data: Partial<TUser["change_raw"]>) {
         const currentUserId = this.checkIsUserIdValid(user_data.id);
 
         const user = await userRepository.getCurrentUser(currentUserId);
@@ -71,8 +71,7 @@ class UserService {
                 image_filetype: newProfileImage.filetype,
                 image_public_id: newProfileImage.public_id,
                 image_resource_type: newProfileImage.resource_type,
-                name: user_data.name,
-                updatedAt: new Date()
+                name: user_data.name
             });
         } else {
             await userRepository.changeUser({
@@ -83,8 +82,7 @@ class UserService {
                 image_filetype: user.image_filetype || null,
                 image_public_id: user.image_public_id || null,
                 image_resource_type: user.image_resource_type || null,
-                name: user.name,
-                updatedAt: new Date()
+                name: user.name
             });
         }
     }

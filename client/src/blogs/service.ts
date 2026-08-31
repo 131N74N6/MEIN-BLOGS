@@ -61,8 +61,8 @@ export default function useBlogService() {
             setMessage(error.message || "failed to edit and save blog. try again later");
         },
         onSuccess: () => {
+            if (titleSearch !== "") queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`blog-content-${blogId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-blogs-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
@@ -87,7 +87,7 @@ export default function useBlogService() {
             queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
             queryClient.invalidateQueries({ queryKey: [`all-blogs-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
+            if (titleSearch !== "") queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-total-${currentUserId}`] });
             setContent("");
             setMedia(null);
@@ -111,7 +111,7 @@ export default function useBlogService() {
             queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
             queryClient.invalidateQueries({ queryKey: [`all-blogs-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
+            if (titleSearch !== "") queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-total-${currentUserId}`] });
             setContent("");
             setMedia(null);
@@ -135,7 +135,7 @@ export default function useBlogService() {
             queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
             queryClient.invalidateQueries({ queryKey: [`all-blogs-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
+            if (titleSearch !== "") queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-total-${currentUserId}`] });
             setContent("");
             setMedia(null);
@@ -224,10 +224,9 @@ export default function useBlogService() {
     const getAllCurrentUserBlogsTotal = useQuery({
         enabled: !!currentUserId,
         queryFn: async () => {
-            const url = otherUserId ? `/api/blogs/user/total/${otherUserId}` : 
-            `/api/blogs/user/total/${currentUserId}`;
+            const endpoint = `/api/blogs/user/total/${currentUserId}`;
+            const request = await apiRequest<number>(endpoint, { method: "GET" });
 
-            const request = await apiRequest<number>(url, { method: "GET" });
             return request.data ?? 0;
         },
         queryKey: [`user-blogs-total-${currentUserId}`]
@@ -236,10 +235,9 @@ export default function useBlogService() {
     const getAllOtherUserBlogsTotal = useQuery({
         enabled: !!otherUserId && otherUserId !== currentUserId,
         queryFn: async () => {
-            const url = otherUserId ? `/api/blogs/user/total/${otherUserId}` : 
-            `/api/blogs/user/total/${currentUserId}`;
-
-            const request = await apiRequest<number>(url, { method: "GET" });
+            const endpoint = `/api/blogs/user/total/${otherUserId}`;
+            const request = await apiRequest<number>(endpoint, { method: "GET" });
+            
             return request.data ?? 0;
         },
         queryKey: [`user-blogs-total-${otherUserId}`]

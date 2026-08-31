@@ -26,6 +26,9 @@ const userProfileSlice: StateCreator<UserProfileState> = (set) => ({
         url: string; } | null
     ) => set({ deleteProfilePcture }),
 
+    newDescription: "",
+    setNewDescription: (newDescription: string) => set({ newDescription }),
+
     newProfilePcture: null,
     setNewProfilePcture: (newProfilePcture: File | null) => set({ newProfilePcture }),
     
@@ -46,6 +49,7 @@ const userProfileSlice: StateCreator<UserProfileState> = (set) => ({
 
     resetUserProfileState: () => set({
         deleteProfilePcture: null,
+        newDescription: "",
         newProfilePcture: null,
         newProfilePctureUrl: null,
         newUserName: "",

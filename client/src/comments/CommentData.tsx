@@ -15,7 +15,7 @@ export default function CommentData(comment: CommentDetail) {
             navigate("/users");
         } else {
             setOtherUserId(comment.user_id);
-            navigate(`/users/others/${comment.user_id}`);
+            navigate(`/users/${comment.user_id}`);
         }
     }
 

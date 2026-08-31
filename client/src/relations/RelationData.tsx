@@ -15,7 +15,7 @@ export default function RelationData(relation: RelationDetail) {
             navigate("/users");
         } else {
             setOtherUserId(relation.user_id);
-            navigate(`/users/others/${relation.user_id}`);
+            navigate(`/users/${relation.user_id}`);
         }
     }
 
