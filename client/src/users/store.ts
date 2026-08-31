@@ -17,14 +17,14 @@ const userWindowSlice: StateCreator<UserIdInput> = (set) => ({
 });
 
 const userProfileSlice: StateCreator<UserProfileState> = (set) => ({
-    deleteProfilePcture: null,
-    setDeleteProfilePcture: (deleteProfilePcture: { 
+    deleteProfilePicture: null,
+    setDeleteProfilePicture: (deleteProfilePicture: { 
         filename: string; 
         filetype: string; 
         public_id: string; 
         resource_type: string; 
         url: string; } | null
-    ) => set({ deleteProfilePcture }),
+    ) => set({ deleteProfilePicture }),
 
     newDescription: "",
     setNewDescription: (newDescription: string) => set({ newDescription }),
@@ -48,7 +48,7 @@ const userProfileSlice: StateCreator<UserProfileState> = (set) => ({
     } | null) => set({ oldProfilePcture }),
 
     resetUserProfileState: () => set({
-        deleteProfilePcture: null,
+        deleteProfilePicture: null,
         newDescription: "",
         newProfilePcture: null,
         newProfilePctureUrl: null,

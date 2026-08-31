@@ -32,14 +32,14 @@ export type ProfilePictureHeaderIntrf = {
 }
 
 export type UserProfileState = {
-    deleteProfilePcture: {
+    deleteProfilePicture: {
         filename: string;
         filetype: string;
         public_id: string;
         resource_type: string;
         url: string;
     } | null;
-    setDeleteProfilePcture: (deleteProfilePcture: {
+    setDeleteProfilePicture: (deleteProfilePicture: {
         filename: string;
         filetype: string;
         public_id: string;

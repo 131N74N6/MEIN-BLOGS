@@ -46,6 +46,7 @@ class UserRepository {
             this.users.updateOne({ _id: new ObjectId(user.id) }, { $set: {
                 description: user.description,
                 name: user.name,
+                image: user.image,
                 image_public_id: user.image_public_id,
                 image_filename: user.image_filename,
                 image_filetype: user.image_filetype,
@@ -91,6 +92,24 @@ class UserRepository {
         const user = await this.users.findOne(
             { _id: new ObjectId(current_user_id) }, 
             { projection: { createdAt: 1, email: 1, image:1, name: 1 } }
+        );
+
+        return user;
+    }
+
+    async getCurrentUserForEdit(current_user_id: string) {
+        const user = await this.users.findOne(
+            { _id: new ObjectId(current_user_id) }, 
+            { projection: { 
+                createdAt: 1, 
+                email: 1, 
+                image:1, 
+                image_filename: 1, 
+                image_filetype: 1, 
+                image_public_id: 1, 
+                image_resource_type: 1, 
+                name: 1 
+            }}
         );
 
         return user;

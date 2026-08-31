@@ -13,7 +13,8 @@ export default function CurrentUser() {
     const relation = useRelationService();
 
     const isProcessing = auth.isProcessing || blog.processing || relation.isProcessing;
-    const hasPicture = auth.getCurrentUser.data && auth.getCurrentUser.data.profile_picture.public_id;
+    const hasPicture = auth.getCurrentUser.data && auth.getCurrentUser.data.profile_picture.public_id &&
+    auth.getCurrentUser.data.profile_picture.url;
 
     return (
         <section className="flex flex-col md:flex-row z-10 relative h-dvh">

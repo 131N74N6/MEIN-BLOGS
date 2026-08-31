@@ -4,7 +4,7 @@ import userService from "./service";
 class UserController {
     async changeUser(user_data: Partial<TUser["change_raw"]>) {
         await userService.changeUserService(user_data);
-        return { message: "this user profile has changed", success: true };
+        return { message: "this user has changed the profile", success: true };
     }
 
     async deleteOldProfile(current_user_id: string) {

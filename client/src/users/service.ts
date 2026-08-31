@@ -102,6 +102,7 @@ export default function useUserService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["current-user"] });
+            navigate("/users");
         }
     });
     

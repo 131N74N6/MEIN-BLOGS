@@ -4,8 +4,11 @@ import Navbar from "../styles/Navbar";
 import useUserService from "./service";
 import { useUserStore } from "./store";
 import { Camera, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function EditProfile() {
+    const navigate = useNavigate();
+
     const auth = useAuthService();
     const user = useUserService();
 
@@ -106,19 +109,19 @@ export default function EditProfile() {
                 </section>
                 <section className="flex justify-end gap-2.5">
                     <button
-                        className="cursor-pointer disabled:cursor-not-allowed bg-blue-700 text-white font-medium text-sm p-2 w-28 rounded-md hover:bg-blue-500 transition-colors"
+                        className="cursor-pointer disabled:cursor-not-allowed bg-blue-700 text-white font-medium text-sm p-2 w-30 rounded-md hover:bg-blue-500 transition-colors"
                         disabled={isProcessing}
                         type="submit"
                     >
                         Save Changes
                     </button>
                     <button
-                        className="cursor-pointer disabled:cursor-not-allowed bg-gray-700 text-white font-medium text-sm p-2 w-45 rounded-md hover:bg-gray-500 transition-colors"
+                        className="cursor-pointer disabled:cursor-not-allowed bg-gray-700 text-white font-medium text-sm p-2 w-35 rounded-md hover:bg-gray-500 transition-colors"
                         disabled={isProcessing}
-                        onClick={() => user.deleteOldProfilePictureMt.mutate()}
+                        onClick={() => navigate("/users/settings")}
                         type="button"
                     >
-                        Remove Profile Picture
+                        Back to settings
                     </button>
                 </section>
             </form>

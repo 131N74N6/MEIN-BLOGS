@@ -28,7 +28,7 @@ class UserService {
     async changeUserService(user_data: Partial<TUser["change_raw"]>) {
         const currentUserId = this.checkIsUserIdValid(user_data.id);
 
-        const user = await userRepository.getCurrentUser(currentUserId);
+        const user = await userRepository.getCurrentUserForEdit(currentUserId);
         if (!user) throw new BlogApiError(404, "user not found");
         
         let newUsername = user.name;
@@ -36,7 +36,6 @@ class UserService {
         if (user_data.name !== undefined && user_data.name !== "") {
             newUsername = this.checkIsInputValid(user_data.name, "username", 3, 30);
         }
-
         
         if (user_data.image) {
             const fileArrayBuffer = await user_data.image.arrayBuffer();
@@ -50,7 +49,7 @@ class UserService {
                 throw new BlogApiError(400, "file size is too large");
             }
 
-            if (user && user.image_public_id !== null) {
+            if (user && user.image && user.image_public_id) {
                 await v2.uploader.destroy(user.image_public_id, { 
                     resource_type: user.image_resource_type 
                 });
@@ -82,7 +81,7 @@ class UserService {
                 image_filetype: user.image_filetype || null,
                 image_public_id: user.image_public_id || null,
                 image_resource_type: user.image_resource_type || null,
-                name: user.name
+                name: user_data.name
             });
         }
     }
@@ -90,7 +89,7 @@ class UserService {
     async deleteUserService(current_user_id: string) {
         const currentUserId = this.checkIsUserIdValid(current_user_id);
 
-        const user = await userRepository.getCurrentUser(currentUserId);
+        const user = await userRepository.getCurrentUserForEdit(currentUserId);
         if (!user) throw new BlogApiError(404, "user not found");
         
         const operations: Promise<unknown>[] = [];
@@ -107,12 +106,10 @@ class UserService {
             operations.push(...deleteFromCloudinary);
         }
 
-        if (user.profile_picture && user.profile_picture.public_id) {
-            operations.push(
-                v2.uploader.destroy(user.profile_picture.public_id, {
-                    resource_type: user.profile_picture.resource_type
-                })
-            );
+        if (user.image && user.image_public_id) {
+            operations.push(v2.uploader.destroy(user.image_public_id, { 
+                resource_type: user.image_resource_type 
+            }));
         }
 
         if (operations.length > 0) await Promise.all(operations);
@@ -122,15 +119,14 @@ class UserService {
 
     async deleteCurrentUserOldProfile(current_user_id: string) {
         const currentUserId = this.checkIsUserIdValid(current_user_id);
+        const user = await userRepository.getCurrentUserForEdit(currentUserId);
 
-        const user = await userRepository.getCurrentUser(currentUserId);
         if (!user) throw new BlogApiError(404, "user not found");
-
-        if (!user.profile_picture || !user.profile_picture.public_id) return;
+        if (!user.image || !user.image_public_id) throw new BlogApiError(404, "image not found");
 
         await Promise.all([
-            v2.uploader.destroy(user.profile_picture.public_id, {
-                resource_type: user.profile_picture.resource_type
+            v2.uploader.destroy(user.image_public_id, {
+                resource_type: user.image_resource_type
             }),
             userRepository.deleteCurrentUserOldProfile(currentUserId)
         ]);
