@@ -12,7 +12,7 @@ export default function BlogGrid(blogs: BlogGridData) {
 
     return (
         <section className="px-2.5 pb-2.5 overflow-y-auto h-full flex flex-col gap-2.5">
-            <section className="grid gap-2.5 lg:grid-cols-3 md:grid-cols-2 grid-cols-1">
+            <section className="grid gap-3 lg:grid-cols-3 md:grid-cols-2 grid-cols-1">
                 {blogs.data.map((blog) => (
                     <BlogCard data={blog} key={`blog-card-${blog._id}`} seeOneBlogMt={blogs.seeOneBlogMt}/>
                 ))}

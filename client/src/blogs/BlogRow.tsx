@@ -22,7 +22,17 @@ export default function BlogRow(blog: BlogRowData) {
 
     const isOwner = blog.data.blog_owner_id === currentUserId;
 
-    const seeThisBlog = () => {
+    function editThisBlog() {
+        setBlogId(blog.data._id);
+        setBlogOwnerId(blog.data.blog_owner_id);
+        navigate(`/users/blogs/edit/${blog.data._id}`);
+    }
+
+    function selectBlog() {
+        if (selectMode) blogIdToggle(blog.data._id);
+    }
+
+    function seeThisBlog() {
         if (isOwner) {
             setBlogId(blog.data._id);
             setBlogOwnerId(blog.data.blog_owner_id);
@@ -64,9 +74,7 @@ export default function BlogRow(blog: BlogRowData) {
                                 "items-center justify-center cursor-pointer disabled:cursor-not-allowed"
                             )}
                             disabled={blog.is_processing}
-                            onClick={() => {
-                                if (selectMode) blogIdToggle(blog.data._id);
-                            }}
+                            onClick={selectBlog}
                             type="button"
                         >
                             {hasSelected ? <SquareCheck size={20}/> : <Square size={20}/>}
@@ -78,7 +86,7 @@ export default function BlogRow(blog: BlogRowData) {
                                 "items-center justify-center cursor-pointer disabled:cursor-not-allowed"
                             )}
                             disabled={blog.is_processing}
-                            onClick={() => navigate(`/user/blogs/edit/${blog.data._id}`)}
+                            onClick={editThisBlog}
                             type="button"
                         >
                             <Pencil size={20}/>

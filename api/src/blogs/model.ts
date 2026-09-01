@@ -24,24 +24,24 @@ export const blogSchema = {
     change_raw: t.Object({
         _id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid or unsupported data" }),
         blog_owner_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid or unsupported data" }),
-        content: t.String({ minLength: 1, error: "invalid content"}),
-        language: t.String({ minLength: 1, error: "invalid language"}),
-        media: t.File({ maxSize: 6 * 1024 * 1024, type: "image/*", error: "invalid file" }),
-        title: t.String({ minLength: 1, error: "invalid title" })
+        content: t.Optional(t.String({ minLength: 1, error: "invalid content"})),
+        language: t.Optional(t.String({ minLength: 1, error: "invalid language"})),
+        media: t.Optional(t.File({ maxSize: 6 * 1024 * 1024, type: "image/*", error: "invalid file" })),
+        title: t.Optional(t.String({ minLength: 1, error: "invalid title" }))
     }),
     change_result: t.Object({
         _id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid or unsupported data" }),
         blog_owner_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid or unsupported data" }),
-        content: t.String({ minLength: 1, error: "invalid content"}),
-        language: t.String({ minLength: 1, error: "invalid language"}),
-        media: t.Object({
+        content: t.Optional(t.String({ minLength: 1, error: "invalid content"})),
+        language: t.Optional(t.String({ minLength: 1, error: "invalid language"})),
+        media: t.Optional(t.Object({
             filename: t.String({ minLength: 1, error: "invalid file name" }),
             filetype: t.String({ minLength: 1, error: "invalid file type" }),
             public_id: t.String({ minLength: 1, error: "invalid public id" }),
             resource_type: t.String({ minLength: 1, error: "invalid resource type" }),
             url: t.String({ minLength: 1, error: "invalid url"}),
-        }),
-        title: t.String({ minLength: 1, error: "invalid title" })
+        })),
+        title: t.Optional(t.String({ minLength: 1, error: "invalid title" }))
     }),
     bulkDelete: t.Object({
         blogs_ids: t.Array(t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid or unsupported data" }))

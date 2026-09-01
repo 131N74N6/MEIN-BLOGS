@@ -1,3 +1,5 @@
+import  DOMPurify from "dompurify";
+import { marked } from "marked";
 import { useBlogStore } from "./store";
 import { useUserStore } from "../users/store";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -16,16 +18,29 @@ export default function useBlogService() {
     const content = useBlogStore((state) => state.content);
     const setContent = useBlogStore((state) => state.setContent);
 
+    const newContent = useBlogStore((state) => state.newContent);
+    const setNewContent = useBlogStore((state) => state.setNewContent);
+
     const media = useBlogStore((state) => state.media);
     const setMedia = useBlogStore((state) => state.setMedia);
 
+    const newMedia = useBlogStore((state) => state.newMedia);
+    const setNewMedia = useBlogStore((state) => state.setNewMedia);
+
     const setMediaUrl = useBlogStore((state) => state.setMediaUrl);
+    const setNewMediaUrl = useBlogStore((state) => state.setNewMediaUrl);
     
     const language = useBlogStore((state) => state.language);
     const setLanguage = useBlogStore((state) => state.setLanguage);
+    
+    const newLanguage = useBlogStore((state) => state.newLanguage);
+    const setNewLanguage = useBlogStore((state) => state.setNewLanguage);
 
     const title = useBlogStore((state) => state.title);
     const setTitle = useBlogStore((state) => state.setTitle);
+
+    const newTitle = useBlogStore((state) => state.newTitle);
+    const setNewTitle = useBlogStore((state) => state.setNewTitle);
 
     const searched = useBlogStore((state) => state.searched);
     const titleSearch = useDebounce<string>(searched.trim(), 500);
@@ -50,10 +65,10 @@ export default function useBlogService() {
     const changeOneBlogMt = useMutation({
         mutationFn: async (id: string) => {
             const updateBlogForm = new FormData();
-            updateBlogForm.append("language", language.trim().toLowerCase());
-            updateBlogForm.append("title", title.trim());
-            updateBlogForm.append("content", content.trim());
-            if (media) updateBlogForm.append("media", media);
+            updateBlogForm.append("language", newLanguage.trim().toLowerCase());
+            updateBlogForm.append("title", newTitle.trim());
+            updateBlogForm.append("content", newContent.trim());
+            if (newMedia) updateBlogForm.append("media", newMedia);
 
             return await apiUpload(`/api/blogs/remake/${id}`, updateBlogForm, "PUT");
         },
@@ -66,6 +81,11 @@ export default function useBlogService() {
             queryClient.invalidateQueries({ queryKey: [`blog-content-${blogId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-blogs-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
+            setNewContent("");
+            setNewMedia(null);
+            setNewMediaUrl(null);
+            setNewLanguage("");
+            setNewTitle("");
             navigate("/users/blogs");
         }
     });
@@ -100,9 +120,7 @@ export default function useBlogService() {
 
     const deleteAllCurrentUserBlogsMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/api/blogs/rm-all`, {
-                method: "DELETE"
-            });
+            return await apiRequest(`/api/blogs/rm-all`, { method: "DELETE" });
         },
         onError: (error) => {
             setMessage(error.message);
@@ -148,17 +166,16 @@ export default function useBlogService() {
     const generateNewBlogMt = useMutation({
         mutationFn: async () => {
             const ingredients = JSON.stringify({ language: language.trim(), title: title.trim() });
-
-            return await apiRequest<string>(`/api/blogs/generate`, {
-                body: ingredients,
-                method: "POST"
-            });
+            return await apiRequest<string>(`/api/blogs/generate`, { body: ingredients, method: "POST" });
         },
         onError: (error) => {
             setMessage(error.message);
         },
         onSuccess: (response) => {
-            setContent(response.data!);
+            if (response.data) {
+                const sanitizeResponse = sanitizedContent(response.data);
+                setContent(sanitizeResponse);
+            }
         }
     });
 
@@ -255,6 +272,18 @@ export default function useBlogService() {
     const processing = deleteAllCurrentUserBlogsMt.isPending || deleteChosenCurrentUserBlogMt.isPending ||
     createNewBlogMt.isPending || generateNewBlogMt.isPending || changeOneBlogMt.isPending;
 
+    function sanitizedContent(response: string) {
+        const htmlResponse = marked.parse(response) as string;
+        return DOMPurify.sanitize(htmlResponse, {
+            ALLOWED_TAGS: [
+                "p", "br", "strong", "em", "u", "ol", "ul", "li", "code", "pre", "blockquote", 
+                "h1", "h2", "h3", "h4", "h5", "h6", "hr", "table", "thead", "tbody", "tr", "th", 
+                "td", "del", "sub", "sup"
+            ],
+            ALLOWED_ATTR: ["class"]
+        });
+    };
+
     return {
         blogMediaPrefiew,
         blogMediaRef,
@@ -270,5 +299,6 @@ export default function useBlogService() {
         getOneBlogContent,
         processing,
         changeOneBlogMt,
+        sanitizedContent
     }
 }

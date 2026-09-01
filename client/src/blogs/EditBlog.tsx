@@ -1,33 +1,36 @@
-import { useEffect, useRef } from "react";
-import useAuthService from "../auth/service";
+import Alert from "../styles/Alert";
 import Navbar from "../styles/Navbar";
-import useBlogService from "./service";
 import Quill from "quill";
+import useAuthService from "../auth/service";
+import useBlogService from "./service";
+import { useEffect, useRef } from "react";
 import { useBlogStore } from "./store";
 import { Image, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../users/store";
 import { useStyleStore } from "../styles/store";
-import Alert from "../styles/Alert";
 
 export default function EditBlog() {
     const auth = useAuthService();
     const blog = useBlogService();
+
     const navigate = useNavigate();
-    
-    const content = useBlogStore((state) => state.content);
-    const setContent = useBlogStore((state) => state.setContent);
+    const resetEditBlogState = useBlogStore((state) => state.resetEditBlogState);
 
-    const language = useBlogStore((state) => state.language);
-    const setLanguage = useBlogStore((state) => state.setLanguage);
+    const newContent = useBlogStore((state) => state.newContent);
+    const setNewContent = useBlogStore((state) => state.setNewContent);
     
-    const setMedia = useBlogStore((state) => state.setMedia);
+    const newLanguage = useBlogStore((state) => state.newLanguage);
+    const setNewLanguage = useBlogStore((state) => state.setNewLanguage);
     
-    const mediaUrl = useBlogStore((state) => state.mediaUrl);
-    const setMediaUrl = useBlogStore((state) => state.setMediaUrl);
+    const setNewMedia = useBlogStore((state) => state.setNewMedia);
+    const blogId = useBlogStore((state) => state.blogId);
+    
+    const newMediaUrl = useBlogStore((state) => state.newMediaUrl);
+    const setNewMediaUrl = useBlogStore((state) => state.setNewMediaUrl);
 
-    const title = useBlogStore((state) => state.title);
-    const setTitle = useBlogStore((state) => state.setTitle);
+    const newTitle = useBlogStore((state) => state.newTitle);
+    const setNewTitle = useBlogStore((state) => state.setNewTitle);
 
     const message = useStyleStore((state) => state.message);
     const setMessage = useStyleStore((state) => state.setMessage);
@@ -52,51 +55,82 @@ export default function EditBlog() {
 
     useEffect(() => {
         if (!quillRef.current && editorTextRef.current) {
-            quillRef.current = new Quill(editorTextRef.current, { theme: "snow" });
+            quillRef.current = new Quill(editorTextRef.current, { 
+                theme: "snow",
+                modules: {
+                    toolbar: [
+                        [{ header: [1, 2, 3, false] }], 
+                        ["bold", "italic", "underline"], 
+                        [{ list: "ordered" }, { list: "bullet" }], 
+                        ["blockquote", "code-block"], 
+                        ["clean"]
+                    ]
+                } 
+            });
 
             quillRef.current.on("text-change", () => {
-                if (quillRef.current) {
-                    setContent(quillRef.current.root.innerHTML);
-                }
+                if (quillRef.current) setNewContent(quillRef.current.root.innerHTML);
             });
         }
-    }, [setContent]);
+    }, [setNewContent]);
 
     useEffect(() => {
-        if (quillRef.current && content !== quillRef.current.root.innerHTML) {
-            quillRef.current.root.innerHTML = content || "";
+        if (quillRef.current && newContent !== quillRef.current.root.innerHTML) {
+            quillRef.current.clipboard.dangerouslyPasteHTML(0, newContent || "");
         }
-    }, [content]);
+    }, [newContent]);
+
+    useEffect(() => {
+        if (blog.getOneBlogContent.data && blog.getOneBlogContent.data._id === blogId) {
+            setNewContent(blog.sanitizedContent(blog.getOneBlogContent.data.content));
+            setNewTitle(blog.getOneBlogContent.data.title);
+            setNewLanguage(blog.getOneBlogContent.data.language);
+            setNewMediaUrl(blog.getOneBlogContent.data.media.url);
+        } else {
+            setNewContent("");
+            setNewTitle("");
+            setNewLanguage("");
+            setNewMediaUrl("");
+        }
+    }, [blogId, blog.getOneBlogContent.data]);
+
+    useEffect(() => {
+        return () => {
+            resetEditBlogState(); 
+        };
+    }, []);
 
     const isProcessing = blog.processing || auth.isProcessing;
 
-    const publishBlog = (event: React.SubmitEvent<HTMLFormElement>) => {
+    function removeThumbnailPreview(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+        event.stopPropagation();
+        setNewMedia(null);
+        setNewMediaUrl(null);
+        if (newMediaUrl) URL.revokeObjectURL(newMediaUrl);
+    }
+
+    function saveChanges(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
-        blog.createNewBlogMt.mutate();
+        if (blogId) blog.changeOneBlogMt.mutate(blogId);
     }
 
     return (
         <section className="flex md:flex-row flex-col h-dvh relative z-10">
-            <Navbar place="create blog" sign_out={auth.signOutMt} is_processing={blog.processing}/>
+            <Navbar place="" sign_out={auth.signOutMt} is_processing={blog.processing}/>
             {message ? <Alert message={message}/> : null}
-            <form className="h-full md:w-3/4 w-full flex flex-col overflow-y-auto" onSubmit={publishBlog}>
+            <form className="h-full md:w-3/4 w-full flex flex-col overflow-y-auto" onSubmit={saveChanges}>
                 <section className="flex flex-col overflow-y-auto h-full px-2.5 pt-2.5 gap-2.5">
                     <div className="flex flex-col gap-1.5">
                         <label className="text-base font-semibold text-gray-600" htmlFor="media">Thumbnail</label>
                         <input className="hidden" id="media" name="media" onChange={blog.blogMediaPrefiew} ref={blog.blogMediaRef} type="file"/>
                         <div className="border cursor-pointer border-dashed border-gray-500 p-2 h-[50dvh]" onClick={() => blog.blogMediaRef.current?.click()}>
-                            {mediaUrl ? (
+                            {newMediaUrl ? (
                                 <div className="relative group w-full h-full">
-                                    <img className="object-cover w-full h-full" src={mediaUrl} alt="thumbnail"/>
+                                    <img className="object-cover w-full h-full" src={newMediaUrl} alt="thumbnail"/>
                                     <button
                                         className="group-hover:opacity-100 opacity-0 bg-amber-600 text-white flex justify-center items-center cursor-pointer p-1.5 rounded-full w-8 h-8 absolute top-2 left-2"
                                         disabled={isProcessing}
-                                        onClick={(event) => {
-                                            event.stopPropagation();
-                                            setMedia(null);
-                                            setMediaUrl(null);
-                                            URL.revokeObjectURL(mediaUrl);
-                                        }}
+                                        onClick={removeThumbnailPreview}
                                         type="button"
                                     >
                                         <X size={18}/>
@@ -120,8 +154,8 @@ export default function EditBlog() {
                             className="border border-zinc-500 p-1.5 text-sm font-medium text-zinc-500 outline-0 rounded-md"
                             id="title"
                             name="title"
-                            onChange={(event) => setTitle(event.target.value)}
-                            value={title}
+                            onChange={(event) => setNewTitle(event.target.value)}
+                            value={newTitle}
                         />
                     </div>
                     <div className="flex flex-col gap-1.5">
@@ -129,8 +163,8 @@ export default function EditBlog() {
                         <select 
                             className="border border-zinc-500 p-1.5 text-sm font-medium outline-0 rounded-e-md" 
                             id="language"
-                            onChange={(event) => setLanguage(event.target.value)}
-                            value={language}
+                            onChange={(event) => setNewLanguage(event.target.value)}
+                            value={newLanguage}
                         >
                             <option value="" disabled>-- Select language --</option>
                             <option value="indonesia">Indonesia</option>
@@ -158,15 +192,15 @@ export default function EditBlog() {
                         disabled={isProcessing}
                         type="submit"
                     >
-                        Publish
+                        Save
                     </button>
                     <button
-                        className="cursor-pointer disabled:cursor-not-allowed bg-gray-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-gray-600 transition-colors"
+                        className="cursor-pointer disabled:cursor-not-allowed bg-gray-800 text-white font-medium text-sm p-2 w-20 rounded-md hover:bg-gray-600 transition-colors"
                         disabled={isProcessing}
-                        onClick={() => blog.generateNewBlogMt.mutate()}
+                        onClick={() => navigate("/users/blogs")}
                         type="button"
                     >
-                        Generate with AI
+                        Back
                     </button>
                 </section>
             </form>

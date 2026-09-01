@@ -70,8 +70,8 @@ export default function BlogDetail() {
                         >
                             <div className="text-gray-800 font-normal text-base">{blog.getOneBlogContent.data?.blog_owner_name}</div>
                             {blog.getOneBlogContent.data?.blog_owner_profile_picture ? (
-                                <div className="w-8 h-8 rounded-full">
-                                    <img className="w-full h-full object-cover" src={blog.getOneBlogContent.data?.blog_owner_profile_picture}/>
+                                <div className="w-8 h-8">
+                                    <img className="w-full h-full rounded-full object-cover" src={blog.getOneBlogContent.data?.blog_owner_profile_picture}/>
                                 </div>
                             ) : (
                                 <div className="bg-gray-900 flex justify-center items-center w-8 h-8 rounded-full">

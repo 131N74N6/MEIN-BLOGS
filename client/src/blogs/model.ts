@@ -31,6 +31,25 @@ export type BlogInfoState = {
     setTitle: (title: string) => void;
 }
 
+export type EditBlogState = {
+    newContent: string;
+    setNewContent: (newContent: string) => void;
+
+    newMedia: File | null;
+    setNewMedia: (newMedia: File | null) => void;
+
+    newMediaUrl: string | null;
+    setNewMediaUrl: (newMediaUrl: string | null) => void;
+
+    newLanguage: string;
+    setNewLanguage: (newLanguage: string) => void;
+
+    resetEditBlogState: () => void;
+
+    newTitle: string;
+    setNewTitle: (newTitle: string) => void;
+}
+
 export type BlogWindowState = {
     blogId: string | undefined;
     setBlogId: (blogId: string | undefined) => void;
@@ -39,11 +58,6 @@ export type BlogWindowState = {
     setBlogOwnerId: (blogId: string | undefined) => void;
 
     resetBlogWindowState: () => void;
-}
-
-export type BlogMessageState = {
-    blogMessage: string | null;
-    setBlogMessage: (blogMessage: string | null) => void;
 }
 
 export type BlogDetail = {

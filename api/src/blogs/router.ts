@@ -52,8 +52,7 @@ const blogRouters = new Elysia({ prefix: "/api/blogs" })
     _id: params._id, blog_owner_id: user.id, ...body
 }), {
     body: t.Omit(blogSchema.change_raw, ["_id", "blog_owner_id"]),
-    params: t.Pick(blogSchema.params, ["_id"]),
-    type: "multipart/form-data"
+    params: t.Pick(blogSchema.params, ["_id"])
 });
 
 export default blogRouters;

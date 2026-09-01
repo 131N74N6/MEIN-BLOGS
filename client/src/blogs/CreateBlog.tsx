@@ -52,25 +52,40 @@ export default function CreateBlog() {
 
     useEffect(() => {
         if (!quillRef.current && editorTextRef.current) {
-            quillRef.current = new Quill(editorTextRef.current, { theme: "snow" });
+            quillRef.current = new Quill(editorTextRef.current, { 
+                theme: "snow",
+                modules: {
+                    toolbar: [
+                        [{ header: [1, 2, 3, false] }], 
+                        ["bold", "italic", "underline"], 
+                        [{ list: "ordered" }, { list: "bullet" }], 
+                        ["blockquote", "code-block"], 
+                        ["clean"]
+                    ]
+                } 
+            });
 
             quillRef.current.on("text-change", () => {
-                if (quillRef.current) {
-                    setContent(quillRef.current.root.innerHTML);
-                }
+                if (quillRef.current) setContent(quillRef.current.root.innerHTML);
             });
         }
     }, [setContent]);
 
     useEffect(() => {
         if (quillRef.current && content !== quillRef.current.root.innerHTML) {
-            quillRef.current.root.innerHTML = content || "";
+            quillRef.current.clipboard.dangerouslyPasteHTML(0, content || "");
         }
     }, [content]);
 
     const isProcessing = blog.processing || auth.isProcessing;
 
-    const publishBlog = (event: React.SubmitEvent<HTMLFormElement>) => {
+    function removeThumbnailPreview(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+        event.stopPropagation();
+        setMedia(null);
+        setMediaUrl(null);
+    }
+
+    function publishBlog(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
         blog.createNewBlogMt.mutate();
     }
@@ -91,12 +106,7 @@ export default function CreateBlog() {
                                     <button
                                         className="group-hover:opacity-100 opacity-0 bg-amber-600 text-white flex justify-center items-center cursor-pointer p-1.5 rounded-full w-8 h-8 absolute top-2 left-2"
                                         disabled={isProcessing}
-                                        onClick={(event) => {
-                                            event.stopPropagation();
-                                            setMedia(null);
-                                            setMediaUrl(null);
-                                            URL.revokeObjectURL(mediaUrl);
-                                        }}
+                                        onClick={removeThumbnailPreview}
                                         type="button"
                                     >
                                         <X size={18}/>

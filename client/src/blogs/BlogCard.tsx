@@ -36,7 +36,7 @@ export default function BlogCard(blog: BlogCardData) {
 
     return (
         <div 
-            className="flex flex-col cursor-pointer gap-2.5 p-2.5 shadow-md shadow-gray-600 rounded-md" 
+            className="flex flex-col border border-zinc-400 cursor-pointer gap-2.5 p-2.5 shadow-md shadow-gray-600 rounded-md" 
             onClick={seeThisBlog}
         >
             <div className="w-full h-full">
@@ -46,8 +46,8 @@ export default function BlogCard(blog: BlogCardData) {
             <section className="flex gap-2.5 items-center">
                 <div className="text-gray-800 font-normal text-xs">{blog.data.blog_owner_name}</div>
                 {blog.data.blog_owner_profile_picture ? (
-                    <div className="w-8 h-8 rounded-full">
-                        <img className="w-full h-full object-cover" src={blog.data.blog_owner_profile_picture}/>
+                    <div className="w-8 h-8">
+                        <img className="w-full h-full rounded-full object-cover" src={blog.data.blog_owner_profile_picture}/>
                     </div>
                 ) : (
                     <div className="bg-gray-900 flex justify-center items-center w-8 h-8 rounded-full">

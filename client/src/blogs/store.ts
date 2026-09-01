@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { StateCreator } from "zustand";
-import type { BlogInfoState, BlogMessageState, BlogWindowState } from "./model";
+import type { BlogInfoState, BlogWindowState, EditBlogState } from "./model";
 
-type Union = BlogInfoState & BlogWindowState & BlogMessageState;
+type Union = BlogInfoState & BlogWindowState & EditBlogState & EditBlogState;
 
 const blogInfoSlice: StateCreator<BlogInfoState> = (set) => ({
     blogIdToggle: (blogIdParam: string) => set((state) => ({
@@ -60,15 +60,35 @@ const blogWindowSlice: StateCreator<BlogWindowState> = (set) => ({
     })
 });
 
-const blogMessageSlice: StateCreator<BlogMessageState> = (set) => ({
-    blogMessage: null,
-    setBlogMessage: (blogMessage: string | null) => set({ blogMessage })
+const editBlogSlice: StateCreator<EditBlogState> = (set) => ({
+    newContent: "",
+    setNewContent: (newContent: string) => set({ newContent }),
+
+    newMedia: null,
+    setNewMedia: (newMedia: File | null) => set({ newMedia }),
+
+    newMediaUrl: null,
+    setNewMediaUrl: (newMediaUrl: string | null) => set({ newMediaUrl }),
+
+    newLanguage: "",
+    setNewLanguage: (newLanguage: string) => set({ newLanguage }),
+
+    resetEditBlogState: () => set({
+        newContent: "",
+        newMedia: null,
+        newMediaUrl: null,
+        newLanguage: "",
+        newTitle: ""
+    }),
+
+    newTitle: "",
+    setNewTitle: (newTitle: string) => set({ newTitle })
 });
 
 export const useBlogStore = create<Union>()(persist((...x) => ({
     ...blogInfoSlice(...x),
-    ...blogMessageSlice(...x),
-    ...blogWindowSlice(...x)
+    ...blogWindowSlice(...x),
+    ...editBlogSlice(...x)
 }), { 
     name: "blog_data",
     partialize: (state) => ({ 
