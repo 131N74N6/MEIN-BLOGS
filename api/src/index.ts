@@ -8,6 +8,7 @@ import viewerRouters from "./viewers/router";
 import userRouters from "./users/router";
 import { setupErrorHandler } from "./error/handler";
 import { v2 } from "cloudinary";
+import userChatRouters from "./user_chats/router";
 
 const port = import.meta.env.PORT || 3000;
 
@@ -28,6 +29,7 @@ const app = new Elysia()
 .use(commentRouters)
 .use(relationsRouters)
 .use(viewerRouters)
+.use(userChatRouters)
 .use(userRouters)
 .get("/", () => "🦊 Hello, this is Elysia")
 .get("/api", () => "🦊 Elysia API is ready");

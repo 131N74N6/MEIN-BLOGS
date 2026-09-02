@@ -15,7 +15,7 @@ export default function Setting() {
     return (
         <section className="flex-col md:flex-row relative z-10 flex h-dvh">
             <Navbar is_processing={isProcessing} place="your settings" sign_out={auth.signOutMt}/>
-            <main className="flex flex-col gap-2.5 p-2.5 w-full md:w-3/4 h-full">
+            <main className="flex flex-col gap-2.5 p-2.5 w-full md:w-3/4 h-full overflow-y-auto">
                 <button
                     className="cursor-pointer disabled:cursor-not-allowed flex flex-col gap-3 p-3 rounded-md bg-amber-200"
                     disabled={isProcessing}

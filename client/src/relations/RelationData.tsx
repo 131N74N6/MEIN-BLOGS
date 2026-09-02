@@ -33,7 +33,8 @@ export default function RelationData(relation: RelationDetail) {
                         alt={`profile-picture-${relation.user_id}`}
                         src={relation.profile_picture}
                     />
-                </button>) : (
+                </button>
+            ) : (
                 <button 
                     className="w-8 h-8 rounded-full bg-purple-600 text-white font-medium text-sm" 
                     disabled={relation.is_processing}
