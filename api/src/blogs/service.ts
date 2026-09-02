@@ -27,45 +27,6 @@ class BlogService {
         return trimmed;
     }
 
-    async createNewBlog(props: TBlogs["add_raw"]) {
-        if (!props.media) throw new BlogApiError(400, "file is required to make new blog");
-        
-        if (!allowedFileType.includes(props.media.type)) {
-            throw new BlogApiError(400, "this file is not allowed");
-        }
-        
-        if (!allowedLanguage.includes(props.language)) {
-            throw new BlogApiError(400, "this language is not supported yet");
-        }
-
-        if (props.media.size > maxFileSize) {
-            throw new BlogApiError(400, "file size is too large");
-        }
-
-        const blogContent = this.checkIsInputValid(props.content, "content", 1);
-        const currentUserId = this.checkIsIdValid(props.blog_owner_id, "blog owner id");
-        const blogLanguage = this.checkIsInputValid(props.language, "language", 1);
-        const blogTitle = this.checkIsInputValid(props.title, "title", 1);
-        
-        const fileArrayBuffer = await props.media.arrayBuffer();
-        const fileBuffer = Buffer.from(fileArrayBuffer);
-        
-        const newBlogMedia = await uploadToCloudinary({
-            file_buffer: fileBuffer,
-            foldername: "blogs_media",
-            mimetype: props.media.type,
-            original_name: props.media.name
-        });
-
-        await blogRepository.createNewBlog({
-            content: blogContent,
-            blog_owner_id: currentUserId,
-            language: blogLanguage,
-            media: newBlogMedia,
-            title: blogTitle
-        });
-    }
-
     async changeOneBlog(props: TBlogs["change_raw"]) {
         const blog = await blogRepository.getBlogContentById(props._id);
         if (!blog) throw new BlogApiError(404, "blog not found");
@@ -121,6 +82,45 @@ class BlogService {
                 title: blogTitle || blog.title
             });
         }
+    }
+
+    async createNewBlog(props: TBlogs["add_raw"]) {
+        if (!props.media) throw new BlogApiError(400, "file is required to make new blog");
+        
+        if (!allowedFileType.includes(props.media.type)) {
+            throw new BlogApiError(400, "this file is not allowed");
+        }
+        
+        if (!allowedLanguage.includes(props.language)) {
+            throw new BlogApiError(400, "this language is not supported yet");
+        }
+
+        if (props.media.size > maxFileSize) {
+            throw new BlogApiError(400, "file size is too large");
+        }
+
+        const blogContent = this.checkIsInputValid(props.content, "content", 1);
+        const currentUserId = this.checkIsIdValid(props.blog_owner_id, "blog owner id");
+        const blogLanguage = this.checkIsInputValid(props.language, "language", 1);
+        const blogTitle = this.checkIsInputValid(props.title, "title", 1);
+        
+        const fileArrayBuffer = await props.media.arrayBuffer();
+        const fileBuffer = Buffer.from(fileArrayBuffer);
+        
+        const newBlogMedia = await uploadToCloudinary({
+            file_buffer: fileBuffer,
+            foldername: "blogs_media",
+            mimetype: props.media.type,
+            original_name: props.media.name
+        });
+
+        await blogRepository.createNewBlog({
+            content: blogContent,
+            blog_owner_id: currentUserId,
+            language: blogLanguage,
+            media: newBlogMedia,
+            title: blogTitle
+        });
     }
 
     async deleteAllBlogs(currentUserId: string) {

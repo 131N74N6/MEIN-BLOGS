@@ -66,6 +66,7 @@ export default function useAuthService() {
                 user_session: request.data.session
             }
         },
+        
         retry: false
     });
 

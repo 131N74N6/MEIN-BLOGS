@@ -28,7 +28,7 @@ class UserChatService {
         const messageId = this.checkIsIdValid("", data._id);
         const updatedMessage = this.checkIsInputValid("message", 1, data.message);
 
-        await userChatRepository.changeMessage({ _id: messageId, message: updatedMessage });
+        return await userChatRepository.changeMessage({ _id: messageId, message: updatedMessage });
     }
 
     async clearAllMessages(data: Omit<TUserChat["delete_chat"], "message_ids">) {
@@ -191,6 +191,14 @@ class UserChatService {
         }
 
         if (operations.length > 0) await Promise.all(operations);
+
+        const affectedIds = chats.map(chat => chat._id.toString());
+        
+        return {
+            deleted_message_ids: affectedIds,
+            receiver_id: data.receiver_id,
+            sender_id: data.sender_id
+        }
     }
 
     async deleteChosenMessages(data: TUserChat["delete_chat"]) {
@@ -273,6 +281,12 @@ class UserChatService {
         }
 
         if (operations.length > 0) await Promise.all(operations);
+
+        return { 
+            deleted_message_ids: data.message_ids,
+            receiver_id: data.receiver_id,
+            sender_id: data.sender_id
+        }
     }
 
     async getAllMessages(data: Omit<TUserChat["pagination"], "page">) {
@@ -305,7 +319,7 @@ class UserChatService {
             }
         }
 
-        await userChatRepository.sendMessage({
+        return await userChatRepository.sendMessage({
             media: selectedMedia || [],
             message: newMessage,
             receiver_id: receiverId,

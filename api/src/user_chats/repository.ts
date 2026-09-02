@@ -6,10 +6,12 @@ class UserChatRepository {
     private user_chats = db().collection("user_chats");
 
     async changeMessage(data: TUserChat["change_result"]) {
-        return await this.user_chats.updateOne({ _id: new ObjectId(data._id) }, {
+        await this.user_chats.updateOne({ _id: new ObjectId(data._id) }, {
             message: data.message,
             updated_at: new Date()
         });
+
+        return await this.user_chats.findOne({ _id: new ObjectId(data._id) });
     }
 
     async deleteAllMessagesPermanently(message_ids: ObjectId[]) {
@@ -17,12 +19,14 @@ class UserChatRepository {
     }
 
     async deleteAllMessagesTemporary(message_ids: ObjectId[]) {
-        return await this.user_chats.updateMany({ _id: { $in: message_ids } }, {
+        await this.user_chats.updateMany({ _id: { $in: message_ids } }, {
             $set: {
                 media: [],
                 message: "This message has been deleted"
             }
         });
+        
+        return message_ids;
     }
 
     async findAllMessages(data: Pick<TUserChat["pagination"], "receiver_id" | "sender_id">) {
@@ -47,19 +51,22 @@ class UserChatRepository {
                 { receiver_id: data.sender_id, sender_id: data.receiver_id }
             ]
         })
+        .sort({ created_at: -1 })
         .limit(data.limit)
         .skip(data.skip)
         .toArray();
     }
 
     async hideAllMessage(user_id: string, message_ids: ObjectId[]) {
-        return await this.user_chats.updateMany({ _id: { $in: message_ids } }, {
+        await this.user_chats.updateMany({ _id: { $in: message_ids } }, {
             $addToSet: { hidden_for: new ObjectId(user_id) }
         });
+
+        return message_ids;
     }
     
     async sendMessage(data: TUserChat["add_result"]) {
-        return await this.user_chats.insertOne({
+        const result = await this.user_chats.insertOne({
             created_at: new Date(),
             hidden_for: [],
             media: data.media,
@@ -68,6 +75,8 @@ class UserChatRepository {
             receiver_id: new ObjectId(data.receiver_id),
             updated_at: new Date()
         });
+
+        return await this.user_chats.findOne({ _id: result.insertedId });
     }
 }
 
