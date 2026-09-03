@@ -37,4 +37,25 @@ export type UserMessageData = {
     updated_at: Date;
 }
 
+export type ChatMediaMeta = {
+    url: string;
+    public_id: string;
+    resource_type: "image" | "video" | "raw";
+    original_name?: string;
+}
+
+export type ChatMessagePayload = {
+    _id?: string;
+    message?: string;
+    receiver_id: string;
+    sender_id: string;
+    media?: ChatMediaMeta[]; 
+    timestamp?: number;
+}
+
+export type WSMessage = {
+    type: string;
+    payload: ChatMessagePayload | Record<string, any>;
+}
+
 // https://open.spotify.com/intl-id/track/6RcsAN8XF5KX6mMh6dum8e?si=53bd956200ee4f9b

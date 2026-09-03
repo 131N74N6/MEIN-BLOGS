@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import relationRepository from "./repository";
 import { TRelation } from "./model";
-import { BlogApiError } from "../error/handler";
+import { BlogApiError } from "../error/service";
 
 class RelationService {
     private checkIsIdValid(fieldName: string, value: unknown) {

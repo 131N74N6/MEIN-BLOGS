@@ -17,7 +17,9 @@ const blogRouters = new Elysia({ prefix: "/api/blogs" })
 }, {
     body: blogSchema.generate
 })
-.delete("/rm-all", async ({ user }) => await blogController.deleteAllBlogs(user.id))
+.delete("/rm-all", async ({ user }) => {
+    return await blogController.deleteAllBlogs(user.id)
+})
 .delete("/rm-chosen", async({ body, user }) => {
     return await blogController.deleteChosenBlogs(body.blogs_ids, user.id);
 }, {

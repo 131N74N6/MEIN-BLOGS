@@ -4,7 +4,7 @@ import { v2 } from "cloudinary";
 import { uploadToCloudinary } from "../cloudinary/service";
 import { ObjectId } from "mongodb";
 import { TBlogs } from "./model";
-import { BlogApiError } from "../error/handler";
+import { BlogApiError } from "../error/service";
 
 export const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 export const allowedLanguage = ["indonesia", "inggris", "jepang", "jerman"];

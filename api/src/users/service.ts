@@ -3,7 +3,7 @@ import { uploadToCloudinary } from "../cloudinary/service";
 import { v2 } from "cloudinary";
 import { ObjectId } from "mongodb";
 import { TUser } from "./model";
-import { BlogApiError } from "../error/handler";
+import { BlogApiError } from "../error/service";
 
 const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const maxFileSize = 6 * 1024 * 1024;

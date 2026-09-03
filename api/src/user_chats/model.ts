@@ -60,14 +60,22 @@ export const userChatSchema = {
     })
 }
 
-export const getChatRoomId = (id1: string, id2: string) => {
-    const sorted = [id1, id2].sort();
-    return `chat_${sorted[0]}_${sorted[1]}`;
-}
-
 export type ChatWSData = {
     user?: any;
     userId?: string;
+}
+
+export type ExecuteDelete = {
+    chatsToDeletePermanently: any[];
+    chatsToDeleteTemporarily: any[];
+    chatsToHide: any[];
+    senderId: string;
+}
+
+export type ExecuteMediaDelete = {
+    chats: any[]; 
+    deleteFn: (ids: any[]) => Promise<any>;
+    operations: Promise<any>[];
 }
 
 export type TUserChat = {

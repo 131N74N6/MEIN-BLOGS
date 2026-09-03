@@ -6,7 +6,7 @@ import commentRouters from "./comments/router";
 import relationsRouters from "./relations/router";
 import viewerRouters from "./viewers/router";
 import userRouters from "./users/router";
-import { setupErrorHandler } from "./error/handler";
+import { setupErrorHandler } from "./error/service";
 import { v2 } from "cloudinary";
 import userChatRouters from "./user_chats/router";
 

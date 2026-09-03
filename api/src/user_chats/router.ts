@@ -1,10 +1,10 @@
 import Elysia, { t } from "elysia";
 import { authMiddleware } from "../auth/middleware";
 import userChatController from "./controller";
-import { ChatWSData, getChatRoomId, TUserChat, userChatSchema } from "./model";
+import { ChatWSData, TUserChat, userChatSchema } from "./model";
 import { authService } from "../auth/service";
 import userChatService from "./service";
-import { BlogApiError } from "../error/handler";
+import { BlogApiError } from "../error/service";
 
 const userChatRouters = new Elysia({ prefix: "/api/chats" })
 .use(authMiddleware)
@@ -54,10 +54,9 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
                 return;
             }
 
-            // SIMPAN userId DI ws.data AGAR BISA DIAKSES DI HANDLER 'message'
             const data = ws.data as ChatWSData;
             data.user = session.user;
-            data.userId = session.user.id; // <-- PERBAIKAN: Langsung assign ke userId
+            data.userId = session.user.id; 
             
             console.log(`✅ User ${session.user.id} connected to chat WS`);
         } catch (error) {
@@ -69,6 +68,11 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
     message: async (ws, body) => {
         const data = ws.data as ChatWSData;
         const userId = data.userId;
+
+        const getChatRoomId = (id1: string, id2: string) => {
+            const sorted = [id1, id2].sort();
+            return `chat_${sorted[0]}_${sorted[1]}`;
+        }
         
         if (!userId) {
             ws.send(JSON.stringify({ type: "ERROR", message: "Unauthorized" }));

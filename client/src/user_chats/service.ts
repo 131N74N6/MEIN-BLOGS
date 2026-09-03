@@ -18,16 +18,16 @@ export default function useUserChatService() {
     const setChatMedia = useUserChatStore((state) => state.setMedia);
 
     const messageChat = useUserChatStore((state) => state.messageChat);
+    const setMessageChat = useUserChatStore((state) => state.setMessageChat);
 
     const currentUserId = useUserStore((state) => state.currentUserId);
     const otherUserId = useUserStore((state) => state.otherUserId);
 
     const changeMessageMt = useMutation({
         mutationFn: async () => {
-            const newMessage = new FormData();
-            newMessage.append("message", messageChat.trim());
-
-            return await apiUpload("/api/chats/remake", newMessage, "PUT");
+            const endpoint = "/api/chats/remake";
+            const newMessage = JSON.stringify({ message: messageChat.trim() });
+            return await apiRequest(endpoint, { body: newMessage, method: "PUT" });
         },
         onError: (error) => {
             setMessage(error.message);
@@ -39,24 +39,29 @@ export default function useUserChatService() {
 
     const clearAllMessagesMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/api/chats/clear-all?receiver_id=${otherUserId}`, { method: "DELETE" });
+            const endpoint = `/api/chats/clear-all?receiver_id=${otherUserId}`;
+            return await apiRequest(endpoint, { method: "DELETE" });
         },
         onError: (error) => {
             setMessage(error.message);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`]});
+            setMessageChat("");
+            setChatMedia([]);
         }
     });
 
     const clearChosenMessagesMt = useMutation({
         mutationFn: async () => {
-            const deletedMessages = { receiver_id: otherUserId, message_ids: chosenMessageIds };
+            const endpoint = "/api/chats/clear-chosen";
 
-            return await apiRequest("/api/chats/clear-chosen", {
-                body: JSON.stringify(deletedMessages),
-                method: "DELETE" 
+            const deletedMessages = JSON.stringify({ 
+                receiver_id: otherUserId, 
+                message_ids: chosenMessageIds 
             });
+
+            return await apiRequest(endpoint, { body: deletedMessages, method: "DELETE"  });
         },
         onError: (error) => {
             setMessage(error.message);
@@ -68,7 +73,8 @@ export default function useUserChatService() {
 
     const deleteAllMessagesMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/api/chats/rm-all?receiver_id=${otherUserId}`, { method: "DELETE" });
+            const endpoint = `/api/chats/rm-all?receiver_id=${otherUserId}`;
+            return await apiRequest(endpoint, { method: "DELETE" });
         },
         onError: (error) => {
             setMessage(error.message);
@@ -80,12 +86,14 @@ export default function useUserChatService() {
 
     const deleteChosenMessagesMt = useMutation({
         mutationFn: async () => {
-            const deletedMessages = { receiver_id: otherUserId, message_ids: chosenMessageIds };
+            const endpoint = "/api/chats/rm-chosen";
 
-            return await apiRequest(`/api/chats/rm-chosen?receiver_id=${otherUserId}`, {
-                body: JSON.stringify(deletedMessages),
-                method: "DELETE"
+            const deletedMessages = JSON.stringify({ 
+                receiver_id: otherUserId, 
+                message_ids: chosenMessageIds 
             });
+
+            return await apiRequest(endpoint, { body: deletedMessages, method: "DELETE" });
         },
         onError: (error) => {
             setMessage(error.message);
@@ -105,7 +113,6 @@ export default function useUserChatService() {
         queryFn: async ({ pageParam = 1}: { pageParam?: number }) => {
             const endpoint = `/api/chats/show?receiver_id=${otherUserId}&page=${pageParam}&limit=${50}`;
             const request = await apiRequest<UserMessageData[]>(endpoint, { method: "GET" });
-
             return request.data ?? [];
         },
         queryKey: [`user-chats-${otherUserId}`]
@@ -129,6 +136,8 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`]});
+            setMessageChat("");
+            setChatMedia([]);
         }
     });
 
@@ -146,9 +155,10 @@ export default function useUserChatService() {
         if (chatMediaRef.current) chatMediaRef.current.value = "";
     }
 
-    const isProcessing = deleteAllMessagesMt.isPending || deleteChosenMessagesMt.isPending ||
-    clearAllMessagesMt.isPending || clearChosenMessagesMt.isPending || changeMessageMt.isPending ||
-    sendMessagesMt.isPending;
+    const isProcessing = [
+        deleteAllMessagesMt, deleteChosenMessagesMt, clearAllMessagesMt, clearChosenMessagesMt, 
+        changeMessageMt, sendMessagesMt
+    ].some(m => m.isPending);
 
     return {
         changeMessageMt,

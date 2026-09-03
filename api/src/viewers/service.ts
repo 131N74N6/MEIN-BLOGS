@@ -1,7 +1,7 @@
 import { TViewer } from "./model";
 import viewerRepository from "./repository";
 import { ObjectId } from "mongodb";
-import { BlogApiError } from "../error/handler";
+import { BlogApiError } from "../error/service";
 
 class ViewerService {
     private checkIsIdValid(fieldName: string, value: unknown) {
