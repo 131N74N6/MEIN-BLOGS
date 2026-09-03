@@ -65,6 +65,11 @@ export const getChatRoomId = (id1: string, id2: string) => {
     return `chat_${sorted[0]}_${sorted[1]}`;
 }
 
+export type ChatWSData = {
+    user?: any;
+    userId?: string;
+}
+
 export type TUserChat = {
     [k in keyof typeof userChatSchema]: UnwrapSchema<typeof userChatSchema[k]>;
 }
