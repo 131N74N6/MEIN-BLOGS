@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUserStore } from "../users/store";
 import { apiRequest, apiUpload } from "../handler/api";
 import { useStyleStore } from "../styles/store";
@@ -26,14 +26,14 @@ export default function useUserChatService() {
     const changeMessageMt = useMutation({
         mutationFn: async () => {
             const endpoint = "/api/chats/remake";
-            const newMessage = JSON.stringify({ message: messageChat.trim() });
+            const newMessage = JSON.stringify({ message: messageChat?.trim() });
             return await apiRequest(endpoint, { body: newMessage, method: "PUT" });
         },
         onError: (error) => {
             setMessage(error.message);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`]});
+            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
         }
     });
 
@@ -46,7 +46,8 @@ export default function useUserChatService() {
             setMessage(error.message);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`]});
+            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            queryClient.removeQueries({ queryKey: [`is-yours-${currentUserId}`] });
             setMessageChat("");
             setChatMedia([]);
         }
@@ -67,7 +68,8 @@ export default function useUserChatService() {
             setMessage(error.message);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`]});
+            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            queryClient.removeQueries({ queryKey: [`is-yours-${currentUserId}`] });
         }
     });
 
@@ -80,7 +82,8 @@ export default function useUserChatService() {
             setMessage(error.message);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`]});
+            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            queryClient.removeQueries({ queryKey: [`is-yours-${currentUserId}`] });
         }
     });
 
@@ -99,7 +102,8 @@ export default function useUserChatService() {
             setMessage(error.message);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`]});
+            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            queryClient.removeQueries({ queryKey: [`is-yours-${currentUserId}`] });
         }
     });
 
@@ -118,10 +122,28 @@ export default function useUserChatService() {
         queryKey: [`user-chats-${otherUserId}`]
     });
 
+    const isYourMessage = useQuery({
+        enabled: !!currentUserId,
+        queryFn: async () => {
+            const request = await apiRequest<boolean>("/api/chats/is-it-yours", { method: "GET" });
+            return request.data ?? false;
+        },
+        queryKey: [`is-yours-${currentUserId}`]
+    });
+
+    const isCreatedTimeSameWithUpdatedTime = useQuery({
+        enabled: !!currentUserId,
+        queryFn: async () => {
+            const request = await apiRequest<boolean>("/api/chats/is-time-same", { method: "GET" });
+            return request.data ?? false;
+        },
+        queryKey: [`is-yours-${currentUserId}`]
+    });
+
     const sendMessagesMt = useMutation({
         mutationFn: async () => {
             const newMessage = new FormData();
-            newMessage.append("message", messageChat.trim());
+            if (messageChat) newMessage.append("message", messageChat.trim());
             if (otherUserId) newMessage.append("receiver_id", otherUserId);
             if (chatMedia && chatMedia.length > 0) {
                 for (let w = 0; w < chatMedia.length; w++) {
@@ -135,7 +157,8 @@ export default function useUserChatService() {
             setMessage(error.message);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`]});
+            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`is-yours-${currentUserId}`] });
             setMessageChat("");
             setChatMedia([]);
         }
@@ -169,6 +192,7 @@ export default function useUserChatService() {
         getAllUserMessages,
         inputChatMediaHandler,
         isProcessing,
+        isYourMessage,
         sendMessagesMt
     }
 }

@@ -2,7 +2,7 @@ export type MessageChatState = {
     media: FileViewerData[];
     setMedia: (media: FileViewerData[] | ((prev: FileViewerData[]) => FileViewerData[])) => void;
 
-    messageChat: string;
+    messageChat?: string;
     setMessageChat: (messageChat: string) => void;
 
     chosenMessageIds: string[];
@@ -20,7 +20,7 @@ export type FileViewerData = {
     filetype: string;
 }
 
-export type UserMessageData = {
+export type UserMessage = {
     _id: string;
     created_at: Date;
     hidden_for: string[];
@@ -30,27 +30,35 @@ export type UserMessageData = {
         filetype: string;
         public_id: string;
         resource_type: string;
-    }[] | null;
+    }[];
     message: string;
     sender_id: string;
     receiver_id: string;
     updated_at: Date;
 }
 
+export type UserMessageData = {
+    chosen_message_ids: string[];
+    is_own: boolean;
+    is_processing: boolean;
+    is_select_mode: boolean;
+    message: UserMessage;
+    set_chosen_message_ids: (messageId: string) => void;
+}
+
 export type ChatMediaMeta = {
     url: string;
     public_id: string;
     resource_type: "image" | "video" | "raw";
-    original_name?: string;
+    filename?: string;
+    filetype?: string;
 }
 
 export type ChatMessagePayload = {
-    _id?: string;
     message?: string;
     receiver_id: string;
     sender_id: string;
-    media?: ChatMediaMeta[]; 
-    timestamp?: number;
+    media?: ChatMediaMeta[];
 }
 
 export type WSMessage = {

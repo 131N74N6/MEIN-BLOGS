@@ -2,29 +2,29 @@ import { t, UnwrapSchema } from "elysia";
 
 export const userChatSchema = {
     add_raw: t.Object({
-        media: t.Union([
-            t.Array(t.File({ 
-                maxSize: 6 * 1024 * 1024, type: ["image/*", "video/*"], error: "unsupported file" 
-            })),
-            t.Null()
-        ]),
-        message: t.String({ minLength: 1, error: "invalid message" }),
+        media: t.Optional(
+            t.Array(
+                t.File({ maxSize: 6 * 1024 * 1024, type: ["image/*", "video/*"], error: "unsupported file" })
+            )
+        ),
+        message: t.Optional(t.String({ minLength: 1, error: "invalid message" })),
         sender_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid sender" }),
         receiver_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid receiver" })
     }),
 
     add_result: t.Object({
-        media: t.Union([
-            t.Array(t.Object({ 
-                filename: t.String({ error: "invalid filename" }),
-                filetype: t.String({ error: "invalid filename" }),
-                public_id: t.String({ error: "invalid filename" }),
-                resource_type: t.String({ error: "invalid filename" }),
-                url: t.String({ error: "invalid filename" })
-            })), 
-            t.Null()
-        ]),
-        message: t.String({ minLength: 1, error: "invalid message" }),
+        media: t.Optional(
+            t.Array(
+                t.Object({ 
+                    filename: t.String({ error: "invalid filename" }),
+                    filetype: t.String({ error: "invalid filename" }),
+                    public_id: t.String({ error: "invalid filename" }),
+                    resource_type: t.String({ error: "invalid filename" }),
+                    url: t.String({ error: "invalid filename" })
+                })
+            )
+        ),
+        message: t.Optional(t.String({ minLength: 1, error: "invalid message" })),
         sender_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid sender" }),
         receiver_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid receiver" })
     }),
@@ -60,6 +60,10 @@ export const userChatSchema = {
     })
 }
 
+export type TUserChat = {
+    [k in keyof typeof userChatSchema]: UnwrapSchema<typeof userChatSchema[k]>;
+}
+
 export type ChatWSData = {
     user?: any;
     userId?: string;
@@ -76,8 +80,4 @@ export type ExecuteMediaDelete = {
     chats: any[]; 
     deleteFn: (ids: any[]) => Promise<any>;
     operations: Promise<any>[];
-}
-
-export type TUserChat = {
-    [k in keyof typeof userChatSchema]: UnwrapSchema<typeof userChatSchema[k]>;
 }

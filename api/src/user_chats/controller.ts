@@ -39,6 +39,16 @@ class UserChatController {
         return { data: messages, message: "user chat retrieved successfully", success: true };
     }
 
+    async isOwnMessage(sender_id: string) {
+        const owner = await userChatService.isOwnMessage(sender_id);
+        return { data: owner, message: "message owner retrieved successfully", success: true };
+    }
+
+    async isCreatedTimeSameWithUpdatedTime(id: string) {
+        const isTimeSame = await userChatService.isCreatedTimeSameWithUpdatedTime(id);
+        return { data: isTimeSame, message: "time condition retrieved successfully", success: true };
+    }
+
     async sendMessage(data: TUserChat["add_raw"]) {
         await userChatService.sendMessage(data);
         return { message: "message has ben sent successfully", success: true };

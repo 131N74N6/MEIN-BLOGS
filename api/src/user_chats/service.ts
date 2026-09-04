@@ -10,7 +10,7 @@ class UserChatService {
         if (!value || value === "" || typeof value !== "string" || !ObjectId.isValid(value)) {
             if (field === "sender id") throw new BlogApiError(400, "invalid sender");
             else if (field === "receiver") throw new BlogApiError(400, "invalid receiver");
-            else throw new BlogApiError(400, "invalid chat");
+            else throw new BlogApiError(400, "invalid message");
         }
 
         return value;
@@ -207,6 +207,24 @@ class UserChatService {
         return await userChatRepository.getAllMessages(data);
     }
 
+    async isOwnMessage(sender_id: string) {
+        const senderId = this.checkIsIdValid("sender id", sender_id);
+        const chat = await userChatRepository.getMessageBySenderId(senderId);
+        if (!chat) throw new BlogApiError(404, "message not found");
+
+        const isOwner = chat.sender_id.toString() === senderId;
+        return isOwner;
+    }
+
+    async isCreatedTimeSameWithUpdatedTime(message_id: string) {
+        const id = this.checkIsIdValid("", message_id);
+        const chat = await userChatRepository.getMessage(id);
+        if (!chat) throw new BlogApiError(404, "message not found");
+
+        const isSameTime = chat.updated_at === chat.created_at;
+        return isSameTime;
+    }
+
     async sendMessage(data: TUserChat["add_raw"]) {
         let selectedMedia: any[] = [];
         const newMessage = this.checkIsInputValid("message", 1, data.message);
@@ -234,7 +252,7 @@ class UserChatService {
         }
 
         return await userChatRepository.sendMessage({
-            media: selectedMedia || [],
+            media: selectedMedia,
             message: newMessage,
             receiver_id: receiverId,
             sender_id: senderId,

@@ -7,8 +7,8 @@ export const useUserChatStore = create<MessageChatState>((set) => ({
         media: typeof media === 'function' ? media(state.media) : media 
     })),
 
-    messageChat: "",
-    setMessageChat: (messageChat: string) => set({ messageChat }),
+    messageChat: undefined,
+    setMessageChat: (messageChat?: string | undefined) => set({ messageChat }),
 
     chosenMessageIds: [],
     setChosenMessageIds: (messageId: string) => set((state) => ({
@@ -23,7 +23,7 @@ export const useUserChatStore = create<MessageChatState>((set) => ({
     resetMessageChatState: () => set({
         chosenMessageIds: [],
         media: [],
-        messageChat: "",
+        messageChat: undefined,
         selectMode: false
     })
 }));

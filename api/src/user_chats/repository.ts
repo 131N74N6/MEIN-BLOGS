@@ -57,6 +57,14 @@ class UserChatRepository {
         .toArray();
     }
 
+    async getMessageBySenderId(sender_id: string) {
+        return await this.user_chats.findOne({ sender_id: new ObjectId(sender_id) });
+    }
+
+    async getMessage(id: string) {
+        return await this.user_chats.findOne({ _id: new ObjectId(id) });
+    }
+
     async hideAllMessage(user_id: string, message_ids: ObjectId[]) {
         await this.user_chats.updateMany({ _id: { $in: message_ids } }, {
             $addToSet: { hidden_for: new ObjectId(user_id) }
@@ -69,8 +77,8 @@ class UserChatRepository {
         const result = await this.user_chats.insertOne({
             created_at: new Date(),
             hidden_for: [],
-            media: data.media,
-            message: data.message,
+            media: data.media || [],
+            message: data.message || "",
             sender_id: new ObjectId(data.sender_id),
             receiver_id: new ObjectId(data.receiver_id),
             updated_at: new Date()
