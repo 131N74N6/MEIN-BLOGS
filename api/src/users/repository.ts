@@ -10,6 +10,7 @@ class UserRepository {
     private sessions = db().collection("session");
     private users = db().collection("user");
     private viewers = db().collection("viewers");
+    private user_chats = db().collection("user_chats");
     
     async changeUser(user: Partial<TUser["change_result"]>) {
         return await Promise.all([
@@ -84,6 +85,8 @@ class UserRepository {
             this.blogs.deleteMany({ blog_owner_id: new ObjectId(id) }),
             this.sessions.deleteMany({ userId: new ObjectId(id) }),
             this.accounts.deleteOne({ userId: new ObjectId(id) }),
+            this.user_chats.deleteMany({ sender_id: new ObjectId(id) }),
+            this.user_chats.deleteMany({ receiver_id: new ObjectId(id) }),
             this.users.deleteOne({ _id: new ObjectId(id) })
         ]);
     }

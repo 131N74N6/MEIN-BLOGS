@@ -41,11 +41,11 @@ export const userChatSchema = {
     }),
 
     pagination: t.Object({
-        limit: t.Number({ default: 50, error: "invalid limit", maximum: 54 }),
+        limit: t.Number({ default: 52, error: "invalid limit", maximum: 54 }),
         page: t.Number({ default: 1, error: "invalid first page", minimum: 1 }),
         receiver_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid receiver" }),
         sender_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid sender" }),
-        skip: t.Number({ default: 50, error: "invalid skip", maximum: 54 })
+        skip: t.Number({ default: 52, error: "invalid skip", maximum: 54 })
     }),
 
     ws_message: t.Object({

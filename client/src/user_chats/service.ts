@@ -4,7 +4,7 @@ import { apiRequest, apiUpload } from "../handler/api";
 import { useStyleStore } from "../styles/store";
 import { useUserChatStore } from "./store";
 import { useRef } from "react";
-import type { FileViewerData, UserMessageData } from "./model";
+import type { FileViewerData, UserMessage } from "./model";
 
 export default function useUserChatService() {
     const queryClient = useQueryClient();
@@ -12,6 +12,7 @@ export default function useUserChatService() {
 
     const setMessage = useStyleStore((state) => state.setMessage);
     
+    const chosenMessageId = useUserChatStore((state) => state.chosenMessageId);
     const chosenMessageIds = useUserChatStore((state) => state.chosenMessageIds);
 
     const chatMedia = useUserChatStore((state) => state.media);
@@ -20,13 +21,15 @@ export default function useUserChatService() {
     const messageChat = useUserChatStore((state) => state.messageChat);
     const setMessageChat = useUserChatStore((state) => state.setMessageChat);
 
+    const setOpenPopUpOption = useUserChatStore((state) => state.setOpenPopUpOption);
+
     const currentUserId = useUserStore((state) => state.currentUserId);
     const otherUserId = useUserStore((state) => state.otherUserId);
 
     const changeMessageMt = useMutation({
         mutationFn: async () => {
             const endpoint = "/api/chats/remake";
-            const newMessage = JSON.stringify({ message: messageChat?.trim() });
+            const newMessage = JSON.stringify({ message: messageChat?.trim(), _id: chosenMessageId });
             return await apiRequest(endpoint, { body: newMessage, method: "PUT" });
         },
         onError: (error) => {
@@ -48,8 +51,7 @@ export default function useUserChatService() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
             queryClient.removeQueries({ queryKey: [`is-yours-${currentUserId}`] });
-            setMessageChat("");
-            setChatMedia([]);
+            setOpenPopUpOption(false);
         }
     });
 
@@ -70,6 +72,7 @@ export default function useUserChatService() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
             queryClient.removeQueries({ queryKey: [`is-yours-${currentUserId}`] });
+            setOpenPopUpOption(false);
         }
     });
 
@@ -84,6 +87,7 @@ export default function useUserChatService() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
             queryClient.removeQueries({ queryKey: [`is-yours-${currentUserId}`] });
+            setOpenPopUpOption(false);
         }
     });
 
@@ -104,6 +108,7 @@ export default function useUserChatService() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
             queryClient.removeQueries({ queryKey: [`is-yours-${currentUserId}`] });
+            setOpenPopUpOption(false);
         }
     });
 
@@ -116,7 +121,7 @@ export default function useUserChatService() {
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam?: number }) => {
             const endpoint = `/api/chats/show?receiver_id=${otherUserId}&page=${pageParam}&limit=${50}`;
-            const request = await apiRequest<UserMessageData[]>(endpoint, { method: "GET" });
+            const request = await apiRequest<UserMessage[]>(endpoint, { method: "GET" });
             return request.data ?? [];
         },
         queryKey: [`user-chats-${otherUserId}`]
@@ -126,15 +131,6 @@ export default function useUserChatService() {
         enabled: !!currentUserId,
         queryFn: async () => {
             const request = await apiRequest<boolean>("/api/chats/is-it-yours", { method: "GET" });
-            return request.data ?? false;
-        },
-        queryKey: [`is-yours-${currentUserId}`]
-    });
-
-    const isCreatedTimeSameWithUpdatedTime = useQuery({
-        enabled: !!currentUserId,
-        queryFn: async () => {
-            const request = await apiRequest<boolean>("/api/chats/is-time-same", { method: "GET" });
             return request.data ?? false;
         },
         queryKey: [`is-yours-${currentUserId}`]

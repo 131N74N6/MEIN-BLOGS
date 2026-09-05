@@ -61,10 +61,6 @@ class UserChatRepository {
         return await this.user_chats.findOne({ sender_id: new ObjectId(sender_id) });
     }
 
-    async getMessage(id: string) {
-        return await this.user_chats.findOne({ _id: new ObjectId(id) });
-    }
-
     async hideAllMessage(user_id: string, message_ids: ObjectId[]) {
         await this.user_chats.updateMany({ _id: { $in: message_ids } }, {
             $addToSet: { hidden_for: new ObjectId(user_id) }

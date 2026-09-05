@@ -36,11 +36,6 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
 .get("/is-it-yours", async ({ user }) => {
     return await userChatController.isOwnMessage(user.id);
 })
-.get("/is-time-same/:_id", async ({ params }) => {
-    return await userChatController.isCreatedTimeSameWithUpdatedTime(params._id);
-}, {
-    params: t.Pick(userChatSchema.change_result, ["_id"])
-})
 .post("/send", async ({ body, user }) => {
     return await userChatController.sendMessage({ sender_id: user.id, ...body });
 }, {

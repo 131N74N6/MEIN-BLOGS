@@ -1,12 +1,24 @@
+import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult, UseMutationResult } from "@tanstack/react-query";
+import type { ApiResponse } from "../handler/api";
+
 export type MessageChatState = {
+    editMessage: boolean;
+    setEditMessage: (editMessage: boolean) => void;
+
     media: FileViewerData[];
     setMedia: (media: FileViewerData[] | ((prev: FileViewerData[]) => FileViewerData[])) => void;
 
     messageChat?: string;
     setMessageChat: (messageChat: string) => void;
 
+    chosenMessageId: string;
+    setChosenMessageId: (chosenMessageId: string) => void;
+
     chosenMessageIds: string[];
-    setChosenMessageIds: (messageId: string) => void;
+    setChosenMessageIds: (chosenMessageId: string) => void;
+
+    openPopUpOption: boolean;
+    setOpenPopUpOption: (openPopUpOption: boolean) => void;
 
     selectMode: boolean;
     setSelectMode: (selectMode: boolean) => void;
@@ -42,7 +54,19 @@ export type UserMessageData = {
     is_own: boolean;
     is_processing: boolean;
     is_select_mode: boolean;
-    message: UserMessage;
+    data: UserMessage;
+    set_chosen_message_ids: (messageId: string) => void;
+}
+
+export type UserMessageDataList = {
+    chosen_message_ids: string[];
+    fetch_next_page: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<UserMessage[], unknown>, Error>>;
+    has_next_page: boolean;
+    is_fetching_next_page: boolean;
+    is_own: boolean;
+    is_processing: boolean;
+    is_select_mode: boolean;
+    messages: UserMessage[];
     set_chosen_message_ids: (messageId: string) => void;
 }
 
@@ -64,6 +88,16 @@ export type ChatMessagePayload = {
 export type WSMessage = {
     type: string;
     payload: ChatMessagePayload | Record<string, any>;
+}
+
+export type PopUpOptionData = {
+    chosenMessageIds: string[];
+    clearAll: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
+    clearChosen: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
+    deleteAll: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
+    deletChosen: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
+    isProcessing: boolean;
+    setEditMode: (editMode: boolean) => void;
 }
 
 // https://open.spotify.com/intl-id/track/6RcsAN8XF5KX6mMh6dum8e?si=53bd956200ee4f9b

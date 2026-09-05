@@ -216,15 +216,6 @@ class UserChatService {
         return isOwner;
     }
 
-    async isCreatedTimeSameWithUpdatedTime(message_id: string) {
-        const id = this.checkIsIdValid("", message_id);
-        const chat = await userChatRepository.getMessage(id);
-        if (!chat) throw new BlogApiError(404, "message not found");
-
-        const isSameTime = chat.updated_at === chat.created_at;
-        return isSameTime;
-    }
-
     async sendMessage(data: TUserChat["add_raw"]) {
         let selectedMedia: any[] = [];
         const newMessage = this.checkIsInputValid("message", 1, data.message);
