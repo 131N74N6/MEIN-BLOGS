@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 
 export default function EditProfile() {
     const navigate = useNavigate();
-
     const auth = useAuthService();
     const user = useUserService();
 
@@ -24,6 +23,12 @@ export default function EditProfile() {
 
     const newProfilePctureUrl = useUserStore((state) => state.newProfilePctureUrl);
     const setNewProfilePctureUrl = useUserStore((state) => state.setNewProfilePctureUrl);
+
+    useEffect(() => {
+        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
+            navigate("/sign-in", { replace: true });
+        }
+    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
     useEffect(() => {
         if (auth.getCurrentUser && auth.getCurrentUser.data && currentUserId) {

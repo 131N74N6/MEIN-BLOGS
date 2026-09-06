@@ -9,8 +9,8 @@ export type MessageChatState = {
     resetChosenMessageIds: () => void;
     setMessageChat: (messageChat: string) => void;
 
-    chosenMessageId: string;
-    setChosenMessageId: (chosenMessageId: string) => void;
+    chosenMessage: UserMessage | null;
+    setChosenMessage: (chosenMessage: UserMessage | null) => void;
 
     chosenMessageIds: string[];
     setChosenMessageIds: (chosenMessageId: string) => void;
@@ -94,7 +94,6 @@ export type PopUpOptionData = {
     deleteAll: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
     deletChosen: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
     isProcessing: boolean;
-    setEditMode: (editMode: boolean) => void;
 }
 
 // https://open.spotify.com/intl-id/track/6RcsAN8XF5KX6mMh6dum8e?si=53bd956200ee4f9b

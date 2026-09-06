@@ -4,13 +4,20 @@ import { useUserChatStore } from "./store";
 
 export default function ChatData(props: UserMessageData) {
     const selectMode = useUserChatStore((state) => state.selectMode);
+    const setChosenMessage = useUserChatStore((state) => state.setChosenMessage);
     const setChosenMessageIds = useUserChatStore((state) => state.setChosenMessageIds);
 
     const isSelected = props.chosen_message_ids.includes(props.data._id);
     const isUpdated =  props.data.created_at !== props.data.updated_at;
 
     const selectMessage = () => {
-        if (selectMode) setChosenMessageIds(props.data._id);
+        if (!selectMode) return;
+        setChosenMessageIds(props.data._id);
+        if (props.is_own) {
+            setChosenMessage(props.data);
+        } else {
+            setChosenMessage(null);
+        }
     }
 
     return (
@@ -27,9 +34,9 @@ export default function ChatData(props: UserMessageData) {
             {props.data.media.length < 0 ? null : (
                 <button></button>
             )}
-            {props.data.message ? (
+            {props.data.message === "" ? null : (
                 <p className="font-medium text-base">{props.data.message}</p>
-            ) : null}
+            )}
             {isUpdated ? (
                 <div className="flex flex-col gap-1.5">
                     <p className="font-normal text-sm">

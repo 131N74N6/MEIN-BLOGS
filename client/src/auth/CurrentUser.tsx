@@ -4,13 +4,22 @@ import Navbar from "../styles/Navbar";
 import useRelationService from "../relations/service";
 import useAuthService from "./service";
 import useBlogService from "../blogs/service";
+import { useEffect } from "react";
+import { useUserStore } from "../users/store";
 
 export default function CurrentUser() {
     const navigate = useNavigate();
-    
     const auth = useAuthService();
     const blog = useBlogService();
     const relation = useRelationService();
+        
+    const currentUserId = useUserStore((state) => state.currentUserId);
+            
+    useEffect(() => {
+        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
+            navigate("/sign-in", { replace: true });
+        }
+    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
     const isProcessing = auth.isProcessing || blog.processing || relation.isProcessing;
     const hasPicture = auth.getCurrentUser.data && auth.getCurrentUser.data.profile_picture.public_id &&

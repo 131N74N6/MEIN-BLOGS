@@ -10,8 +10,8 @@ export const useUserChatStore = create<MessageChatState>((set) => ({
     messageChat: undefined,
     setMessageChat: (messageChat?: string | undefined) => set({ messageChat }),
 
-    chosenMessageId: "",
-    setChosenMessageId: (chosenMessageId: string) => set({ chosenMessageId }),
+    chosenMessage: null,
+    setChosenMessage: (chosenMessage) => set({chosenMessage }),
 
     chosenMessageIds: [],
     resetChosenMessageIds: () => set({ chosenMessageIds: [] }),
@@ -28,7 +28,7 @@ export const useUserChatStore = create<MessageChatState>((set) => ({
     setSelectMode: (selectMode: boolean) => set({ selectMode }),
 
     resetMessageChatState: () => set({
-        chosenMessageId: "",
+        chosenMessage: null,
         chosenMessageIds: [],
         media: [],
         messageChat: undefined,

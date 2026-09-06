@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye } from "lucide-react";
 import useViewerService from "../viewers/service";
 import { useUserStore } from "../users/store";
+import { useEffect } from "react";
 
 export default function BlogDetail() {
     const navigate = useNavigate();
@@ -20,6 +21,12 @@ export default function BlogDetail() {
     const currentUserId = useUserStore((state) => state.currentUserId);
     const setOtherUserId = useUserStore((state) => state.setOtherUserId);
 
+    useEffect(() => {
+        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
+            navigate("/sign-in", { replace: true });
+        }
+    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
+    
     const isProcessing = auth.isProcessing || blog.processing || blog.getOneBlogContent.isLoading;
     const isOwner = blog.getOneBlogContent.data && blog.getOneBlogContent.data.blog_owner_id === currentUserId;
 

@@ -13,7 +13,6 @@ import Loading from "../styles/Loading";
 
 export default function OtherUserBlogs() {
     const navigate = useNavigate();
-    
     const auth = useAuthService();
     const user = useUserService();
     const blog = useBlogService();

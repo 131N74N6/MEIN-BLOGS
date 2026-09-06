@@ -44,6 +44,7 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
     body: t.Omit(userChatSchema.add_raw, ["sender_id"])
 })
 .put("/remake", async ({ body }) => {
+    console.log(body);
     return await userChatController.changeMessage(body);
 }, {
     body: userChatSchema.change_result

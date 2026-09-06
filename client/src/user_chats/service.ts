@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUserStore } from "../users/store";
 import { apiRequest, apiUpload } from "../handler/api";
 import { useStyleStore } from "../styles/store";
@@ -28,56 +28,18 @@ export default function useUserChatService() {
     const otherUserId = useUserStore((state) => state.otherUserId);
 
     const changeMessageMt = useMutation({
-        mutationFn: async () => {
+        mutationFn: async (id: string) => {
             const endpoint = "/api/chats/remake";
-            const newMessage = JSON.stringify({ message: messageChat?.trim(), _id: chosenMessageIds[0] });
+            const newMessage = JSON.stringify({ message: messageChat?.trim(), _id: id });
             return await apiRequest<UserMessage>(endpoint, { body: newMessage, method: "PUT" });
         },
-        // OPTIMISTIC UPDATE: Langsung update UI sebelum response dari server
-        onMutate: async (messageId: string) => {
-            await queryClient.cancelQueries({ queryKey: [`user-chats-${otherUserId}`] });
-            
-            const previousMessages = queryClient.getQueryData<InfiniteData<UserMessage[], unknown>>(
-                [`user-chats-${otherUserId}`]
-            );
-
-            if (previousMessages) {
-                queryClient.setQueryData(
-                    [`user-chats-${otherUserId}`],
-                    (old: InfiniteData<UserMessage[], unknown> | undefined) => {
-                        if (!old) return old;
-                        return {
-                            ...old,
-                            pages: old.pages.map(page =>
-                                page.map(msg =>
-                                    msg._id === messageId
-                                        ? { ...msg, message: messageChat?.trim() || msg.message, updated_at: new Date().toISOString() }
-                                        : msg
-                                )
-                            )
-                        };
-                    }
-                );
-            }
-
-            return { previousMessages };
-        },
-        onError: (error: any, _variables, context) => {
-            // Rollback jika gagal
-            if (context?.previousMessages) {
-                queryClient.setQueryData(
-                    [`user-chats-${otherUserId}`],
-                    context.previousMessages
-                );
-            }
+        onError: (error) => {
             setMessage(error.message || "Failed to edit message");
         },
         onSuccess: () => {
-            // FIXED: Reset semua state setelah edit berhasil
             setMessageChat("");
             setSelectMode(false);
             resetChosenMessageIds();
-            // Query akan di-refetch otomatis untuk sinkronisasi timestamp server
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
         }
     });
@@ -92,6 +54,7 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            resetChosenMessageIds();
             setOpenPopUpOption(false);
         }
     });
@@ -112,6 +75,8 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            setSelectMode(false);
+            resetChosenMessageIds();
             setOpenPopUpOption(false);
         }
     });
@@ -126,6 +91,7 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            resetChosenMessageIds();
             setOpenPopUpOption(false);
         }
     });
@@ -146,6 +112,8 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            setSelectMode(false);
+            resetChosenMessageIds();
             setOpenPopUpOption(false);
         }
     });
@@ -163,16 +131,6 @@ export default function useUserChatService() {
             return request.data ?? [];
         },
         queryKey: [`user-chats-${otherUserId}`]
-    });
-
-    const getMessage = useQuery({
-        enabled: chosenMessageIds.length === 1,
-        queryFn: async () => {
-            const endpoint = `/api/chats/messages/${chosenMessageIds[0]}`;
-            const request = await apiRequest<UserMessage>(endpoint, { method: "GET" });
-            return request.data;
-        },
-        queryKey: [`message-${chosenMessageIds[0]}`]
     });
 
     const sendMessagesMt = useMutation({
@@ -198,6 +156,13 @@ export default function useUserChatService() {
         }
     });
 
+    function getMessage(): UserMessage | undefined {
+        if (chosenMessageIds.length !== 1) return undefined;
+        
+        const allMessages = getAllUserMessages.data?.pages.flat() ?? [];
+        return allMessages.find(msg => msg._id === chosenMessageIds[0]);
+    }
+
     function inputChatMediaHandler(event: React.ChangeEvent<HTMLInputElement>) {
         const files = event.target.files;
         const selected: FileViewerData[] = [];
@@ -213,8 +178,12 @@ export default function useUserChatService() {
     }
 
     const isProcessing = [
-        deleteAllMessagesMt, deleteChosenMessagesMt, clearAllMessagesMt, clearChosenMessagesMt, 
-        changeMessageMt, sendMessagesMt
+        deleteAllMessagesMt, 
+        deleteChosenMessagesMt, 
+        clearAllMessagesMt, 
+        clearChosenMessagesMt, 
+        changeMessageMt, 
+        sendMessagesMt
     ].some(m => m.isPending);
 
     return {

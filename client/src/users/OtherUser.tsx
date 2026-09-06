@@ -6,21 +6,25 @@ import useUserService from "./service";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "./store";
 import useBlogService from "../blogs/service";
+import { useEffect } from "react";
 
 export default function OtherUser() {
     const navigate = useNavigate();
-
     const auth = useAuthService();
     const blog = useBlogService();
     const relation = useRelationService();
     const user = useUserService();
     
+    const currentUserId = useUserStore((state) => state.currentUserId);
     const otherUserId = useUserStore((state) => state.otherUserId);
+    
+    useEffect(() => {
+        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
+            navigate("/sign-in", { replace: true });
+        }
+    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
     const isProcessing = auth.isProcessing || blog.processing || relation.isProcessing || user.isProcessing;
-
-    const hasPicture = user.getCurrentUser.data && user.getCurrentUser.data.profile_picture && 
-    user.getCurrentUser.data.profile_picture.public_id;
 
     return (
         <section className="flex flex-col md:flex-row z-10 relative h-dvh">
@@ -28,12 +32,14 @@ export default function OtherUser() {
             <main className="h-full w-full md:w-3/4 flex flex-col gap-2.5 p-2.5">
                 <section className="grid md:grid-cols-2 grid-cols-1 gap-2.5">
                     <div className="flex flex-row gap-2 rounded-md bg-amber-100 p-2">
-                        {hasPicture ? (
+                        {user.getCurrentUser.data && 
+                        user.getCurrentUser.data.profile_picture && 
+                        user.getCurrentUser.data.profile_picture.public_id ? (
                             <div className="w-8 h-8 rounded-full bg-purple-600 text-white font-medium text-sm">
                                 <img 
                                     className="w-full h-full object-cover rounded-full" 
-                                    alt={`profile-picture-${user.getCurrentUser.data?.user_id}`}
-                                    src={user.getCurrentUser.data?.profile_picture?.url!}
+                                    alt={`profile-picture-${user.getCurrentUser.data.user_id}`}
+                                    src={user.getCurrentUser.data.profile_picture.url}
                                 />
                             </div>
                         ) : (

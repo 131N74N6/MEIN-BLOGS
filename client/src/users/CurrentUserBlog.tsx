@@ -15,7 +15,6 @@ import Loading from "../styles/Loading";
 
 export default function CurrentUserBlog() {
     const navigate = useNavigate();
-    
     const auth = useAuthService();
     const user = useUserService();
     const blog = useBlogService();

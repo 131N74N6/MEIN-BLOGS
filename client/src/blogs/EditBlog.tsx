@@ -111,6 +111,7 @@ export default function EditBlog() {
 
     function saveChanges(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
+        if (isProcessing) return;
         if (blogId) blog.changeOneBlogMt.mutate(blogId);
     }
 

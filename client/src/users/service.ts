@@ -110,6 +110,7 @@ export default function useUserService() {
         enabled: !!otherUserId && otherUserId !== currentUserId,
         queryFn: async () => {
             const request = await apiRequest<OtherUserData>(`/api/users/show/${otherUserId}`, { method: "GET" });
+            console.log(request.data);
             return request.data;
         },
         queryKey: [`other-user-${otherUserId}`]

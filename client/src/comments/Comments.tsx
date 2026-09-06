@@ -5,13 +5,25 @@ import useCommentSevice from "./service";
 import CommentList from "./CommentList";
 import { useCommentStore } from "./store";
 import Loading from "../styles/Loading";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useUserStore } from "../users/store";
 
 export default function Comments() {
+    const navigate = useNavigate();
     const auth = useAuthService();
     const comment = useCommentSevice();
 
     const text = useCommentStore((state) => state.text);
     const setText = useCommentStore((state) => state.setText);
+    
+    const currentUserId = useUserStore((state) => state.currentUserId);
+    
+    useEffect(() => {
+        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
+            navigate("/sign-in", { replace: true });
+        }
+    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
     const isProcessing = auth.isProcessing || comment.isProcessing;
 

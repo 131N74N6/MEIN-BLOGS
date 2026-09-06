@@ -87,6 +87,7 @@ export default function CreateBlog() {
 
     function publishBlog(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
+        if (isProcessing) return;
         blog.createNewBlogMt.mutate();
     }
 

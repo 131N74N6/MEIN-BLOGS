@@ -3,12 +3,21 @@ import useAuthService from "../auth/service";
 import Navbar from "../styles/Navbar";
 import useUserService from "../users/service";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useUserStore } from "../users/store";
 
 export default function Setting() {
     const navigate = useNavigate();
-
     const auth = useAuthService();
     const user = useUserService();
+        
+    const currentUserId = useUserStore((state) => state.currentUserId);
+
+    useEffect(() => {
+        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
+            navigate("/sign-in", { replace: true });
+        }
+    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
     const isProcessing = auth.isProcessing || user.isProcessing;
 
