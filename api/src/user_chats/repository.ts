@@ -7,8 +7,10 @@ class UserChatRepository {
 
     async changeMessage(data: TUserChat["change_result"]) {
         await this.user_chats.updateOne({ _id: new ObjectId(data._id) }, {
-            message: data.message,
-            updated_at: new Date()
+            $set: {
+                message: data.message,
+                updated_at: new Date()
+            }
         });
 
         return await this.user_chats.findOne({ _id: new ObjectId(data._id) });
