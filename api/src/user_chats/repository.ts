@@ -45,20 +45,22 @@ class UserChatRepository {
     }
 
     async getAllMessages(data: Omit<TUserChat["pagination"], "page">) {
-        return await this.user_chats.find({ 
+        const chats = await this.user_chats.find({ 
             $or: [
-                { receiver_id: data.receiver_id, sender_id: data.sender_id },
-                { receiver_id: data.sender_id, sender_id: data.receiver_id }
+                { receiver_id: new ObjectId(data.receiver_id), sender_id: new ObjectId(data.sender_id) },
+                { receiver_id: new ObjectId(data.sender_id), sender_id: new ObjectId(data.receiver_id) }
             ]
         })
         .sort({ created_at: -1 })
         .limit(data.limit)
         .skip(data.skip)
         .toArray();
+
+        return chats;
     }
 
-    async getMessageBySenderId(sender_id: string) {
-        return await this.user_chats.findOne({ sender_id: new ObjectId(sender_id) });
+    async getMessage(id: string) {
+        return await this.user_chats.findOne({ _id: new ObjectId(id) });
     }
 
     async hideAllMessage(user_id: string, message_ids: ObjectId[]) {

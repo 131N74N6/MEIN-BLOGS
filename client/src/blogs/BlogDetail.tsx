@@ -33,7 +33,12 @@ export default function BlogDetail() {
             ],
             ALLOWED_ATTR: ["class", "style"]
         });
-    };
+    }
+
+    const chatWithBlogOwner = () => {
+        setOtherUserId(blog.getOneBlogContent.data?.blog_owner_id);
+        navigate(`/users/chats/${blog.getOneBlogContent.data?.blog_owner_id}`);
+    }
 
     const visitUser = () => {
         if (isOwner) {
@@ -42,7 +47,7 @@ export default function BlogDetail() {
             setOtherUserId(blog.getOneBlogContent.data?.blog_owner_id);
             navigate(`/users/${blog.getOneBlogContent.data?.blog_owner_id}`);
         }
-    };
+    }
 
     return (
         <section className="h-dvh flex flex-col md:flex-row z-10 relative">
@@ -127,14 +132,26 @@ export default function BlogDetail() {
                     >
                         {sanitizedAnswer()}
                     </ReactMarkdown>
-                    <button
-                        className="cursor-pointer disabled:cursor-not-allowed bg-gray-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-gray-600 transition-colors"
-                        disabled={isProcessing}
-                        onClick={() => navigate(`/users/blogs/contains/${blog.getOneBlogContent.data?._id}/comments/`)}
-                        type="button"
-                    >
-                        Send Comments
-                    </button>
+                    <section className="flex gap-2">
+                        {isOwner ? null : (
+                            <button
+                                className="cursor-pointer disabled:cursor-not-allowed bg-olive-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-olive-600 transition-colors"
+                                disabled={isProcessing}
+                                onClick={chatWithBlogOwner}
+                                type="button"
+                            >
+                                Chat with {blog.getOneBlogContent.data?.blog_owner_name}
+                            </button>
+                        )}
+                        <button
+                            className="cursor-pointer disabled:cursor-not-allowed bg-gray-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-gray-600 transition-colors"
+                            disabled={isProcessing}
+                            onClick={() => navigate(`/users/blogs/contains/${blog.getOneBlogContent.data?._id}/comments/`)}
+                            type="button"
+                        >
+                            Send Comments
+                        </button>
+                    </section>
                 </main>
             )}
         </section>

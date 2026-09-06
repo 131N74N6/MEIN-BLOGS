@@ -2,9 +2,6 @@ import { create } from "zustand";
 import type { MessageChatState } from "./model";
 
 export const useUserChatStore = create<MessageChatState>((set) => ({
-    editMessage: false,
-    setEditMessage: (editMessage: boolean) => set({ editMessage }),
-
     media: [],
     setMedia: (media) => set((state) => ({ 
         media: typeof media === 'function' ? media(state.media) : media 
@@ -17,6 +14,7 @@ export const useUserChatStore = create<MessageChatState>((set) => ({
     setChosenMessageId: (chosenMessageId: string) => set({ chosenMessageId }),
 
     chosenMessageIds: [],
+    resetChosenMessageIds: () => set({ chosenMessageIds: [] }),
     setChosenMessageIds: (messageId: string) => set((state) => ({
         chosenMessageIds: state.chosenMessageIds.includes(messageId) ?
         state.chosenMessageIds.filter(chosenMessageId => chosenMessageId !== messageId) : 
@@ -32,7 +30,6 @@ export const useUserChatStore = create<MessageChatState>((set) => ({
     resetMessageChatState: () => set({
         chosenMessageId: "",
         chosenMessageIds: [],
-        editMessage: false,
         media: [],
         messageChat: undefined,
         openPopUpOption: false,

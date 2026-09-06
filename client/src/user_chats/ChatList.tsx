@@ -1,7 +1,10 @@
+import { useUserStore } from "../users/store";
 import ChatData from "./ChatData";
 import type { UserMessageDataList } from "./model";
 
 export default function ChatList(data: UserMessageDataList) {
+    const currentUserId = useUserStore((state) => state.currentUserId);
+
     if (data.messages.length === 0) {
         return (
             <section className="flex justify-center items-center h-full">
@@ -11,7 +14,7 @@ export default function ChatList(data: UserMessageDataList) {
     }
 
     return (
-        <div className="overflow-y-auto p-2 flex flex-col gap-2">
+        <div className="overflow-y-auto p-2 flex flex-col gap-2 border-x h-[80%] border-zinc-800">
             {data.messages.length <= 52 ? null : data.has_next_page ? (
                 <section className="flex justify-center">
                     <button
@@ -36,7 +39,7 @@ export default function ChatList(data: UserMessageDataList) {
                 {data.messages.map(message => (
                     <ChatData 
                         chosen_message_ids={data.chosen_message_ids}
-                        is_own={data.is_own}
+                        is_own={currentUserId === message.sender_id}
                         is_processing={data.is_processing}
                         is_select_mode={data.is_select_mode}
                         key={`userchat-${message._id}`} 

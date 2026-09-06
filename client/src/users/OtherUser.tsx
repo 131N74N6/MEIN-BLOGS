@@ -56,8 +56,16 @@ export default function OtherUser() {
                                     {user.getCurrentUser.data.description}
                                 </p>
                             ) : null}
-                            {relation.hasUserFollowed.data ? (
-                                <div className="flex">
+                            <div className="flex gap-2.5">
+                                <button
+                                    className="cursor-pointer disabled:cursor-not-allowed bg-olive-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-olive-600 transition-colors"
+                                    disabled={isProcessing}
+                                    onClick={() => navigate(`/users/chats/${otherUserId}`)}
+                                    type="button"
+                                >
+                                    Chat with {user.getCurrentUser.data?.user_name}
+                                </button>
+                                {relation.hasUserFollowed.data ? (
                                     <button
                                         className="cursor-pointer disabled:cursor-not-allowed bg-gray-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-gray-600 transition-colors"
                                         disabled={isProcessing}
@@ -66,9 +74,7 @@ export default function OtherUser() {
                                     >
                                         Unfollow
                                     </button>
-                                </div>
-                            ) : (
-                                <div className="flex">
+                                ) : (
                                     <button
                                         className="cursor-pointer disabled:cursor-not-allowed bg-blue-700 text-white font-medium text-sm p-2 w-22 rounded-md hover:bg-blue-500 transition-colors"
                                         disabled={isProcessing}
@@ -77,8 +83,8 @@ export default function OtherUser() {
                                     >
                                         Follow
                                     </button>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
                     <div className="flex flex-col gap-2">

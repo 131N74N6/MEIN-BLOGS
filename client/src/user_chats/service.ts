@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { useUserStore } from "../users/store";
 import { apiRequest, apiUpload } from "../handler/api";
 import { useStyleStore } from "../styles/store";
@@ -12,8 +12,9 @@ export default function useUserChatService() {
 
     const setMessage = useStyleStore((state) => state.setMessage);
     
-    const chosenMessageId = useUserChatStore((state) => state.chosenMessageId);
     const chosenMessageIds = useUserChatStore((state) => state.chosenMessageIds);
+    const resetChosenMessageIds = useUserChatStore((state) => state.resetChosenMessageIds);
+    const setSelectMode = useUserChatStore((state) => state.setSelectMode);
 
     const chatMedia = useUserChatStore((state) => state.media);
     const setChatMedia = useUserChatStore((state) => state.setMedia);
@@ -29,13 +30,54 @@ export default function useUserChatService() {
     const changeMessageMt = useMutation({
         mutationFn: async () => {
             const endpoint = "/api/chats/remake";
-            const newMessage = JSON.stringify({ message: messageChat?.trim(), _id: chosenMessageId });
-            return await apiRequest(endpoint, { body: newMessage, method: "PUT" });
+            const newMessage = JSON.stringify({ message: messageChat?.trim(), _id: chosenMessageIds[0] });
+            return await apiRequest<UserMessage>(endpoint, { body: newMessage, method: "PUT" });
         },
-        onError: (error) => {
-            setMessage(error.message);
+        // OPTIMISTIC UPDATE: Langsung update UI sebelum response dari server
+        onMutate: async (messageId: string) => {
+            await queryClient.cancelQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            
+            const previousMessages = queryClient.getQueryData<InfiniteData<UserMessage[], unknown>>(
+                [`user-chats-${otherUserId}`]
+            );
+
+            if (previousMessages) {
+                queryClient.setQueryData(
+                    [`user-chats-${otherUserId}`],
+                    (old: InfiniteData<UserMessage[], unknown> | undefined) => {
+                        if (!old) return old;
+                        return {
+                            ...old,
+                            pages: old.pages.map(page =>
+                                page.map(msg =>
+                                    msg._id === messageId
+                                        ? { ...msg, message: messageChat?.trim() || msg.message, updated_at: new Date().toISOString() }
+                                        : msg
+                                )
+                            )
+                        };
+                    }
+                );
+            }
+
+            return { previousMessages };
+        },
+        onError: (error: any, _variables, context) => {
+            // Rollback jika gagal
+            if (context?.previousMessages) {
+                queryClient.setQueryData(
+                    [`user-chats-${otherUserId}`],
+                    context.previousMessages
+                );
+            }
+            setMessage(error.message || "Failed to edit message");
         },
         onSuccess: () => {
+            // FIXED: Reset semua state setelah edit berhasil
+            setMessageChat("");
+            setSelectMode(false);
+            resetChosenMessageIds();
+            // Query akan di-refetch otomatis untuk sinkronisasi timestamp server
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
         }
     });
@@ -50,7 +92,6 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
-            queryClient.removeQueries({ queryKey: [`is-yours-${currentUserId}`] });
             setOpenPopUpOption(false);
         }
     });
@@ -71,7 +112,6 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
-            queryClient.removeQueries({ queryKey: [`is-yours-${currentUserId}`] });
             setOpenPopUpOption(false);
         }
     });
@@ -86,7 +126,6 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
-            queryClient.removeQueries({ queryKey: [`is-yours-${currentUserId}`] });
             setOpenPopUpOption(false);
         }
     });
@@ -107,7 +146,6 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
-            queryClient.removeQueries({ queryKey: [`is-yours-${currentUserId}`] });
             setOpenPopUpOption(false);
         }
     });
@@ -120,20 +158,21 @@ export default function useUserChatService() {
         },
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1}: { pageParam?: number }) => {
-            const endpoint = `/api/chats/show?receiver_id=${otherUserId}&page=${pageParam}&limit=${50}`;
+            const endpoint = `/api/chats/show?receiver_id=${otherUserId}&page=${pageParam}&limit=${52}`;
             const request = await apiRequest<UserMessage[]>(endpoint, { method: "GET" });
             return request.data ?? [];
         },
         queryKey: [`user-chats-${otherUserId}`]
     });
 
-    const isYourMessage = useQuery({
-        enabled: !!currentUserId,
+    const getMessage = useQuery({
+        enabled: chosenMessageIds.length === 1,
         queryFn: async () => {
-            const request = await apiRequest<boolean>("/api/chats/is-it-yours", { method: "GET" });
-            return request.data ?? false;
+            const endpoint = `/api/chats/messages/${chosenMessageIds[0]}`;
+            const request = await apiRequest<UserMessage>(endpoint, { method: "GET" });
+            return request.data;
         },
-        queryKey: [`is-yours-${currentUserId}`]
+        queryKey: [`message-${chosenMessageIds[0]}`]
     });
 
     const sendMessagesMt = useMutation({
@@ -154,7 +193,6 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`is-yours-${currentUserId}`] });
             setMessageChat("");
             setChatMedia([]);
         }
@@ -188,7 +226,7 @@ export default function useUserChatService() {
         getAllUserMessages,
         inputChatMediaHandler,
         isProcessing,
-        isYourMessage,
+        getMessage,
         sendMessagesMt
     }
 }

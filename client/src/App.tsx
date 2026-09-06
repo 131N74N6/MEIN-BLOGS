@@ -21,6 +21,7 @@ import YourFollowers from "./relations/YourFollowers";
 import YourFollowed from "./relations/YourFollowed";
 import OtherFollowers from "./relations/OtherFollowers";
 import OtherFollowed from "./relations/OtherFollowed";
+import Chats from "./user_chats/Chats";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -43,6 +44,7 @@ export default function App() {
                     <Route path="/home" element={<ProtectedRoute><Home/></ProtectedRoute>}/>
                     <Route path="/users" element={<ProtectedRoute><CurrentUser/></ProtectedRoute>}/>
                     <Route path="/users/:_id" element={<ProtectedRoute><OtherUser/></ProtectedRoute>}/>
+                    <Route path="/users/chats/:_id" element={<ProtectedRoute><Chats/></ProtectedRoute>}/>
                     <Route path="/users/edit" element={<ProtectedRoute><EditProfile/></ProtectedRoute>}/>
                     <Route path="/users/settings" element={<ProtectedRoute><Setting/></ProtectedRoute>}/>
                     <Route path="/users/blogs" element={<ProtectedRoute><CurrentUserBlog/></ProtectedRoute>}/>

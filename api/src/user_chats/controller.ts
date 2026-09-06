@@ -32,16 +32,16 @@ class UserChatController {
         const limit = data.limit;
         const skip = (page - 1) * limit;
 
-        const messages = await userChatService.getAllMessages({
+        const chats = await userChatService.getAllMessages({
             limit: limit, skip: skip, receiver_id: data.receiver_id, sender_id: data.sender_id
         });
 
-        return { data: messages, message: "user chat retrieved successfully", success: true };
+        return { data: chats, message: "user chats retrieved successfully", success: true };
     }
 
-    async isOwnMessage(sender_id: string) {
-        const owner = await userChatService.isOwnMessage(sender_id);
-        return { data: owner, message: "message owner retrieved successfully", success: true };
+    async getMessage(id: string) {
+        const message = await userChatService.getMessage(id);
+        return { data: message, message: "user message retrieved successfully", success: true };
     }
 
     async sendMessage(data: TUserChat["add_raw"]) {

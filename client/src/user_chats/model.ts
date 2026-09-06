@@ -2,13 +2,11 @@ import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult, U
 import type { ApiResponse } from "../handler/api";
 
 export type MessageChatState = {
-    editMessage: boolean;
-    setEditMessage: (editMessage: boolean) => void;
-
     media: FileViewerData[];
     setMedia: (media: FileViewerData[] | ((prev: FileViewerData[]) => FileViewerData[])) => void;
 
     messageChat?: string;
+    resetChosenMessageIds: () => void;
     setMessageChat: (messageChat: string) => void;
 
     chosenMessageId: string;
@@ -63,7 +61,6 @@ export type UserMessageDataList = {
     fetch_next_page: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<UserMessage[], unknown>, Error>>;
     has_next_page: boolean;
     is_fetching_next_page: boolean;
-    is_own: boolean;
     is_processing: boolean;
     is_select_mode: boolean;
     messages: UserMessage[];

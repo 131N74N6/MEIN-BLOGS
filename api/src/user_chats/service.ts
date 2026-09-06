@@ -207,13 +207,12 @@ class UserChatService {
         return await userChatRepository.getAllMessages(data);
     }
 
-    async isOwnMessage(sender_id: string) {
-        const senderId = this.checkIsIdValid("sender id", sender_id);
-        const chat = await userChatRepository.getMessageBySenderId(senderId);
-        if (!chat) throw new BlogApiError(404, "message not found");
+    async getMessage(id: string) {
+        const messageId = this.checkIsIdValid("", id);
+        const message = await userChatRepository.getMessage(messageId);
 
-        const isOwner = chat.sender_id.toString() === senderId;
-        return isOwner;
+        if (!message) throw new BlogApiError(404, "message not found");
+        return message;
     }
 
     async sendMessage(data: TUserChat["add_raw"]) {
