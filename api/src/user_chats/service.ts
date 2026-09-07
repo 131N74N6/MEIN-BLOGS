@@ -26,9 +26,22 @@ class UserChatService {
 
     async changeMessage(data: TUserChat["change_result"]) {
         const messageId = this.checkIsIdValid("", data._id);
+        const receiverId = this.checkIsIdValid("receiver id", data.receiver_id);
+        const senderId = this.checkIsIdValid("sender id", data.sender_id);
         const updatedMessage = this.checkIsInputValid("message", 1, data.message);
 
-        return await userChatRepository.changeMessage({ _id: messageId, message: updatedMessage });
+        const message = await this.findOneMessage(messageId);
+        if (!message) throw new BlogApiError(404, "message not found");
+        if (message.sender_id.toString() !== senderId) {
+            throw new BlogApiError(403, "you are not allowed to change this message");
+        }
+
+        return await userChatRepository.changeMessage({ 
+            _id: messageId, 
+            message: updatedMessage, 
+            receiver_id: receiverId,
+            sender_id: senderId 
+        });
     }
 
     async clearAllMessages(data: Omit<TUserChat["delete_chat"], "message_ids">) {
@@ -203,16 +216,16 @@ class UserChatService {
         props.operations.push(props.deleteFn(ids));
     }
 
-    async getAllMessages(data: Omit<TUserChat["pagination"], "page">) {
-        return await userChatRepository.getAllMessages(data);
-    }
-
-    async getMessage(id: string) {
+    async findOneMessage(id: string) {
         const messageId = this.checkIsIdValid("", id);
-        const message = await userChatRepository.getMessage(messageId);
+        const message = await userChatRepository.findOneMessage(messageId);
 
         if (!message) throw new BlogApiError(404, "message not found");
         return message;
+    }
+
+    async getAllMessages(data: Omit<TUserChat["pagination"], "page">) {
+        return await userChatRepository.getAllMessages(data);
     }
 
     async sendMessage(data: TUserChat["add_raw"]) {

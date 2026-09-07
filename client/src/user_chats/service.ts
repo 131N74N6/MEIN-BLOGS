@@ -12,6 +12,9 @@ export default function useUserChatService() {
 
     const setMessage = useStyleStore((state) => state.setMessage);
     
+    const setChosenMessage = useUserChatStore((state) => state.setChosenMessage);
+    const setOpenPopUpOption = useUserChatStore((state) => state.setOpenPopUpOption);
+
     const chosenMessageIds = useUserChatStore((state) => state.chosenMessageIds);
     const resetChosenMessageIds = useUserChatStore((state) => state.resetChosenMessageIds);
     const setSelectMode = useUserChatStore((state) => state.setSelectMode);
@@ -22,15 +25,19 @@ export default function useUserChatService() {
     const messageChat = useUserChatStore((state) => state.messageChat);
     const setMessageChat = useUserChatStore((state) => state.setMessageChat);
 
-    const setOpenPopUpOption = useUserChatStore((state) => state.setOpenPopUpOption);
-
     const currentUserId = useUserStore((state) => state.currentUserId);
     const otherUserId = useUserStore((state) => state.otherUserId);
 
     const changeMessageMt = useMutation({
         mutationFn: async (id: string) => {
             const endpoint = "/api/chats/remake";
-            const newMessage = JSON.stringify({ message: messageChat?.trim(), _id: id });
+
+            const newMessage = JSON.stringify({ 
+                _id: id, 
+                message: messageChat?.trim(), 
+                receiver_id: otherUserId 
+            });
+            
             return await apiRequest<UserMessage>(endpoint, { body: newMessage, method: "PUT" });
         },
         onError: (error) => {
@@ -39,8 +46,8 @@ export default function useUserChatService() {
         onSuccess: () => {
             setMessageChat("");
             setSelectMode(false);
+            setChosenMessage(null);
             resetChosenMessageIds();
-            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
         }
     });
 
@@ -90,7 +97,7 @@ export default function useUserChatService() {
             setMessage(error.message);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            setSelectMode(false);
             resetChosenMessageIds();
             setOpenPopUpOption(false);
         }
@@ -111,7 +118,6 @@ export default function useUserChatService() {
             setMessage(error.message);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
             setSelectMode(false);
             resetChosenMessageIds();
             setOpenPopUpOption(false);
@@ -144,13 +150,13 @@ export default function useUserChatService() {
                 }
             }
 
-            return await apiUpload("/api/chats/send", newMessage, "POST");
+            const request = await apiUpload<UserMessage>("/api/chats/send", newMessage, "POST");
+            return request.data;
         },
         onError: (error) => {
             setMessage(error.message);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
             setMessageChat("");
             setChatMedia([]);
         }

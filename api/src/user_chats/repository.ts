@@ -6,14 +6,15 @@ class UserChatRepository {
     private user_chats = db().collection("user_chats");
 
     async changeMessage(data: TUserChat["change_result"]) {
-        await this.user_chats.updateOne({ _id: new ObjectId(data._id) }, {
-            $set: {
-                message: data.message,
-                updated_at: new Date()
-            }
-        });
-
-        return await this.user_chats.findOne({ _id: new ObjectId(data._id) });
+        return await this.user_chats.findOneAndUpdate(
+            { 
+                _id: new ObjectId(data._id), 
+                sender_id: new ObjectId(data.sender_id), 
+                receiver_id: new ObjectId(data.receiver_id) 
+            }, 
+            { $set: { message: data.message, updated_at: new Date() }}, 
+            { returnDocument: "after"}
+        );
     }
 
     async deleteAllMessagesPermanently(message_ids: ObjectId[]) {
@@ -46,6 +47,10 @@ class UserChatRepository {
         return await this.user_chats.find({ _id: { $in: ids } }).toArray();
     }
 
+    async findOneMessage(id: string) {
+        return await this.user_chats.findOne({ _id: new ObjectId(id) });
+    }
+
     async getAllMessages(data: Omit<TUserChat["pagination"], "page">) {
         const chats = await this.user_chats.find({ 
             $or: [
@@ -59,10 +64,6 @@ class UserChatRepository {
         .toArray();
 
         return chats;
-    }
-
-    async getMessage(id: string) {
-        return await this.user_chats.findOne({ _id: new ObjectId(id) });
     }
 
     async hideAllMessage(user_id: string, message_ids: ObjectId[]) {

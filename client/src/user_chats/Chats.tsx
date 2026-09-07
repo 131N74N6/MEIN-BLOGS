@@ -2,19 +2,23 @@ import { useNavigate } from "react-router-dom";
 import useAuthService from "../auth/service";
 import Navbar from "../styles/Navbar";
 import useUserChatService from "./service";
-import { CheckCircle2, ArrowUp, Settings2, X, File } from "lucide-react";
+import { ArrowUp, Settings2, File } from "lucide-react";
 import ChatList from "./ChatList";
 import { useUserChatStore } from "./store";
 import PopUpOption from "./PopUpOption";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useStyleStore } from "../styles/store";
 import Alert from "../styles/Alert";
 import { useUserStore } from "../users/store";
 import useUserService from "../users/service";
+import type { UserMessage, WSMessage } from "./model";
+import { useQueryClient } from "@tanstack/react-query";
+import { useChatWS } from "./hook";
 
 export default function Chats() {
     const navigate = useNavigate();
     const auth = useAuthService();
+    const queryClient = useQueryClient();
     const user = useUserService();
     const userChat = useUserChatService();
 
@@ -26,6 +30,8 @@ export default function Chats() {
 
     const chosenMessage = useUserChatStore((state) => state.chosenMessage);
     const setChosenMessage = useUserChatStore((state) => state.setChosenMessage);
+
+    const chatMedia = useUserChatStore((state) => state.media);
 
     const chosenMessageIds = useUserChatStore((state) => state.chosenMessageIds);
     const resetChosenMessageIds = useUserChatStore((state) => state.resetChosenMessageIds);
@@ -39,6 +45,68 @@ export default function Chats() {
 
     const selectMode = useUserChatStore((state) => state.selectMode);
     const setSelectMode = useUserChatStore((state) => state.setSelectMode);
+
+    const handleMessage = useCallback((data: WSMessage) => {
+        switch (data.type) {
+            case "MESSAGE_SENT": {
+                const newMessage = data.payload as UserMessage;
+                queryClient.setQueryData([`user-chats-${otherUserId}`], (oldData: any) => {
+                    if (!oldData) return oldData;
+                    return { ...oldData, pages: oldData.pages.map((page: UserMessage[], index: number) => {
+                        return index === 0 ? [newMessage, ...page] : page
+                    })}
+                });
+
+                break;
+            }
+
+            case "MESSAGE_EDITED": {
+                const editedMessage = data.payload as UserMessage;
+                queryClient.setQueryData([`user-chats-${otherUserId}`], (oldData: any) => {
+                    if (!oldData) return oldData;
+                    return { ...oldData, pages: oldData.pages.map((page: UserMessage[]) => {
+                        return page.map(message => message._id === editedMessage._id ? editedMessage : message)
+                    })}
+                });
+
+                break;
+            }
+
+            case "MESSAGES_DELETED": {
+                const { message_ids } = data.payload as { message_ids: string[] };
+                queryClient.setQueryData([`user-chats-${otherUserId}`], (oldData: any) => {
+                    if (!oldData) return oldData;
+                    return { ...oldData, pages: oldData.pages.map((page: UserMessage[]) => {
+                        return page.filter(message => !message_ids.includes(message._id))
+                    })}
+                });
+
+                break;
+            }
+
+            case "ALL_MESSAGES_DELETED": {
+                queryClient.setQueryData([`user-chats-${otherUserId}`], { pages: [[]], pageParams: [1] });
+
+                break;
+            }
+
+            case "ERROR": {
+                const errorMsg = (data.payload as any).message || "Unknown error";
+                setMessage(errorMsg);
+
+                break;
+            }
+        }
+    }, [otherUserId, queryClient, setMessage]);
+
+    const { send, isConnected } = useChatWS(handleMessage);
+
+    useEffect(() => {
+        if (isConnected && currentUserId && otherUserId) {
+            send("JOIN", { targetUserId: otherUserId });
+            console.log(`🚪 Joining room with ${otherUserId}`);
+        }
+    }, [isConnected, currentUserId, otherUserId, send]);
 
     useEffect(() => {
         if (message) {
@@ -70,7 +138,7 @@ export default function Chats() {
         resetChosenMessageIds();
     }
 
-    const sendMessage = (event: React.SubmitEvent<HTMLFormElement>) => {
+    const sendMessage = async (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (isProcessing) return;
         if (selectMode && chosenMessage) {
@@ -78,10 +146,84 @@ export default function Chats() {
                 cancelSelectMode();
                 return;
             }
-            userChat.changeMessageMt.mutate(chosenMessage._id);
+
+            try {
+                // Kirim edit via HTTP dulu (untuk validasi backend)
+                await userChat.changeMessageMt.mutateAsync(chosenMessage._id);
+                
+                // Broadcast edit via WebSocket ke lawan bicara
+                send("EDIT", {
+                    _id: chosenMessage._id,
+                    message: messageChat.trim(),
+                    sender_id: currentUserId,
+                    receiver_id: otherUserId
+                });
+
+                cancelSelectMode();
+            } catch (error: any) {
+                console.error("Edit failed:", error);
+                setMessage(error.message || "Gagal mengedit pesan");
+            }
+            return;
         }
-        else userChat.sendMessagesMt.mutate();
+
+        if (chatMedia && chatMedia.length > 0) {
+            try {
+                const response = await userChat.sendMessagesMt.mutateAsync();
+                send("SEND", {
+                    message: messageChat?.trim(),
+                    sender_id: currentUserId,
+                    receiver_id: otherUserId,
+                    media: response?.media || []
+                });
+
+                setMessageChat("");
+            } catch (error: any) {
+                console.error("Send failed:", error);
+                setMessage(error.message || "Failed to send message. Check your internet connection.");
+            }
+        } else {
+            try {
+                send("SEND", {
+                    message: messageChat?.trim(),
+                    sender_id: currentUserId,
+                    receiver_id: otherUserId,
+                    media: []
+                });
+                setMessageChat("");
+            } catch (error: any) {
+                console.error("WS Send failed:", error);
+                setMessage("Failed to send message. Check your internet connection.");
+            }
+        }
     }
+
+    const handleDeleteChosen = async () => {
+        try {
+            await userChat.deleteChosenMessagesMt.mutateAsync();
+            
+            send("DELETE_CHOSEN", {
+                message_ids: chosenMessageIds,
+                sender_id: currentUserId,
+                receiver_id: otherUserId
+            });
+        } catch (error: any) {
+            setMessage(error.message || "Gagal menghapus pesan");
+        }
+    };
+
+    const handleDeleteAll = async () => {
+        try {
+            await userChat.deleteAllMessagesMt.mutateAsync();
+            
+            send("DELETE_ALL", {
+                sender_id: currentUserId,
+                receiver_id: otherUserId
+            });
+        } catch (error: any) {
+            setMessage(error.message || "Gagal menghapus semua pesan");
+        }
+    };
 
     return (
         <section className="flex flex-col md:flex-row h-dvh relative z-10">
@@ -93,8 +235,8 @@ export default function Chats() {
                     clearAll={userChat.clearAllMessagesMt}
                     chosenMessageIds={chosenMessageIds}
                     clearChosen={userChat.clearChosenMessagesMt}
-                    deleteAll={userChat.deleteAllMessagesMt}
-                    deletChosen={userChat.deleteChosenMessagesMt}
+                    deleteAll={{ ...userChat.deleteAllMessagesMt, mutate: handleDeleteAll }}
+                    deletChosen={{ ...userChat.deleteChosenMessagesMt, mutate: handleDeleteChosen }}
                 />
             )}
             <main className="h-full overflow-y-auto p-2.5 flex flex-col w-full md:w-3/4">
@@ -133,25 +275,6 @@ export default function Chats() {
                         >
                             <Settings2 size={22}/>
                         </button>
-                        {selectMode ? (
-                            <button 
-                                className="text-base font-medium cursor-pointer disabled:cursor-not-allowed text-white"
-                                disabled={isProcessing}
-                                onClick={cancelSelectMode}
-                                type="button"
-                            >
-                                <X size={22}/>
-                            </button>
-                        ) : (
-                            <button 
-                                className="text-base font-medium cursor-pointer disabled:cursor-not-allowed text-white"
-                                disabled={isProcessing}
-                                onClick={() => setSelectMode(true)}
-                                type="button"
-                            >
-                                <CheckCircle2 size={22}/>
-                            </button>
-                        )}
                     </section>
                 </header>
                 <ChatList

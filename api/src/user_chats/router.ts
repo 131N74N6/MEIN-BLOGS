@@ -33,21 +33,15 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
 }, {
     query: t.Omit(userChatSchema.pagination, ["sender_id", "skip"])
 })
-.get("/messages/:_id", async ({ params }) => {
-    return await userChatController.getMessage(params._id);
-}, {
-    params: t.Pick(userChatSchema.change_result, ["_id"])
-})
 .post("/send", async ({ body, user }) => {
     return await userChatController.sendMessage({ sender_id: user.id, ...body });
 }, {
     body: t.Omit(userChatSchema.add_raw, ["sender_id"])
 })
-.put("/remake", async ({ body }) => {
-    console.log(body);
-    return await userChatController.changeMessage(body);
+.put("/remake", async ({ body, user }) => {
+    return await userChatController.changeMessage({ ...body, sender_id: user.id });
 }, {
-    body: userChatSchema.change_result
+    body: t.Omit(userChatSchema.change_result, ["sender_id"])
 })
 .ws("/ws", {
     open: async (ws) => {
