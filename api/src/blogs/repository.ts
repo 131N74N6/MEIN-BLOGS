@@ -48,10 +48,12 @@ class BlogRepository {
     }
 
     async deleteAllBlogs(blogs_ids: string[], current_user_id: string) {
+        const ids = blogs_ids.map(id => new ObjectId(id));
+
         return await Promise.all([
-            this.viewers.deleteMany({ blog_id: { $in: blogs_ids } }),
-            this.comments.deleteMany({ blog_id: { $in: blogs_ids } }),
-            this.blogs.deleteMany({ blog_owner_id: current_user_id })
+            this.viewers.deleteMany({ blog_id: { $in: ids } }),
+            this.comments.deleteMany({ blog_id: { $in: ids } }),
+            this.blogs.deleteMany({ blog_owner_id: new ObjectId(current_user_id) })
         ]);
     }
 

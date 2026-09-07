@@ -46,12 +46,19 @@ export default function Chats() {
     const selectMode = useUserChatStore((state) => state.selectMode);
     const setSelectMode = useUserChatStore((state) => state.setSelectMode);
 
-    const handleMessage = useCallback((data: WSMessage) => {
-        switch (data.type) {
+    const handleMessage = useCallback((ws: WSMessage) => {
+        switch (ws.type) {
             case "MESSAGE_SENT": {
-                const newMessage = data.payload as UserMessage;
+                const newMessage = ws.payload as UserMessage;
                 queryClient.setQueryData([`user-chats-${otherUserId}`], (oldData: any) => {
-                    if (!oldData) return oldData;
+                    if (!oldData) return { pages: [[newMessage]], pageParams: [1] };
+
+                    const messageExists = oldData.pages.some((page: UserMessage[]) => {
+                        return page.some((msg: UserMessage) => msg._id === newMessage._id)
+                    });
+                    
+                    if (messageExists) return oldData;
+                    
                     return { ...oldData, pages: oldData.pages.map((page: UserMessage[], index: number) => {
                         return index === 0 ? [newMessage, ...page] : page
                     })}
@@ -61,7 +68,7 @@ export default function Chats() {
             }
 
             case "MESSAGE_EDITED": {
-                const editedMessage = data.payload as UserMessage;
+                const editedMessage = ws.payload as UserMessage;
                 queryClient.setQueryData([`user-chats-${otherUserId}`], (oldData: any) => {
                     if (!oldData) return oldData;
                     return { ...oldData, pages: oldData.pages.map((page: UserMessage[]) => {
@@ -73,7 +80,7 @@ export default function Chats() {
             }
 
             case "MESSAGES_DELETED": {
-                const { message_ids } = data.payload as { message_ids: string[] };
+                const { message_ids } = ws.payload as { message_ids: string[] };
                 queryClient.setQueryData([`user-chats-${otherUserId}`], (oldData: any) => {
                     if (!oldData) return oldData;
                     return { ...oldData, pages: oldData.pages.map((page: UserMessage[]) => {
@@ -91,7 +98,7 @@ export default function Chats() {
             }
 
             case "ERROR": {
-                const errorMsg = (data.payload as any).message || "Unknown error";
+                const errorMsg = (ws.payload as any).message || "Unknown error";
                 setMessage(errorMsg);
 
                 break;
@@ -168,10 +175,12 @@ export default function Chats() {
         }
 
         if (chatMedia && chatMedia.length > 0) {
+            const currentMessage = messageChat?.trim() || "";
+
             try {
                 const response = await userChat.sendMessagesMt.mutateAsync();
-                send("SEND", {
-                    message: messageChat?.trim(),
+                send("SEND_FILE", {
+                    message: currentMessage,
                     sender_id: currentUserId,
                     receiver_id: otherUserId,
                     media: response?.media || []
@@ -183,9 +192,11 @@ export default function Chats() {
                 setMessage(error.message || "Failed to send message. Check your internet connection.");
             }
         } else {
+            const currentMessage = messageChat?.trim() || "";
+            
             try {
-                send("SEND", {
-                    message: messageChat?.trim(),
+                send("SEND_TEXT", {
+                    message: currentMessage,
                     sender_id: currentUserId,
                     receiver_id: otherUserId,
                     media: []
@@ -236,7 +247,7 @@ export default function Chats() {
                     chosenMessageIds={chosenMessageIds}
                     clearChosen={userChat.clearChosenMessagesMt}
                     deleteAll={{ ...userChat.deleteAllMessagesMt, mutate: handleDeleteAll }}
-                    deletChosen={{ ...userChat.deleteChosenMessagesMt, mutate: handleDeleteChosen }}
+                    deleteChosen={{ ...userChat.deleteChosenMessagesMt, mutate: handleDeleteChosen }}
                 />
             )}
             <main className="h-full overflow-y-auto p-2.5 flex flex-col w-full md:w-3/4">

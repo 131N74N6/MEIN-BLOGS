@@ -18,13 +18,13 @@ class UserChatController {
     }
 
     async deleteAllMessages(data: Omit<TUserChat["delete_chat"], "message_ids">) {
-        await userChatService.deleteAllMessages(data);
-        return { message: "all messages has deleted successfully", success: true };
+        const result = await userChatService.deleteAllMessages(data);
+        return { data: result, message: "all messages has deleted successfully", success: true };
     }
 
     async deleteChosenMessages(data: TUserChat["delete_chat"]) {
-        await userChatService.deleteChosenMessages(data);
-        return { message: "chosen messages has deleted successfully", success: true };
+        const result = await userChatService.deleteChosenMessages(data);
+        return { data: result, message: "chosen messages has deleted successfully", success: true };
     }
 
     async getAllMessages(data: Omit<TUserChat["pagination"], "skip">) {
@@ -40,8 +40,8 @@ class UserChatController {
     }
 
     async sendMessage(data: TUserChat["add_raw"]) {
-        await userChatService.sendMessage(data);
-        return { message: "message has ben sent successfully", success: true };
+        const result = await userChatService.sendMessage(data);
+        return { data: result, message: "message has ben sent successfully", success: true };
     }
 }
 

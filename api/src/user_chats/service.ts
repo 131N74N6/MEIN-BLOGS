@@ -182,13 +182,13 @@ class UserChatService {
 
         this.executeMediaDeletions({ 
             chats: props.chatsToDeletePermanently, 
-            deleteFn: userChatRepository.deleteAllMessagesPermanently,
+            deleteFn: (ids) => userChatRepository.deleteAllMessagesPermanently(ids),
             operations: operations
         });
 
         this.executeMediaDeletions({
             chats: props.chatsToDeleteTemporarily, 
-            deleteFn: userChatRepository.deleteAllMessagesTemporary,
+            deleteFn: (ids) => userChatRepository.deleteAllMessagesTemporary(ids),
             operations: operations
         });
 
@@ -230,7 +230,14 @@ class UserChatService {
 
     async sendMessage(data: TUserChat["add_raw"]) {
         let selectedMedia: any[] = [];
-        const newMessage = this.checkIsInputValid("message", 1, data.message);
+        let newMessage = "";
+
+        if (data.message) {
+            newMessage = this.checkIsInputValid("message", 1, data.message);
+        } else if (!data.media || data.media.length === 0) {
+            throw new BlogApiError(400, "message or media is required");
+        }
+        
         const receiverId = this.checkIsIdValid("receiver id", data.receiver_id);
         const senderId = this.checkIsIdValid("sender id", data.sender_id);
 

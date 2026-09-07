@@ -92,7 +92,7 @@ export type PopUpOptionData = {
     clearAll: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
     clearChosen: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
     deleteAll: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
-    deletChosen: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
+    deleteChosen: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
     isProcessing: boolean;
 }
 

@@ -53,10 +53,13 @@ export const userChatSchema = {
     ws_message: t.Object({
         type: t.Enum({ 
             JOIN: "JOIN",
-            SEND: "SEND", 
+            SEND_FILE: "SEND_FILE",
+            SEND_TEXT: "SEND_TEXT",
             EDIT: "EDIT", 
             DELETE_CHOSEN: "DELETE_CHOSEN", 
-            DELETE_ALL: "DELETE_ALL" 
+            DELETE_ALL: "DELETE_ALL",
+            PING: "ping",
+            PONG: "pong"
         }),
         payload: t.Any()
     })
@@ -82,4 +85,21 @@ export type ExecuteMediaDelete = {
     chats: any[]; 
     deleteFn: (ids: any[]) => Promise<any>;
     operations: Promise<any>[];
+}
+
+export type UserMessage = {
+    _id: string;
+    created_at: Date;
+    hidden_for: string[];
+    media: {
+        url: string;
+        filename: string;
+        filetype: string;
+        public_id: string;
+        resource_type: string;
+    }[];
+    message: string;
+    sender_id: string;
+    receiver_id: string;
+    updated_at: Date;
 }

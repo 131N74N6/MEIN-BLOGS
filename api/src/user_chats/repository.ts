@@ -35,8 +35,8 @@ class UserChatRepository {
     async findAllMessages(data: Pick<TUserChat["pagination"], "receiver_id" | "sender_id">) {
         return await this.user_chats.find({ 
             $or: [
-                { receiver_id: data.receiver_id, sender_id: data.sender_id },
-                { receiver_id: data.sender_id, sender_id: data.receiver_id }
+                { receiver_id: new ObjectId(data.receiver_id), sender_id: new ObjectId(data.sender_id) },
+                { receiver_id: new ObjectId(data.sender_id), sender_id: new ObjectId(data.receiver_id) }
             ]
         })
         .toArray();

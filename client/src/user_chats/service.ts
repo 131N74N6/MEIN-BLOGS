@@ -31,13 +31,9 @@ export default function useUserChatService() {
     const changeMessageMt = useMutation({
         mutationFn: async (id: string) => {
             const endpoint = "/api/chats/remake";
+            const message = messageChat?.trim() ?? ".";
 
-            const newMessage = JSON.stringify({ 
-                _id: id, 
-                message: messageChat?.trim(), 
-                receiver_id: otherUserId 
-            });
-            
+            const newMessage = JSON.stringify({ _id: id, message: message, receiver_id: otherUserId });
             return await apiRequest<UserMessage>(endpoint, { body: newMessage, method: "PUT" });
         },
         onError: (error) => {
@@ -53,7 +49,7 @@ export default function useUserChatService() {
 
     const clearAllMessagesMt = useMutation({
         mutationFn: async () => {
-            const endpoint = `/api/chats/clear-all?receiver_id=${otherUserId}`;
+            const endpoint = `/api/chats/clear-all/${otherUserId}`;
             return await apiRequest(endpoint, { method: "DELETE" });
         },
         onError: (error) => {
@@ -90,7 +86,7 @@ export default function useUserChatService() {
 
     const deleteAllMessagesMt = useMutation({
         mutationFn: async () => {
-            const endpoint = `/api/chats/rm-all?receiver_id=${otherUserId}`;
+            const endpoint = `/api/chats/rm-all/${otherUserId}`;
             return await apiRequest(endpoint, { method: "DELETE" });
         },
         onError: (error) => {
@@ -141,8 +137,9 @@ export default function useUserChatService() {
 
     const sendMessagesMt = useMutation({
         mutationFn: async () => {
+            const message = messageChat?.trim() ?? ".";
             const newMessage = new FormData();
-            if (messageChat) newMessage.append("message", messageChat.trim());
+            newMessage.append("message", message);
             if (otherUserId) newMessage.append("receiver_id", otherUserId);
             if (chatMedia && chatMedia.length > 0) {
                 for (let w = 0; w < chatMedia.length; w++) {

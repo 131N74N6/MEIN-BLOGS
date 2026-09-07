@@ -87,7 +87,7 @@ export default function PopUpOption(props: PopUpOptionData) {
                                 "bg-white text-zinc-800 font-medium text-sm p-2 w-full rounded-md" 
                             )}
                             disabled={props.isProcessing}
-                            onClick={() => props.deletChosen.mutate()}
+                            onClick={() => props.deleteChosen.mutate()}
                             type="button"
                         >
                             Delete Chosen Messages
