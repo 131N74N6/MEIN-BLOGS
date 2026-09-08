@@ -1,10 +1,11 @@
 import Elysia, { t } from "elysia";
 import { authMiddleware } from "../auth/middleware";
 import userChatController from "./controller";
-import { ChatWSData, TUserChat, userChatSchema, UserMessage } from "./model";
-import { authService } from "../auth/service";
-import userChatService from "./service";
-import { BlogApiError } from "../error/service";
+import { userChatSchema } from "./model";
+import { userChatsEvents } from "./event";
+import { validateSessionFromToken } from "../auth/service";
+
+const wsContext = new WeakMap<any, { roomId: string; handler: (payload: any) => void }>();
 
 const userChatRouters = new Elysia({ prefix: "/api/chats" })
 .use(authMiddleware)
@@ -43,150 +44,72 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
 }, {
     body: t.Omit(userChatSchema.change_result, ["sender_id"])
 })
-.ws("/ws", {
-    beforeHandle: ({ request }) => {
-        const cookie = request.headers.get("cookie");
-        return { cookie };
-    },
-    open: async (ws) => {
+.ws("/ws/:receiver_id", {
+    query: t.Object({
+        token: t.String({ minLength: 1, error: "invalid token" })
+    }),
+
+    async open(ws) {
         try {
-            const rawHeaders = ws.data.headers;
-            const headersInit: Record<string, string> = {};
+            const token = ws.data.query.token; 
+            const receiverId = ws.data.params.receiver_id;
+            const session = await validateSessionFromToken(token);
 
-            for (const key in rawHeaders) {
-                if (rawHeaders[key] !== null && rawHeaders[key] !== undefined) {
-                    headersInit[key] = rawHeaders[key] as string;
-                }
-            }
-
-            const headers = new Headers(headersInit);
-            const session = await authService.api.getSession({ headers });
-
-            if (!session) {
-                ws.close(1008, "Unauthorized: Invalid or missing session");
+            if (!session || !session.user) {
+                console.error("❎ WebSocket: invalid or token expired");
+                ws.send(JSON.stringify({ type: "error", message: "Unauthorized" }));
+                ws.close(4001, "Unauthorized");
                 return;
             }
 
-            const data = ws.data as ChatWSData;
-            data.user = session.user;
-            data.userId = session.user.id; 
-            
-            console.log(`✅ User ${session.user.id} connected to chat WS`);
-        } catch (error) {
-            console.error("WS Open Error:", error);
-            ws.close(1011, "Internal Server Error during auth");
-        }
-    },
+            const userId = session.user.id;
 
-    message: async (ws, body) => {
-        const data = ws.data as ChatWSData;
-        const userId = data.userId;
-
-        const getChatRoomId = (id1: string, id2: string) => {
-            const sorted = [id1, id2].sort();
-            return `chat_${sorted[0]}_${sorted[1]}`;
-        }
-        
-        if (!userId) {
-            ws.send(JSON.stringify({ type: "ERROR", message: "Unauthorized" }));
-            return;
-        }
-
-        try {
-            const parsed = body;
-            
-            if (!parsed.type || !parsed.payload) {
-                ws.send(JSON.stringify({ type: "ERROR", message: "Invalid message format" }));
+            if (!userId || !receiverId) {
+                console.error("❎ WebSocket: Missing userId or receiverId");
+                ws.send(JSON.stringify({ type: "error", message: "Missing parameters" }));
+                ws.close(4002, "Missing parameters");
                 return;
             }
 
-            switch (parsed.type) {
-                case "ping": {
-                    ws.send(JSON.stringify({ type: "pong", payload: {} }));
-                }
-                case "JOIN": {
-                    const targetUserId = parsed.payload.targetUserId as string;
-                    if (!targetUserId) break;
-
-                    const roomId = getChatRoomId(userId, targetUserId);
-                    ws.subscribe(roomId);
-                    console.log(`🔔 User ${userId} joined room ${roomId}`);
-                    break;
-                }
-                case "SEND_FILE": {
-                    const newMessage = parsed.payload as UserMessage;
-                    if (newMessage.sender_id !== userId) throw new BlogApiError(403, "Forbidden");
-
-                    const roomId = getChatRoomId(newMessage.sender_id, newMessage.receiver_id);
-                    ws.publish(roomId, JSON.stringify({ type: "MESSAGE_SENT", payload: newMessage }));
-                    break;
-                }
-                case "SEND_TEXT": {
-                    const payload = parsed.payload as TUserChat["add_raw"];
-                    if (payload.sender_id !== userId) throw new BlogApiError(403, "Forbidden");
-
-                    const newMessage = await userChatService.sendMessage(payload);
-                    const roomId = getChatRoomId(payload.sender_id, payload.receiver_id);
-                    ws.publish(roomId, JSON.stringify({ type: "MESSAGE_SENT", payload: newMessage }));
-                    break;
-                }
-                case "EDIT": {
-                    const payload = parsed.payload as TUserChat["change_result"];
-                    if (payload.sender_id !== userId) throw new BlogApiError(403, "Forbidden");
-
-                    const updatedMessage = await userChatService.changeMessage(payload);
-                    if (updatedMessage) {
-                        const senderId = updatedMessage.sender_id.toString();
-                        const receiverId = updatedMessage.receiver_id.toString();
-
-                        const roomId = getChatRoomId(senderId, receiverId);
-                        ws.publish(roomId, JSON.stringify({ 
-                            type: "MESSAGE_EDITED", 
-                            payload: updatedMessage 
-                        }));
-                    }
-                    break;
-                }
-                case "DELETE_CHOSEN": {
-                    const payload = parsed.payload as TUserChat["delete_chat"];
-                    if (payload.sender_id !== userId) throw new BlogApiError(403, "Forbidden");
-
-                    await userChatService.deleteChosenMessages(payload);
-                    const roomId = getChatRoomId(payload.sender_id, payload.receiver_id);
-                    ws.publish(roomId, JSON.stringify({ 
-                        type: "MESSAGES_DELETED", 
-                        payload: { message_ids: payload.message_ids } 
-                    }));
-                    break;
-                }
-                case "DELETE_ALL": {
-                    const payload = parsed.payload as Omit<TUserChat["delete_chat"], "message_ids">;
-                    if (payload.sender_id !== userId) throw new BlogApiError(403, "Forbidden");
-                    await userChatService.deleteAllMessages(payload);
-                    const roomId = getChatRoomId(payload.sender_id, payload.receiver_id);
-                    ws.publish(roomId, JSON.stringify({ 
-                        type: "ALL_MESSAGES_DELETED", 
-                        payload: { receiver_id: payload.receiver_id, sender_id: payload.sender_id } 
-                    }));
-                    break;
-                }
-                default: { 
-                    ws.send(JSON.stringify({ type: "ERROR", payload: { message: "Unknown action type" } })); 
+            const roomId = [userId, receiverId].sort().join("_");
+            
+            const handler = (payload: any) => {
+                try {
+                    ws.send(JSON.stringify(payload));
+                } catch (error) {
+                    console.error("Error sending WebSocket message:", error);
                 }
             }
+            
+            userChatsEvents.on(roomId, handler);
+            wsContext.set(ws, { roomId, handler });
+
+            ws.send(JSON.stringify({ 
+                type: "connected", 
+                roomId,
+                userId,
+                message: "WebSocket connection established"
+            }));
+                
+            console.log(`✅ WebSocket connected: ${userId} joined room ${roomId}`);
         } catch (error) {
-            console.error("WS Message Error:", error);
-            const errorMsg = error instanceof BlogApiError ? error.message : "something went wrong";
-            ws.send(JSON.stringify({ type: "ERROR", payload: { message: errorMsg } }));
+            console.error(" WebSocket open error:", error);
+            ws.send(JSON.stringify({ 
+                type: "error", 
+                message: "Connection failed" 
+            }));
+            ws.close(4003, "Internal error");
         }
     },
 
-    close: (ws) => {
-        const data = ws.data as ChatWSData;
-        console.log(`❌ User ${data.userId || 'Unknown'} disconnected from chat WS`);
-    },
-
-    body: userChatSchema.ws_message 
+    close(ws) {
+        const ctx = wsContext.get(ws);
+        if (ctx) {
+            userChatsEvents.off(ctx.roomId, ctx.handler);
+            wsContext.delete(ws);
+            console.log(`📶 WebSocket disconnected from room ${ctx.roomId}`);
+        }
+    }
 });
 
 export default userChatRouters;

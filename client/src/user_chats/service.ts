@@ -1,14 +1,15 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUserStore } from "../users/store";
 import { apiRequest, apiUpload } from "../handler/api";
 import { useStyleStore } from "../styles/store";
 import { useUserChatStore } from "./store";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { FileViewerData, UserMessage } from "./model";
 
 export default function useUserChatService() {
     const queryClient = useQueryClient();
     const chatMediaRef = useRef<HTMLInputElement | null>(null);
+    const wsRef = useRef<WebSocket | null>(null);
 
     const setMessage = useStyleStore((state) => state.setMessage);
     
@@ -28,10 +29,127 @@ export default function useUserChatService() {
     const currentUserId = useUserStore((state) => state.currentUserId);
     const otherUserId = useUserStore((state) => state.otherUserId);
 
+    const getSessionToken = useQuery({
+        enabled: !!currentUserId,
+        queryFn: async () => {
+            const response = await apiRequest<string>("/api/users/session", { method: "GET" });
+            return response;
+        },
+        queryKey: [`user-session-token-${currentUserId}`]
+    })
+
+    // Cleanup WebSocket
+    const cleanupWebSocket = () => {
+        if (wsRef.current) {
+            wsRef.current.close();
+            wsRef.current = null;
+        }
+    };
+
+    useEffect(() => {
+        if (!currentUserId || !otherUserId) {
+            cleanupWebSocket();
+            return;
+        }
+
+        if (getSessionToken.isLoading) {
+            return;
+        }
+
+        // Dapatkan token
+        const token = getSessionToken;
+        if (!token) {
+            console.error("❎ No auth token found");
+            return;
+        }
+
+        cleanupWebSocket();
+
+        const backendUrl = import.meta.env.VITE_BASE_API_URL || 'http://localhost:3000';
+        const wsProtocol = backendUrl.startsWith("https") ? "wss:" : "ws:";
+        const backendHost = backendUrl.replace(/^https?:\/\//, '');
+
+        const wsUrl = `${wsProtocol}//${backendHost}/api/chats/ws/${otherUserId}?token=${token}`;
+        const ws = new WebSocket(wsUrl);
+        let messageQueue: any[] = [];
+
+        ws.onopen = () => {
+            console.log("📶 WebSocket connected to:", wsUrl);
+            messageQueue.forEach(msg => {
+                try {
+                    ws.send(msg);
+                } catch (error) {
+                    console.error("Error sending queued message:", error);
+                }
+            });
+            messageQueue = [];
+        }
+
+        ws.onmessage = (event) => {
+            try {
+                const payload = JSON.parse(event.data);
+
+                if (payload.type === "connected") {
+                    console.log("✅", payload.message);
+                    setMessage(payload.message);
+                    return;
+                }
+                
+                if (payload.type === "error") {
+                    console.error("❎ WebSocket error from server:", payload.message);
+                    setMessage(payload.message);
+                    return;
+                }
+
+                const queryKey = [`user-chats-${otherUserId}`];
+                
+                if (payload.type === "message:created") {
+                    queryClient.setQueryData(queryKey, (old: any) => {
+                        if (!old) return old;
+                        const newPages = [...old.pages];
+                        // API mengurutkan berdasarkan created_at: -1 (terbaru di awal)
+                        newPages[0] = [payload.data, ...newPages[0]];
+                        return { ...old, pages: newPages };
+                    });
+                } else if (payload.type === "message:updated") {
+                    queryClient.setQueryData(queryKey, (old: any) => {
+                        if (!old) return old;
+                        const newPages = old.pages.map((page: any[]) => 
+                            page.map(msg => msg._id === payload.data._id ? payload.data : msg)
+                        );
+                        return { ...old, pages: newPages };
+                    });
+                } else if (payload.type === "message:deleted") {
+                    queryClient.setQueryData(queryKey, (old: any) => {
+                        if (!old) return old;
+                        const newPages = old.pages.map((page: any[]) => 
+                            page.filter(msg => !payload.data.ids.includes(msg._id))
+                        );
+                        return { ...old, pages: newPages };
+                    });
+                }
+
+                queryClient.invalidateQueries({ queryKey });
+            } catch (err) {
+                console.error("WS message parse error", err);
+            }
+        }
+
+        ws.onerror = (error) => {
+            console.error("❌ WebSocket error:", error);
+        }
+
+        ws.onclose = () => {
+            console.log("❌ WebSocket disconnected");
+        }
+
+        return () => ws.close();
+    }, [currentUserId, otherUserId, queryClient]);
+
     const changeMessageMt = useMutation({
         mutationFn: async (id: string) => {
             const endpoint = "/api/chats/remake";
-            const message = messageChat?.trim() ?? ".";
+            const message = messageChat?.trim() ?? "";
 
             const newMessage = JSON.stringify({ _id: id, message: message, receiver_id: otherUserId });
             return await apiRequest<UserMessage>(endpoint, { body: newMessage, method: "PUT" });
@@ -40,7 +158,9 @@ export default function useUserChatService() {
             setMessage(error.message || "Failed to edit message");
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
             setMessageChat("");
+            setSelectMode(false);
             setChosenMessage(null);
             resetChosenMessageIds();
             setOpenPopUpOption(false);
@@ -83,6 +203,7 @@ export default function useUserChatService() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
             setMessageChat("");
+            setSelectMode(false);
             setChosenMessage(null);
             resetChosenMessageIds();
             setOpenPopUpOption(false);
@@ -99,6 +220,7 @@ export default function useUserChatService() {
             setMessage(error.message);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
             setMessageChat("");
             setChosenMessage(null);
             resetChosenMessageIds();
@@ -122,9 +244,13 @@ export default function useUserChatService() {
             setMessage(error.message);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            setMessageChat("");
             setSelectMode(false);
+            setChosenMessage(null);
             resetChosenMessageIds();
             setOpenPopUpOption(false);
+            resetChosenMessageIds();
         }
     });
 
@@ -145,7 +271,7 @@ export default function useUserChatService() {
 
     const sendMessagesMt = useMutation({
         mutationFn: async () => {
-            const message = messageChat?.trim() ?? ".";
+            const message = messageChat?.trim() ?? "";
             const newMessage = new FormData();
             newMessage.append("message", message);
             if (otherUserId) newMessage.append("receiver_id", otherUserId);
@@ -162,6 +288,7 @@ export default function useUserChatService() {
             setMessage(error.message);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
             setMessageChat("");
             setChatMedia([]);
         }

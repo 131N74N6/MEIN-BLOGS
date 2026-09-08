@@ -49,29 +49,10 @@ export const userChatSchema = {
         sender_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid sender" }),
         skip: t.Number({ default: 52, error: "invalid skip", maximum: 54 })
     }),
-
-    ws_message: t.Object({
-        type: t.Enum({ 
-            JOIN: "JOIN",
-            SEND_FILE: "SEND_FILE",
-            SEND_TEXT: "SEND_TEXT",
-            EDIT: "EDIT", 
-            DELETE_CHOSEN: "DELETE_CHOSEN", 
-            DELETE_ALL: "DELETE_ALL",
-            PING: "ping",
-            PONG: "pong"
-        }),
-        payload: t.Any()
-    })
 }
 
 export type TUserChat = {
     [k in keyof typeof userChatSchema]: UnwrapSchema<typeof userChatSchema[k]>;
-}
-
-export type ChatWSData = {
-    user?: any;
-    userId?: string;
 }
 
 export type ExecuteDelete = {
@@ -87,19 +68,7 @@ export type ExecuteMediaDelete = {
     operations: Promise<any>[];
 }
 
-export type UserMessage = {
-    _id: string;
-    created_at: Date;
-    hidden_for: string[];
-    media: {
-        url: string;
-        filename: string;
-        filetype: string;
-        public_id: string;
-        resource_type: string;
-    }[];
-    message: string;
-    sender_id: string;
-    receiver_id: string;
-    updated_at: Date;
-}
+export type UserChatWsPayload = {
+    type: "error" | "message:created" | "message:updated" | "message:deleted";
+    data: any;
+};

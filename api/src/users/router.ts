@@ -16,6 +16,10 @@ const userRouters = new Elysia({ prefix: "/api/users" })
 }, {
     params: userSchema["other_user"]
 })
+.get("/session", async ({ cookie }) => {
+    const sessionToken = cookie['better-auth.session_token']?.value;
+    return { data: sessionToken || null, success: true, message: "Session retrieved successfully" };
+})
 .put("/remake", async ({ body, user }) => {
     return await userController.changeUser({ id: user.id, ...body });
 }, {

@@ -5,17 +5,6 @@ import { TUserChat } from "./model";
 class UserChatRepository {
     private user_chats = db().collection("user_chats");
 
-    private formattedDoc(data: any) {
-        if (!data) return null;
-        return {
-            ...data,
-            _id: data._id.toString(),
-            sender_id: data.sender_id.toString(),
-            receiver_id: data.receiver_id.toString(),
-            hidden_for: (data.hidden_for || []).map((h: ObjectId) => h.toString())
-        }
-    }
-
     async changeMessage(data: TUserChat["change_result"]) {
         const result = await this.user_chats.findOneAndUpdate(
             { 
@@ -27,7 +16,7 @@ class UserChatRepository {
             { returnDocument: "after"}
         );
 
-        return this.formattedDoc(result);
+        return result;
     }
 
     async deleteAllMessagesPermanently(message_ids: ObjectId[]) {
@@ -77,7 +66,7 @@ class UserChatRepository {
         .skip(data.skip)
         .toArray();
 
-        return chats.map(this.formattedDoc);
+        return chats;
     }
 
     async hideAllMessage(user_id: string, message_ids: ObjectId[]) {
@@ -89,7 +78,7 @@ class UserChatRepository {
     }
     
     async sendMessage(data: TUserChat["add_result"]) {
-        const result = await this.user_chats.insertOne({
+        const message = {
             created_at: new Date(),
             hidden_for: [],
             media: data.media || [],
@@ -97,10 +86,11 @@ class UserChatRepository {
             sender_id: new ObjectId(data.sender_id),
             receiver_id: new ObjectId(data.receiver_id),
             updated_at: new Date()
-        });
+        }
 
-        const doc = await this.user_chats.findOne({ _id: result.insertedId });
-        return this.formattedDoc(doc);
+        const result = await this.user_chats.insertOne(message);
+        
+        return { ...message, _id: result.insertedId }
     }
 }
 

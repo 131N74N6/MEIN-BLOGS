@@ -79,3 +79,21 @@ export const authService = betterAuth({
         }
     }
 });
+
+export async function validateSessionFromToken(token: string) {
+    if (!token) return null;
+    
+    try {
+        const headers = new Headers();
+        headers.set('cookie', `better-auth.session_token=${token}`);
+        
+        const session = await authService.api.getSession({
+            headers
+        });
+        
+        return session;
+    } catch (error) {
+        console.error('Error validating session:', error);
+        return null;
+    }
+}
