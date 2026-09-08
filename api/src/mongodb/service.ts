@@ -18,8 +18,3 @@ const connection: Db = mongodbClient.db(dbName);
 export function db(): Db {
     return connection;
 }
-
-// Opsional: Untuk kompatibilitas jika masih dipanggil di index.ts
-export async function dbConnect(): Promise<Db> {
-    return connection;
-}

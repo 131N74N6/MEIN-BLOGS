@@ -41,8 +41,9 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             setMessageChat("");
-            setSelectMode(false);
             setChosenMessage(null);
+            resetChosenMessageIds();
+            setOpenPopUpOption(false);
             resetChosenMessageIds();
         }
     });
@@ -57,8 +58,11 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            setMessageChat("");
+            setChosenMessage(null);
             resetChosenMessageIds();
             setOpenPopUpOption(false);
+            resetChosenMessageIds();
         }
     });
 
@@ -78,9 +82,11 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
-            setSelectMode(false);
+            setMessageChat("");
+            setChosenMessage(null);
             resetChosenMessageIds();
             setOpenPopUpOption(false);
+            resetChosenMessageIds();
         }
     });
 
@@ -93,9 +99,11 @@ export default function useUserChatService() {
             setMessage(error.message);
         },
         onSuccess: () => {
-            setSelectMode(false);
+            setMessageChat("");
+            setChosenMessage(null);
             resetChosenMessageIds();
             setOpenPopUpOption(false);
+            resetChosenMessageIds();
         }
     });
 

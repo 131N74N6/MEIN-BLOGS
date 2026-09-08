@@ -30,7 +30,7 @@ class UserChatService {
         const senderId = this.checkIsIdValid("sender id", data.sender_id);
         const updatedMessage = this.checkIsInputValid("message", 1, data.message);
 
-        const message = await this.findOneMessage(messageId);
+        const message = await userChatRepository.findOneMessage(messageId);
         if (!message) throw new BlogApiError(404, "message not found");
         if (message.sender_id.toString() !== senderId) {
             throw new BlogApiError(403, "you are not allowed to change this message");
@@ -52,17 +52,17 @@ class UserChatService {
         if (chats.length === 0) throw new BlogApiError(404, "messages not found");
 
         const toDeleteChatPermanent = chats.filter(chat => {
-            return chat.hidden_for.some((hidden: ObjectId) => hidden.toString() === receiverId);
+            return chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId);
         });
 
         const toDeleteChatTemporary = chats.filter(chat => {
-            return !chat.hidden_for.some((hidden: ObjectId) => hidden.toString() === receiverId);
+            return !chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId);
         });
         
         await this.executeDeletions({ 
             chatsToDeletePermanently: toDeleteChatPermanent, 
-            chatsToDeleteTemporarily: toDeleteChatTemporary,
-            chatsToHide: [],
+            chatsToDeleteTemporarily: [],
+            chatsToHide: toDeleteChatTemporary,
             senderId: senderId
         });
     }
@@ -76,17 +76,17 @@ class UserChatService {
         if (chats.length === 0) throw new BlogApiError(404, "messages not found");
 
         const toDeleteChatPermanent = chats.filter(chat => {
-            return chat.hidden_for.some((hidden: ObjectId) => hidden.toString() === receiverId);
+            return chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId);
         });
 
         const toDeleteChatTemporary = chats.filter(chat => {
-            return !chat.hidden_for.some((hidden: ObjectId) => hidden.toString() === receiverId);
+            return !chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId);
         });
 
         await this.executeDeletions({
             chatsToDeletePermanently: toDeleteChatPermanent,
-            chatsToDeleteTemporarily: toDeleteChatTemporary,
-            chatsToHide: [],
+            chatsToDeleteTemporarily: [],
+            chatsToHide: toDeleteChatTemporary,
             senderId: senderId
         });
     }
@@ -99,22 +99,22 @@ class UserChatService {
         if (chats.length === 0) throw new BlogApiError(404, "messages not found");
         
         const deleteOwnPermanent = chats.filter(chat => {
-            return chat.hidden_for.some((hidden: ObjectId) => hidden.toString() === receiverId) &&
+            return chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === receiverId && chat.sender_id.toString() === senderId);
         });
 
         const deleteOwnTemporary = chats.filter(chat => {
-            return !chat.hidden_for.some((hidden: ObjectId) => hidden.toString() === receiverId) &&
+            return !chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === receiverId && chat.sender_id.toString() === senderId);
         });
 
         const deleteOtherPermanent = chats.filter(chat => {
-            return chat.hidden_for.some((hidden: ObjectId) => hidden.toString() === receiverId) &&
+            return chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === senderId && chat.sender_id.toString() === receiverId);
         });
 
         const deleteOtherTemporary = chats.filter(chat => {
-            return !chat.hidden_for.some((hidden: ObjectId) => hidden.toString() === receiverId) &&
+            return !chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === senderId && chat.sender_id.toString() === receiverId);
         });
 
@@ -144,22 +144,22 @@ class UserChatService {
         if (chats.length === 0) throw new BlogApiError(404, "messages not found");
 
         const deleteOwnPermanent = chats.filter(chat => {
-            return chat.hidden_for.some((hidden: ObjectId) => hidden.toString() === receiverId) &&
+            return chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === receiverId && chat.sender_id.toString() === senderId);
         });
 
         const deleteOwnTemporary = chats.filter(chat => {
-            return !chat.hidden_for.some((hidden: ObjectId) => hidden.toString() === receiverId) &&
+            return !chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === receiverId && chat.sender_id.toString() === senderId);
         });
 
         const deleteOtherPermanent = chats.filter(chat => {
-            return chat.hidden_for.some((hidden: ObjectId) => hidden.toString() === receiverId) &&
+            return chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === senderId && chat.sender_id.toString() === receiverId);
         });
 
         const deleteOtherTemporary = chats.filter(chat => {
-            return !chat.hidden_for.some((hidden: ObjectId) => hidden.toString() === receiverId) &&
+            return !chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === senderId && chat.sender_id.toString() === receiverId);
         });
 
@@ -214,14 +214,6 @@ class UserChatService {
         }
 
         props.operations.push(props.deleteFn(ids));
-    }
-
-    async findOneMessage(id: string) {
-        const messageId = this.checkIsIdValid("", id);
-        const message = await userChatRepository.findOneMessage(messageId);
-
-        if (!message) throw new BlogApiError(404, "message not found");
-        return message;
     }
 
     async getAllMessages(data: Omit<TUserChat["pagination"], "page">) {

@@ -50,6 +50,13 @@ export default function Chats() {
         switch (ws.type) {
             case "MESSAGE_SENT": {
                 const newMessage = ws.payload as UserMessage;
+                
+                // FIX: Pastikan _id ada sebelum dimasukkan ke cache
+                if (!newMessage || !newMessage._id) {
+                    console.warn("Received MESSAGE_SENT without _id", newMessage);
+                    break;
+                }
+
                 queryClient.setQueryData([`user-chats-${otherUserId}`], (oldData: any) => {
                     if (!oldData) return { pages: [[newMessage]], pageParams: [1] };
 
@@ -59,9 +66,12 @@ export default function Chats() {
                     
                     if (messageExists) return oldData;
                     
-                    return { ...oldData, pages: oldData.pages.map((page: UserMessage[], index: number) => {
-                        return index === 0 ? [newMessage, ...page] : page
-                    })}
+                    return { 
+                        ...oldData, 
+                        pages: oldData.pages.map((page: UserMessage[], index: number) => {
+                            return index === 0 ? [newMessage, ...page] : page
+                        })
+                    };
                 });
 
                 break;
@@ -71,9 +81,14 @@ export default function Chats() {
                 const editedMessage = ws.payload as UserMessage;
                 queryClient.setQueryData([`user-chats-${otherUserId}`], (oldData: any) => {
                     if (!oldData) return oldData;
-                    return { ...oldData, pages: oldData.pages.map((page: UserMessage[]) => {
-                        return page.map(message => message._id === editedMessage._id ? editedMessage : message)
-                    })}
+                    return { 
+                        ...oldData, 
+                        pages: oldData.pages.map((page: UserMessage[]) => {
+                            return page.map(message => {
+                                return message._id === editedMessage._id ? editedMessage : message
+                            })
+                        })
+                    }
                 });
 
                 break;
@@ -147,7 +162,9 @@ export default function Chats() {
 
     const sendMessage = async (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
+
         if (isProcessing) return;
+
         if (selectMode && chosenMessage) {
             if (!messageChat || messageChat.trim() === chosenMessage.message) {
                 cancelSelectMode();
@@ -169,27 +186,20 @@ export default function Chats() {
                 cancelSelectMode();
             } catch (error: any) {
                 console.error("Edit failed:", error);
-                setMessage(error.message || "Gagal mengedit pesan");
+                setMessage(error.message || "Failed to edit message.");
             }
             return;
         }
 
         if (chatMedia && chatMedia.length > 0) {
-            const currentMessage = messageChat?.trim() || "";
-
             try {
                 const response = await userChat.sendMessagesMt.mutateAsync();
-                send("SEND_FILE", {
-                    message: currentMessage,
-                    sender_id: currentUserId,
-                    receiver_id: otherUserId,
-                    media: response?.media || []
-                });
+                if (response) send("SEND_FILE", response);
 
                 setMessageChat("");
             } catch (error: any) {
                 console.error("Send failed:", error);
-                setMessage(error.message || "Failed to send message. Check your internet connection.");
+                setMessage(error.message || "Failed to send message.");
             }
         } else {
             const currentMessage = messageChat?.trim() || "";

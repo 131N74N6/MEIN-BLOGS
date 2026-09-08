@@ -5,8 +5,19 @@ import { TUserChat } from "./model";
 class UserChatRepository {
     private user_chats = db().collection("user_chats");
 
+    private formattedDoc(data: any) {
+        if (!data) return null;
+        return {
+            ...data,
+            _id: data._id.toString(),
+            sender_id: data.sender_id.toString(),
+            receiver_id: data.receiver_id.toString(),
+            hidden_for: (data.hidden_for || []).map((h: ObjectId) => h.toString())
+        }
+    }
+
     async changeMessage(data: TUserChat["change_result"]) {
-        return await this.user_chats.findOneAndUpdate(
+        const result = await this.user_chats.findOneAndUpdate(
             { 
                 _id: new ObjectId(data._id), 
                 sender_id: new ObjectId(data.sender_id), 
@@ -15,6 +26,8 @@ class UserChatRepository {
             { $set: { message: data.message, updated_at: new Date() }}, 
             { returnDocument: "after"}
         );
+
+        return this.formattedDoc(result);
     }
 
     async deleteAllMessagesPermanently(message_ids: ObjectId[]) {
@@ -56,14 +69,15 @@ class UserChatRepository {
             $or: [
                 { receiver_id: new ObjectId(data.receiver_id), sender_id: new ObjectId(data.sender_id) },
                 { receiver_id: new ObjectId(data.sender_id), sender_id: new ObjectId(data.receiver_id) }
-            ]
+            ], 
+            hidden_for: { $nin: [new ObjectId(data.sender_id)] } 
         })
         .sort({ created_at: -1 })
         .limit(data.limit)
         .skip(data.skip)
         .toArray();
 
-        return chats;
+        return chats.map(this.formattedDoc);
     }
 
     async hideAllMessage(user_id: string, message_ids: ObjectId[]) {
@@ -85,7 +99,8 @@ class UserChatRepository {
             updated_at: new Date()
         });
 
-        return await this.user_chats.findOne({ _id: result.insertedId });
+        const doc = await this.user_chats.findOne({ _id: result.insertedId });
+        return this.formattedDoc(doc);
     }
 }
 

@@ -44,6 +44,10 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
     body: t.Omit(userChatSchema.change_result, ["sender_id"])
 })
 .ws("/ws", {
+    beforeHandle: ({ request }) => {
+        const cookie = request.headers.get("cookie");
+        return { cookie };
+    },
     open: async (ws) => {
         try {
             const rawHeaders = ws.data.headers;
