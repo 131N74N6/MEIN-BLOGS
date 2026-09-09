@@ -29,7 +29,6 @@ export default function useUserChatService() {
     const messageChat = useUserChatStore((state) => state.messageChat);
     const setMessageChat = useUserChatStore((state) => state.setMessageChat);
 
-    const isWebSocketConnected = useUserChatStore((state) => state.isWebSocketConnected);
     const setIsWebSocketConnected = useUserChatStore((state) => state.setIsWebSocketConnected);
 
     const getSessionToken = useQuery({

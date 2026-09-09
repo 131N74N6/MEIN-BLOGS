@@ -3,31 +3,47 @@ import { EventEmitter } from "eventemitter3";
 class UserChatWebSocket extends EventEmitter {
     private ws: WebSocket | null = null;
     private url: string | null = null;
+
     private reconnectAttempts = 0;
     private maxReconnectAttempts = 5;
     private reconnectDelay = 1000;
+
     private messageQueue: any[] = [];
     private isConnecting = false;
     private shouldReconnect = true;
 
+    private token: string = "";
+    private backendUrl: string = "";
+    private otherUserId: string = "";
+
     connect (token: string, otherUserId: string, backendUrl: string) {
+        if (this.isConnecting) {
+            console.log("⏳ Connection already in progress, skipping...");
+            return;
+        }
+
         if (this.ws && (this.ws.readyState === WebSocket.CONNECTING || this.ws.readyState === WebSocket.OPEN)) {
-            // console.log("✅ WebSocket already connected or connecting");
+            console.log("✅ WebSocket already connected or connecting");
             return;
         }
 
         const newWsUrl = this.buildWsUrl(token, otherUserId, backendUrl);
         if (this.url && this.url !== newWsUrl) {
-            // console.log("🔄 URL changed, reconnecting to new room");
+            console.log("🔄 URL changed, reconnecting to new room");
             this.disconnect();
         }
 
         this.url = newWsUrl;
         this.isConnecting = true;
-
         this.ws = new WebSocket(this.url);
+        
+        this.bindEvents();
+    }
+
+    private bindEvents() {
+        if (!this.ws) return;
         this.ws.onopen = () => {
-            // console.log(" WebSocket connected to:", this.url);
+            console.log(" WebSocket connected to:", this.url);
             this.reconnectAttempts = 0;
             this.isConnecting = false;
             this.emit("connected", { message: "WebSocket connection established" });
@@ -59,7 +75,7 @@ class UserChatWebSocket extends EventEmitter {
             if (this.shouldReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
                 this.reconnectAttempts++;
                 const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
-                // console.log(`🔄 Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+                console.log(`🔄 Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
                 
                 setTimeout(() => {
                     if (this.url) this.connectFromUrl();
@@ -70,14 +86,6 @@ class UserChatWebSocket extends EventEmitter {
         };
     }
 
-    private connectFromUrl() {
-        if (this.url) {
-            this.ws = new WebSocket(this.url);
-            // Re-attach event handlers (same as above)
-            // ... (copy dari connect method)
-        }
-    }
-
     private buildWsUrl(token: string, otherUserId: string, backendUrl: string) {
         const wsProtocol = backendUrl.startsWith("https") ? "wss:" : "ws:";
         const backendHost = backendUrl.replace(/^https?:\/\//, '');
@@ -86,11 +94,11 @@ class UserChatWebSocket extends EventEmitter {
         return wsUrl;
     }
 
-    send(message: any) {
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify(message));
-        } else {
-            this.messageQueue.push(message);
+    private connectFromUrl() {
+        if (this.url && this.token && this.otherUserId && this.backendUrl) {
+            this.isConnecting = true;
+            this.ws = new WebSocket(this.url);
+            this.bindEvents();
         }
     }
 
@@ -109,6 +117,14 @@ class UserChatWebSocket extends EventEmitter {
 
     isConnected(): boolean {
         return this.ws?.readyState === WebSocket.OPEN;
+    }
+
+    send(message: any) {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify(message));
+        } else {
+            this.messageQueue.push(message);
+        }
     }
 }
 
