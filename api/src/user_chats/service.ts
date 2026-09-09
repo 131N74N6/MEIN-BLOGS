@@ -150,32 +150,31 @@ class UserChatService {
 
         const chats = await userChatRepository.findAllMessages({ receiver_id: receiverId, sender_id: senderId });
         if (chats.length === 0) throw new BlogApiError(404, "messages not found");
-        
-        const deleteOwnPermanent = chats.filter(chat => {
+
+        const toDeleteOwnPermanent = chats.filter(chat => {
             return chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === receiverId && chat.sender_id.toString() === senderId);
         });
 
-        const deleteOwnTemporary = chats.filter(chat => {
+        const toDeleteOwnTemporary = chats.filter(chat => {
             return !chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === receiverId && chat.sender_id.toString() === senderId);
         });
 
-        const deleteOtherPermanent = chats.filter(chat => {
+        const toDeleteOtherPermanent = chats.filter(chat => {
             return chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === senderId && chat.sender_id.toString() === receiverId);
         });
 
-        const deleteOtherTemporary = chats.filter(chat => {
+        const toDeleteOtherTemporary = chats.filter(chat => {
             return !chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === senderId && chat.sender_id.toString() === receiverId);
         });
-
 
         const affectedIds = await this.executeDeletions({
-            chatsToDeletePermanently: [...deleteOwnPermanent, ...deleteOtherPermanent],
-            chatsToDeleteTemporarily: deleteOtherTemporary,
-            chatsToHide: deleteOwnTemporary,
+            chatsToDeletePermanently: [...toDeleteOwnPermanent, ...toDeleteOtherPermanent],
+            chatsToDeleteTemporarily: toDeleteOwnTemporary,
+            chatsToHide: toDeleteOtherTemporary,
             senderId: senderId
         });
 
@@ -193,30 +192,30 @@ class UserChatService {
         const chats = await userChatRepository.findAllMessagesByIds(messageIds);
         if (chats.length === 0) throw new BlogApiError(404, "messages not found");
 
-        const deleteOwnPermanent = chats.filter(chat => {
+        const toDeleteOwnPermanent = chats.filter(chat => {
             return chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === receiverId && chat.sender_id.toString() === senderId);
         });
 
-        const deleteOwnTemporary = chats.filter(chat => {
+        const toDeleteOwnTemporary = chats.filter(chat => {
             return !chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === receiverId && chat.sender_id.toString() === senderId);
         });
 
-        const deleteOtherPermanent = chats.filter(chat => {
+        const toDeleteOtherPermanent = chats.filter(chat => {
             return chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === senderId && chat.sender_id.toString() === receiverId);
         });
 
-        const deleteOtherTemporary = chats.filter(chat => {
+        const toDeleteOtherTemporary = chats.filter(chat => {
             return !chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) &&
             (chat.receiver_id.toString() === senderId && chat.sender_id.toString() === receiverId);
         });
 
         const affectedIds = await this.executeDeletions({
-            chatsToDeletePermanently: [...deleteOtherPermanent, ...deleteOwnPermanent],
-            chatsToDeleteTemporarily: deleteOtherTemporary,
-            chatsToHide: deleteOwnTemporary,
+            chatsToDeletePermanently: [...toDeleteOtherPermanent, ...toDeleteOwnPermanent],
+            chatsToDeleteTemporarily: toDeleteOwnTemporary,
+            chatsToHide: toDeleteOtherTemporary,
             senderId: senderId
         });
 
@@ -270,7 +269,8 @@ class UserChatService {
             sender_id: senderId,
         });
 
-        return message;
+        const roomId = this.getRoomId(senderId, receiverId);
+        userChatsEvents.emit(roomId, { type: "message:created", data: message });
     }
 }
 

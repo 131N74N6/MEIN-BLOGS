@@ -10,8 +10,12 @@ export default function useUserChatService() {
     const queryClient = useQueryClient();
     const chatMediaRef = useRef<HTMLInputElement | null>(null);
     const wsRef = useRef<WebSocket | null>(null);
+    const reconnectAttemptsRef = useRef(0);
 
     const setMessage = useStyleStore((state) => state.setMessage);
+
+    const currentUserId = useUserStore((state) => state.currentUserId);
+    const otherUserId = useUserStore((state) => state.otherUserId);
     
     const setChosenMessage = useUserChatStore((state) => state.setChosenMessage);
     const setOpenPopUpOption = useUserChatStore((state) => state.setOpenPopUpOption);
@@ -26,16 +30,21 @@ export default function useUserChatService() {
     const messageChat = useUserChatStore((state) => state.messageChat);
     const setMessageChat = useUserChatStore((state) => state.setMessageChat);
 
-    const currentUserId = useUserStore((state) => state.currentUserId);
-    const otherUserId = useUserStore((state) => state.otherUserId);
+    const reconnectTrigger = useUserChatStore((state) => state.reconnectTrigger);
+    const setReconnectTrigger = useUserChatStore((state) => state.setReconnectTrigger);
+        
+    const maxReconnectAttempts = 5;
+    const reconnectDelay = 2000;
 
     const getSessionToken = useQuery({
         enabled: !!currentUserId,
         queryFn: async () => {
             const response = await apiRequest<string>("/api/users/session", { method: "GET" });
-            return response;
+            return response.data;
         },
-        queryKey: [`user-session-token-${currentUserId}`]
+        queryKey: [`user-session-token-${currentUserId}`],
+        retry: 3,
+        retryDelay: 1000,
     })
 
     // Cleanup WebSocket
@@ -52,14 +61,13 @@ export default function useUserChatService() {
             return;
         }
 
-        if (getSessionToken.isLoading) {
-            return;
-        }
+        if (getSessionToken.isLoading) return;
 
         // Dapatkan token
-        const token = getSessionToken;
-        if (!token) {
-            console.error("❎ No auth token found");
+        const token = getSessionToken.data;
+        if (!token || typeof token !== 'string') {
+            console.error("❎ No valid auth token found");
+            setMessage("Authentication token not found");
             return;
         }
 
@@ -69,12 +77,13 @@ export default function useUserChatService() {
         const wsProtocol = backendUrl.startsWith("https") ? "wss:" : "ws:";
         const backendHost = backendUrl.replace(/^https?:\/\//, '');
 
-        const wsUrl = `${wsProtocol}//${backendHost}/api/chats/ws/${otherUserId}?token=${token}`;
+        const wsUrl = `${wsProtocol}//${backendHost}/api/chats/ws/${otherUserId}?token=${encodeURIComponent(token)}`;
         const ws = new WebSocket(wsUrl);
         let messageQueue: any[] = [];
 
         ws.onopen = () => {
             console.log("📶 WebSocket connected to:", wsUrl);
+            reconnectAttemptsRef.current = 0;
             messageQueue.forEach(msg => {
                 try {
                     ws.send(msg);
@@ -129,7 +138,7 @@ export default function useUserChatService() {
                     });
                 }
 
-                queryClient.invalidateQueries({ queryKey });
+                // queryClient.invalidateQueries({ queryKey });
             } catch (err) {
                 console.error("WS message parse error", err);
             }
@@ -141,10 +150,32 @@ export default function useUserChatService() {
 
         ws.onclose = () => {
             console.log("❌ WebSocket disconnected");
+
+            if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+                reconnectAttemptsRef.current++;
+                const delay = reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1);
+                console.log(`Reconnecting in ${delay} ms (attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts})`);
+
+                setTimeout(() => {
+                    if (currentUserId && otherUserId && getSessionToken.data) {
+                        setReconnectTrigger(prev => prev + 1);
+                    }
+                }, delay);
+            }else {
+                setMessage("Connection lost. Please refresh the page.");
+            }
         }
 
         return () => ws.close();
-    }, [currentUserId, otherUserId, queryClient]);
+    }, [
+        currentUserId, 
+        otherUserId, 
+        queryClient, 
+        reconnectTrigger,
+        getSessionToken.data, 
+        getSessionToken.isLoading,
+        getSessionToken.error
+    ]);
 
     const changeMessageMt = useMutation({
         mutationFn: async (id: string) => {

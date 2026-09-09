@@ -10,6 +10,7 @@ import type { AuthServiceApi } from "../../../api/src/auth/model";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 import { useEffect } from "react";
 import { useRelationStore } from "../relations/store";
+import { useUserChatStore } from "../user_chats/store";
 
 export default function useAuthService() {
     const navigate = useNavigate();
@@ -38,6 +39,7 @@ export default function useAuthService() {
     const resetUserIdState = useUserStore((state) => state.resetUserIdState);
     
     const setCurrentUserId = useUserStore((state) => state.setCurrentUserId);
+    const resetMessageChatState = useUserChatStore((state) => state.resetMessageChatState);
     
     const authClient = createAuthClient({
         baseURL: import.meta.env.VITE_BASE_API_URL,
@@ -121,6 +123,7 @@ export default function useAuthService() {
             resetNavbarState();
             useBlogStore.persist.clearStorage();
             useUserStore.persist.clearStorage();
+            resetMessageChatState();
             navigate("/sign-in");
         }
     });

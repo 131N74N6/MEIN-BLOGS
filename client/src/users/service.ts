@@ -8,6 +8,7 @@ import { useStyleStore } from "../styles/store";
 import { apiRequest, apiUpload } from "../handler/api";
 import type { OtherUserData } from "./model";
 import { useRelationStore } from "../relations/store";
+import { useUserChatStore } from "../user_chats/store";
 
 export default function useUserService() {
     const navigate = useNavigate();
@@ -41,6 +42,7 @@ export default function useUserService() {
     const resetRelationState = useRelationStore((state) => state.resetRelationState);
 
     const resetNavbarState = useStyleStore((state) => state.resetNavbarState);
+    const resetMessageChatState = useUserChatStore((state) => state.resetMessageChatState);
     
     const changeUserMt = useMutation({
         mutationFn: async () => {
@@ -87,6 +89,7 @@ export default function useUserService() {
             resetNavbarState();
             useBlogStore.persist.clearStorage();
             useUserStore.persist.clearStorage();
+            resetMessageChatState();
             navigate("/sign-in");
         }
     });

@@ -18,6 +18,9 @@ export type MessageChatState = {
     openPopUpOption: boolean;
     setOpenPopUpOption: (openPopUpOption: boolean) => void;
 
+    reconnectTrigger: number;
+    setReconnectTrigger: (reconnectTrigger: number | ((prev: number) => number)) => void;
+
     selectMode: boolean;
     setSelectMode: (selectMode: boolean) => void;
 

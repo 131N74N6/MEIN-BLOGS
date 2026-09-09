@@ -94,10 +94,7 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
             console.log(`✅ WebSocket connected: ${userId} joined room ${roomId}`);
         } catch (error) {
             console.error(" WebSocket open error:", error);
-            ws.send(JSON.stringify({ 
-                type: "error", 
-                message: "Connection failed" 
-            }));
+            ws.send(JSON.stringify({ type: "error", message: "Connection failed" }));
             ws.close(4003, "Internal error");
         }
     },

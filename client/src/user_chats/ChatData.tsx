@@ -24,8 +24,8 @@ export default function ChatData(props: UserMessageData) {
         <div 
             className={cn(
                 "p-2 flex flex-col gap-2 rounded-t-lg",
-                props.is_own ? "rounded-bl-lg bg-zinc-200 ml-[50%] text-zinc-800" : 
-                "rounded-br-lg bg-zinc-800 mr-[50%] text-zinc-100",
+                props.is_own ? "rounded-bl-lg bg-zinc-200 ml-[15%] text-zinc-800" : 
+                "rounded-br-lg bg-zinc-800 mr-[15%] text-zinc-100",
                 props.is_select_mode ? "cursor-pointer hover:opacity-80" : "",
                 isSelected ? "bg-amber-200 ring-1 text-amber-950 ring-amber-700" : ""
             )}
