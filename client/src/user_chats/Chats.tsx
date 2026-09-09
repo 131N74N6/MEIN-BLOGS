@@ -54,9 +54,14 @@ export default function Chats() {
     }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
     useEffect(() => {
-        if (selectMode && chosenMessage) {
+        const canEdit = selectMode && 
+        chosenMessageIds.length === 1 && 
+        chosenMessage && 
+        chosenMessage.message !== "This message has been deleted";
+        
+        if (canEdit) {
             setMessageChat(chosenMessage.message);
-        } else if (selectMode && chosenMessageIds.length !== 1) {
+        } else {
             setMessageChat("");
         }
     }, [selectMode, chosenMessageIds, chosenMessage, setMessageChat]);
@@ -166,7 +171,7 @@ export default function Chats() {
                         <button
                             className="w-8 h-8 text-white rounded-full flex justify-center items-center cursor-pointer disabled:cursor-not-allowed bg-blue-700"
                             disabled={isProcessing}
-                            onClick={() => navigate(`/users/chats/${otherUserId}/media`)}
+                            onClick={() => navigate(`/users/chats/${otherUserId}/media/preview`)}
                             type="button"
                         >
                             <File size={16}/>

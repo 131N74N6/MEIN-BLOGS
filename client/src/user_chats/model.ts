@@ -15,11 +15,11 @@ export type MessageChatState = {
     chosenMessageIds: string[];
     setChosenMessageIds: (chosenMessageId: string) => void;
 
+    isWebSocketConnected: boolean;
+    setIsWebSocketConnected: (isWebSocketConnected: boolean) => void;
+
     openPopUpOption: boolean;
     setOpenPopUpOption: (openPopUpOption: boolean) => void;
-
-    reconnectTrigger: number;
-    setReconnectTrigger: (reconnectTrigger: number | ((prev: number) => number)) => void;
 
     selectMode: boolean;
     setSelectMode: (selectMode: boolean) => void;
@@ -98,5 +98,3 @@ export type PopUpOptionData = {
     deleteChosen: UseMutationResult<ApiResponse<unknown>, Error, void, unknown>;
     isProcessing: boolean;
 }
-
-// https://open.spotify.com/intl-id/track/6RcsAN8XF5KX6mMh6dum8e?si=53bd956200ee4f9b

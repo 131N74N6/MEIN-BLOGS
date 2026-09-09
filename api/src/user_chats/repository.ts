@@ -39,7 +39,8 @@ class UserChatRepository {
             $or: [
                 { receiver_id: new ObjectId(data.receiver_id), sender_id: new ObjectId(data.sender_id) },
                 { receiver_id: new ObjectId(data.sender_id), sender_id: new ObjectId(data.receiver_id) }
-            ]
+            ],
+            hidden_for: { $nin: [new ObjectId(data.sender_id)] } 
         })
         .toArray();
     }

@@ -171,12 +171,24 @@ class UserChatService {
             (chat.receiver_id.toString() === senderId && chat.sender_id.toString() === receiverId);
         });
 
-        const affectedIds = await this.executeDeletions({
-            chatsToDeletePermanently: [...toDeleteOwnPermanent, ...toDeleteOtherPermanent],
+        const toHideDeletedChat = chats.filter(chat => {
+            return !chat.hidden_for.includes(receiverId) && chat.message === "This message has been deleted";
+        });
+        
+        const toRemoveDeletedChat = chats.filter(chat => {
+            return chat.hidden_for.includes(receiverId) && chat.message === "This message has been deleted";
+        });
+
+        await this.executeDeletions({
+            chatsToDeletePermanently: [
+                ...toDeleteOwnPermanent, ...toDeleteOtherPermanent, ...toRemoveDeletedChat
+            ],
             chatsToDeleteTemporarily: toDeleteOwnTemporary,
-            chatsToHide: toDeleteOtherTemporary,
+            chatsToHide: [...toDeleteOtherTemporary, ...toHideDeletedChat],
             senderId: senderId
         });
+
+        const affectedIds = toDeleteOwnTemporary.map(message => message._id.toString());
 
         if (chats.length > 0) {
             const roomId = this.getRoomId(senderId, receiverId);
@@ -212,12 +224,26 @@ class UserChatService {
             (chat.receiver_id.toString() === senderId && chat.sender_id.toString() === receiverId);
         });
 
-        const affectedIds = await this.executeDeletions({
-            chatsToDeletePermanently: [...toDeleteOtherPermanent, ...toDeleteOwnPermanent],
+        const toHideDeletedChat = chats.filter(chat => {
+            return !chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) && 
+            chat.message === "This message has been deleted";
+        });
+        
+        const toRemoveDeletedChat = chats.filter(chat => {
+            return chat.hidden_for.some((id: ObjectId) => id.toString() === receiverId) && 
+            chat.message === "This message has been deleted";
+        });
+
+        await this.executeDeletions({
+            chatsToDeletePermanently: [
+                ...toDeleteOwnPermanent, ...toDeleteOtherPermanent, ...toRemoveDeletedChat
+            ],
             chatsToDeleteTemporarily: toDeleteOwnTemporary,
-            chatsToHide: toDeleteOtherTemporary,
+            chatsToHide: [...toDeleteOtherTemporary, ...toHideDeletedChat],
             senderId: senderId
         });
+
+        const affectedIds = toDeleteOwnTemporary.map(message => message._id.toString());
 
         if (chats.length > 0) {
             const roomId = this.getRoomId(senderId, receiverId);

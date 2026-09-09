@@ -21,14 +21,11 @@ export const useUserChatStore = create<MessageChatState>((set) => ({
         [...state.chosenMessageIds, messageId]
     })),
 
+    isWebSocketConnected: false,
+    setIsWebSocketConnected: (isWebSocketConnected) => set({ isWebSocketConnected }),
+
     openPopUpOption: false,
     setOpenPopUpOption: (openPopUpOption: boolean) => set({ openPopUpOption }),
-
-    reconnectTrigger: 0,
-    setReconnectTrigger: (reconnectTrigger) => set((state) => ({
-        reconnectTrigger: typeof reconnectTrigger === "function" ? 
-        reconnectTrigger(state.reconnectTrigger) : reconnectTrigger
-    })),
 
     selectMode: false,
     setSelectMode: (selectMode: boolean) => set({ selectMode }),
@@ -39,7 +36,6 @@ export const useUserChatStore = create<MessageChatState>((set) => ({
         media: [],
         messageChat: undefined,
         openPopUpOption: false,
-        reconnectTrigger: 0,
         selectMode: false
     })
 }));

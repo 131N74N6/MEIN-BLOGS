@@ -5,12 +5,11 @@ import { useStyleStore } from "../styles/store";
 import { useUserChatStore } from "./store";
 import { useEffect, useRef } from "react";
 import type { FileViewerData, UserMessage } from "./model";
+import { userChatWebSocket } from './event';
 
 export default function useUserChatService() {
     const queryClient = useQueryClient();
     const chatMediaRef = useRef<HTMLInputElement | null>(null);
-    const wsRef = useRef<WebSocket | null>(null);
-    const reconnectAttemptsRef = useRef(0);
 
     const setMessage = useStyleStore((state) => state.setMessage);
 
@@ -30,11 +29,8 @@ export default function useUserChatService() {
     const messageChat = useUserChatStore((state) => state.messageChat);
     const setMessageChat = useUserChatStore((state) => state.setMessageChat);
 
-    const reconnectTrigger = useUserChatStore((state) => state.reconnectTrigger);
-    const setReconnectTrigger = useUserChatStore((state) => state.setReconnectTrigger);
-        
-    const maxReconnectAttempts = 5;
-    const reconnectDelay = 2000;
+    const isWebSocketConnected = useUserChatStore((state) => state.isWebSocketConnected);
+    const setIsWebSocketConnected = useUserChatStore((state) => state.setIsWebSocketConnected);
 
     const getSessionToken = useQuery({
         enabled: !!currentUserId,
@@ -45,23 +41,11 @@ export default function useUserChatService() {
         queryKey: [`user-session-token-${currentUserId}`],
         retry: 3,
         retryDelay: 1000,
-    })
-
-    // Cleanup WebSocket
-    const cleanupWebSocket = () => {
-        if (wsRef.current) {
-            wsRef.current.close();
-            wsRef.current = null;
-        }
-    };
+    });
 
     useEffect(() => {
-        if (!currentUserId || !otherUserId) {
-            cleanupWebSocket();
-            return;
-        }
-
-        if (getSessionToken.isLoading) return;
+        if (!currentUserId || !otherUserId) return;
+        if (getSessionToken.isLoading || !getSessionToken.data) return;
 
         // Dapatkan token
         const token = getSessionToken.data;
@@ -71,107 +55,89 @@ export default function useUserChatService() {
             return;
         }
 
-        cleanupWebSocket();
-
         const backendUrl = import.meta.env.VITE_BASE_API_URL || 'http://localhost:3000';
-        const wsProtocol = backendUrl.startsWith("https") ? "wss:" : "ws:";
-        const backendHost = backendUrl.replace(/^https?:\/\//, '');
+        
+        userChatWebSocket.enableReconnect();
+        userChatWebSocket.connect(token, otherUserId, backendUrl);
 
-        const wsUrl = `${wsProtocol}//${backendHost}/api/chats/ws/${otherUserId}?token=${encodeURIComponent(token)}`;
-        const ws = new WebSocket(wsUrl);
-        let messageQueue: any[] = [];
+        const handleConnected = (payload: any) => {
+            console.log("✅", payload.message);
+            setIsWebSocketConnected(true);
+            setMessage(payload.message);
+        };
 
-        ws.onopen = () => {
-            console.log("📶 WebSocket connected to:", wsUrl);
-            reconnectAttemptsRef.current = 0;
-            messageQueue.forEach(msg => {
-                try {
-                    ws.send(msg);
-                } catch (error) {
-                    console.error("Error sending queued message:", error);
-                }
-            });
-            messageQueue = [];
-        }
+        const handleMessage = (payload: any) => {
+            if (payload.type === "error") {
+                console.error("❎ WebSocket error:", payload.message);
+                setMessage(payload.message);
+                return;
+            }
 
-        ws.onmessage = (event) => {
-            try {
-                const payload = JSON.parse(event.data);
-
-                if (payload.type === "connected") {
-                    console.log("✅", payload.message);
-                    setMessage(payload.message);
-                    return;
-                }
-                
-                if (payload.type === "error") {
-                    console.error("❎ WebSocket error from server:", payload.message);
-                    setMessage(payload.message);
-                    return;
-                }
-
-                const queryKey = [`user-chats-${otherUserId}`];
-                
-                if (payload.type === "message:created") {
-                    queryClient.setQueryData(queryKey, (old: any) => {
-                        if (!old) return old;
-                        const newPages = [...old.pages];
-                        // API mengurutkan berdasarkan created_at: -1 (terbaru di awal)
-                        newPages[0] = [payload.data, ...newPages[0]];
-                        return { ...old, pages: newPages };
+            const queryKey = [`user-chats-${otherUserId}`];
+            
+            if (payload.type === "message:created") {
+                queryClient.setQueryData(queryKey, (old: any) => {
+                    if (!old) return old;
+                    const newPages = [...old.pages];
+                    // API mengurutkan berdasarkan created_at: -1 (terbaru di awal)
+                    newPages[0] = [payload.data, ...newPages[0]];
+                    return { ...old, pages: newPages };
+                });
+            } else if (payload.type === "message:updated") {
+                queryClient.setQueryData(queryKey, (old: any) => {
+                    if (!old) return old;
+                    const newPages = old.pages.map((page: any[]) => {
+                        return page.map((message) => {
+                            return message._id === payload.data._id ? payload.data : message
+                        });
                     });
-                } else if (payload.type === "message:updated") {
-                    queryClient.setQueryData(queryKey, (old: any) => {
-                        if (!old) return old;
-                        const newPages = old.pages.map((page: any[]) => 
-                            page.map(msg => msg._id === payload.data._id ? payload.data : msg)
-                        );
-                        return { ...old, pages: newPages };
+                    return { ...old, pages: newPages };
+                });
+            } else if (payload.type === "message:deleted") {
+                queryClient.setQueryData(queryKey, (old: any) => {
+                    if (!old) return old;
+                    const newPages = old.pages.map((page: any[]) => {
+                        return page.map((message) => {
+                            if (payload.data.ids.includes(message._id)) {
+                                return {
+                                    ...message,
+                                    message: "This message has been deleted", 
+                                    media: [], 
+                                    updated_at: new Date().toISOString()
+                                };
+                            }
+                            return message;
+                        });
                     });
-                } else if (payload.type === "message:deleted") {
-                    queryClient.setQueryData(queryKey, (old: any) => {
-                        if (!old) return old;
-                        const newPages = old.pages.map((page: any[]) => 
-                            page.filter(msg => !payload.data.ids.includes(msg._id))
-                        );
-                        return { ...old, pages: newPages };
-                    });
-                }
-
-                // queryClient.invalidateQueries({ queryKey });
-            } catch (err) {
-                console.error("WS message parse error", err);
+                    return { ...old, pages: newPages };
+                });
             }
         }
 
-        ws.onerror = (error) => {
-            console.error("❌ WebSocket error:", error);
+        const handleDisconnected = () => {
+            setIsWebSocketConnected(false);
+        };
+        
+        const handleError = (error: any) => {
+            setMessage(error.message);
+        };
+
+        // Subscribe to events
+        userChatWebSocket.on("connected", handleConnected);
+        userChatWebSocket.on("message", handleMessage);
+        userChatWebSocket.on("disconnected", handleDisconnected);
+        userChatWebSocket.on("error", handleError);
+
+        return () => {
+            userChatWebSocket.off("connected", handleConnected);
+            userChatWebSocket.off("message", handleMessage);
+            userChatWebSocket.off("disconnected", handleDisconnected);
+            userChatWebSocket.off("error", handleError);
         }
-
-        ws.onclose = () => {
-            console.log("❌ WebSocket disconnected");
-
-            if (reconnectAttemptsRef.current < maxReconnectAttempts) {
-                reconnectAttemptsRef.current++;
-                const delay = reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1);
-                console.log(`Reconnecting in ${delay} ms (attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts})`);
-
-                setTimeout(() => {
-                    if (currentUserId && otherUserId && getSessionToken.data) {
-                        setReconnectTrigger(prev => prev + 1);
-                    }
-                }, delay);
-            }else {
-                setMessage("Connection lost. Please refresh the page.");
-            }
-        }
-
-        return () => ws.close();
     }, [
         currentUserId, 
         otherUserId, 
         queryClient, 
-        reconnectTrigger,
         getSessionToken.data, 
         getSessionToken.isLoading,
         getSessionToken.error

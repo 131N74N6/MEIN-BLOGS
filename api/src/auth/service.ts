@@ -71,9 +71,9 @@ export const authService = betterAuth({
         cookies: {
             session_token: {
                 attributes: {
-                    secure: process.env.NODE_ENV === "production", // Hanya kirim via HTTPS di produksi
-                    httpOnly: true,  // Mencegah akses via JavaScript (XSS protection)
-                    sameSite: "lax", // Mencegah CSRF
+                    secure: process.env.NODE_ENV === "production", // only send HTTPS only in production
+                    httpOnly: true,  //  XSS protection
+                    sameSite: "lax", // CSRF protection
                 }
             }
         }
@@ -87,9 +87,7 @@ export async function validateSessionFromToken(token: string) {
         const headers = new Headers();
         headers.set('cookie', `better-auth.session_token=${token}`);
         
-        const session = await authService.api.getSession({
-            headers
-        });
+        const session = await authService.api.getSession({ headers });
         
         return session;
     } catch (error) {
