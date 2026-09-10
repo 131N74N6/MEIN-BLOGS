@@ -123,6 +123,7 @@ export default function useAuthService() {
             resetNavbarState();
             useBlogStore.persist.clearStorage();
             useUserStore.persist.clearStorage();
+            useUserChatStore.persist.clearStorage();
             resetMessageChatState();
             navigate("/sign-in");
         }

@@ -29,6 +29,7 @@ export default function useUserChatService() {
     const messageChat = useUserChatStore((state) => state.messageChat);
     const setMessageChat = useUserChatStore((state) => state.setMessageChat);
 
+    const chosenMessageId = useUserChatStore((state) => state.chosenMessageId);
     const setIsWebSocketConnected = useUserChatStore((state) => state.setIsWebSocketConnected);
 
     const getSessionToken = useQuery({
@@ -265,10 +266,10 @@ export default function useUserChatService() {
         queryKey: [`user-chats-${otherUserId}`]
     });
 
-    const getAllUserMessagesMedia = useQuery({
-        enabled: !!currentUserId && !!otherUserId && currentUserId !== otherUserId,
+    const getChosenMessageFilesForUser = useQuery({
+        enabled: !!chosenMessageId,
         queryFn: async () => {
-            const endpoint = `/api/chats/media/show?receiver_id=${otherUserId}`;
+            const endpoint = `/api/chats/media/show?_id=${chosenMessageId}`;
             const request = await apiRequest<Pick<UserMessage, "media">>(endpoint, { method: "GET" });
             return request.data;
         },
@@ -343,7 +344,7 @@ export default function useUserChatService() {
         deleteAllMessagesMt,
         deleteChosenMessagesMt,
         getAllUserMessages,
-        getAllUserMessagesMedia,
+        getChosenMessageFilesForUser,
         inputChatMediaHandler,
         isProcessing,
         getMessage,

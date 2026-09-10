@@ -246,8 +246,11 @@ class UserChatService {
         return await userChatRepository.getAllMessages(data);
     }
 
-    async getAllMessagesMedia(receiver_id: string, sender_id: string) {
-        return await userChatRepository.getAllMessagesMedia(receiver_id, sender_id);
+    async getChosenMessageFiles(message_id: string) {
+        const messageId = this.checkIsIdValid("", message_id);
+        const message = await userChatRepository.getChosenMessageFiles(messageId);
+        if (!message) throw new BlogApiError(404, "files not found");
+        return message;
     }
 
     async sendMessage(data: TUserChat["add_raw"]) {

@@ -16,6 +16,9 @@ export type MessageChatState = {
     chosenMessageIds: string[];
     setChosenMessageIds: (chosenMessageId: string) => void;
 
+    chosenMessageId: string;
+    setChosenMessageId: (chosenMessageId: string) => void;
+
     isWebSocketConnected: boolean;
     setIsWebSocketConnected: (isWebSocketConnected: boolean) => void;
 

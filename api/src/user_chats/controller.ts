@@ -39,8 +39,8 @@ class UserChatController {
         return { data: chats, message: "user chats retrieved successfully", success: true };
     }
 
-    async getAllMessagesMedia(receiver_id: string, sender_id: string) {
-        const media = await userChatService.getAllMessagesMedia(receiver_id, sender_id);
+    async getChosenMessageFiles(message_id: string) {
+        const media = await userChatService.getChosenMessageFiles(message_id);
         return { data: media, message: "user chats media retrieved successfully", success: true };
     }
 

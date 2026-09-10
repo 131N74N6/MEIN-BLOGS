@@ -1,9 +1,13 @@
 import { create } from "zustand";
 import type { MessageChatState } from "./model";
+import { persist } from "zustand/middleware";
 
-export const useUserChatStore = create<MessageChatState>((set) => ({
+export const useUserChatStore = create<MessageChatState>()(persist((set) => ({
     chosenMessage: null,
     setChosenMessage: (chosenMessage) => set({chosenMessage }),
+
+    chosenMessageId: "",
+    setChosenMessageId: (chosenMessageId: string) => set({ chosenMessageId }),
     
     chosenMessageIds: [],
     resetChosenMessageIds: () => set({ chosenMessageIds: [] }),
@@ -35,6 +39,7 @@ export const useUserChatStore = create<MessageChatState>((set) => ({
 
     resetMessageChatState: () => set({
         chosenMessage: null,
+        chosenMessageId: "",
         chosenMessageIds: [],
         media: [],
         messageChat: undefined,
@@ -42,4 +47,7 @@ export const useUserChatStore = create<MessageChatState>((set) => ({
         openPopUpOption: false,
         selectMode: false
     })
+}), {
+    name: "user_chat",
+    partialize: (state) => ({ chosenMessageId: state.chosenMessageId })
 }));

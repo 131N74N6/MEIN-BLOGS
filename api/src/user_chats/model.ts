@@ -30,14 +30,14 @@ export const userChatSchema = {
     }),
 
     change_result: t.Object({
-        _id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid chat" }),
+        _id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid message" }),
         message: t.Optional(t.String({ error: "invalid message" })),
         receiver_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid message receiver" }),
         sender_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid message owner" })
     }),
 
     delete_chat: t.Object({
-        message_ids: t.Array(t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid chat" })),
+        message_ids: t.Array(t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid messages" })),
         receiver_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid receiver" }),
         sender_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid sender" })
     }),
