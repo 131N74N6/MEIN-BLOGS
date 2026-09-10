@@ -34,6 +34,11 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
 }, {
     query: t.Omit(userChatSchema.pagination, ["sender_id", "skip"])
 })
+.get("/media/show", async ({ query, user }) => {
+    return await userChatController.getAllMessagesMedia(query.receiver_id, user.id);
+}, {
+    query: t.Pick(userChatSchema.pagination, ["receiver_id"])
+})
 .post("/send", async ({ body, user }) => {
     return await userChatController.sendMessage({ sender_id: user.id, ...body });
 }, {

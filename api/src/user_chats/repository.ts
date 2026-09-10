@@ -70,6 +70,19 @@ class UserChatRepository {
         return chats;
     }
 
+    async getAllMessagesMedia(receiver_id: string, sender_id: string) {
+        const chats = await this.user_chats.find({ 
+            $or: [
+                { receiver_id: new ObjectId(receiver_id), sender_id: new ObjectId(sender_id) },
+                { receiver_id: new ObjectId(sender_id), sender_id: new ObjectId(receiver_id) }
+            ], 
+            hidden_for: { $nin: [new ObjectId(sender_id)] } 
+        }, { projection: { media: 1 }})
+        .toArray();
+
+        return chats;
+    }
+
     async hideAllMessage(user_id: string, message_ids: ObjectId[]) {
         await this.user_chats.updateMany({ _id: { $in: message_ids } }, {
             $addToSet: { hidden_for: new ObjectId(user_id) }

@@ -3,6 +3,7 @@ import type { ApiResponse } from "../handler/api";
 
 export type MessageChatState = {
     media: FileViewerData[];
+    removeMedia: (filename: string) => void;
     setMedia: (media: FileViewerData[] | ((prev: FileViewerData[]) => FileViewerData[])) => void;
 
     messageChat?: string;
@@ -31,6 +32,23 @@ export type FileViewerData = {
     file: File;
     filename: string;
     filetype: string;
+    url: string;
+}
+
+export type FilePreviewPlace = {
+    media: FileViewerData[];
+    name: "media-raw-preview";
+    openFileSelector: () => void;
+}
+
+export type UploadedFileResultPlace = {
+    media: ChatMediaMeta[];
+    name: "media-result";
+}
+
+export type ChatMediaViewer = {
+    place: FilePreviewPlace | UploadedFileResultPlace;
+    is_processing: boolean;
 }
 
 export type UserMessage = {
@@ -73,9 +91,9 @@ export type UserMessageDataList = {
 export type ChatMediaMeta = {
     url: string;
     public_id: string;
-    resource_type: "image" | "video" | "raw";
-    filename?: string;
-    filetype?: string;
+    resource_type: string;
+    filename: string;
+    filetype: string;
 }
 
 export type ChatMessagePayload = {

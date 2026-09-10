@@ -7,7 +7,7 @@ export default function ChatList(data: UserMessageDataList) {
 
     if (data.messages.length === 0) {
         return (
-            <section className="flex justify-center items-center h-full">
+            <section className="border-x border-zinc-800 flex justify-center items-center h-full">
                 <div className="text-xl text-gray-800 font-medium">Chats not found</div>
             </section>
         );

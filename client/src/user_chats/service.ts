@@ -101,8 +101,7 @@ export default function useUserChatService() {
                                 return {
                                     ...message,
                                     message: "This message has been deleted", 
-                                    media: [], 
-                                    updated_at: new Date().toISOString()
+                                    media: []
                                 };
                             }
                             return message;
@@ -120,8 +119,7 @@ export default function useUserChatService() {
         const handleError = (error: any) => {
             setMessage(error.message);
         };
-
-        // Subscribe to events
+        
         userChatWebSocket.on("connected", handleConnected);
         userChatWebSocket.on("message", handleMessage);
         userChatWebSocket.on("disconnected", handleDisconnected);
@@ -217,6 +215,7 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`user-chats-media-${otherUserId}`] });
             setMessageChat("");
             setChosenMessage(null);
             resetChosenMessageIds();
@@ -241,6 +240,7 @@ export default function useUserChatService() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`user-chats-media-${otherUserId}`] });
             setMessageChat("");
             setSelectMode(false);
             setChosenMessage(null);
@@ -253,7 +253,7 @@ export default function useUserChatService() {
     const getAllUserMessages = useInfiniteQuery({
         enabled: !!currentUserId && !!otherUserId && currentUserId !== otherUserId,
         getNextPageParam: (lastPage, allPages) => {
-            if (lastPage.length < 50) return;
+            if (lastPage.length < 52) return;
             return allPages.length + 1;
         },
         initialPageParam: 1,
@@ -263,6 +263,16 @@ export default function useUserChatService() {
             return request.data ?? [];
         },
         queryKey: [`user-chats-${otherUserId}`]
+    });
+
+    const getAllUserMessagesMedia = useQuery({
+        enabled: !!currentUserId && !!otherUserId && currentUserId !== otherUserId,
+        queryFn: async () => {
+            const endpoint = `/api/chats/media/show?receiver_id=${otherUserId}`;
+            const request = await apiRequest<Pick<UserMessage, "media">>(endpoint, { method: "GET" });
+            return request.data;
+        },
+        queryKey: [`user-chats-media-${otherUserId}`]
     });
 
     const sendMessagesMt = useMutation({
@@ -304,7 +314,12 @@ export default function useUserChatService() {
         if (!files || files.length === 0) return;
 
         for (let b = 0; b < files.length; b++) {
-            selected.push({ file: files[b], filename: files[b].name, filetype: files[b].type });
+            selected.push({ 
+                file: files[b], 
+                filename: files[b].name, 
+                filetype: files[b].type, 
+                url: URL.createObjectURL(files[b]) 
+            });
         }
 
         setChatMedia((prev) => [...prev, ...selected]);
@@ -322,11 +337,13 @@ export default function useUserChatService() {
 
     return {
         changeMessageMt,
+        chatMediaRef,
         clearAllMessagesMt,
         clearChosenMessagesMt,
         deleteAllMessagesMt,
         deleteChosenMessagesMt,
         getAllUserMessages,
+        getAllUserMessagesMedia,
         inputChatMediaHandler,
         isProcessing,
         getMessage,

@@ -2,17 +2,9 @@ import { create } from "zustand";
 import type { MessageChatState } from "./model";
 
 export const useUserChatStore = create<MessageChatState>((set) => ({
-    media: [],
-    setMedia: (media) => set((state) => ({ 
-        media: typeof media === 'function' ? media(state.media) : media 
-    })),
-
-    messageChat: undefined,
-    setMessageChat: (messageChat?: string | undefined) => set({ messageChat }),
-
     chosenMessage: null,
     setChosenMessage: (chosenMessage) => set({chosenMessage }),
-
+    
     chosenMessageIds: [],
     resetChosenMessageIds: () => set({ chosenMessageIds: [] }),
     setChosenMessageIds: (messageId: string) => set((state) => ({
@@ -20,6 +12,17 @@ export const useUserChatStore = create<MessageChatState>((set) => ({
         state.chosenMessageIds.filter(chosenMessageId => chosenMessageId !== messageId) : 
         [...state.chosenMessageIds, messageId]
     })),
+
+    media: [],
+    removeMedia: (filename: string) => set((state) => ({
+        media: state.media.filter(media => media.filename !== filename)
+    })),
+    setMedia: (media) => set((state) => ({ 
+        media: typeof media === 'function' ? media(state.media) : media 
+    })),
+
+    messageChat: undefined,
+    setMessageChat: (messageChat?: string | undefined) => set({ messageChat }),
 
     isWebSocketConnected: false,
     setIsWebSocketConnected: (isWebSocketConnected) => set({ isWebSocketConnected }),
@@ -35,6 +38,7 @@ export const useUserChatStore = create<MessageChatState>((set) => ({
         chosenMessageIds: [],
         media: [],
         messageChat: undefined,
+        isWebSocketConnected: false,
         openPopUpOption: false,
         selectMode: false
     })

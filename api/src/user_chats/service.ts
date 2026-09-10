@@ -17,21 +17,13 @@ class UserChatService {
         return value;
     }
 
-    private checkIsInputValid(field: string, min: number, value: unknown) {
-        if (!value || value === "" || typeof value !== "string" || min < 0 || min === 0) {
-            throw new BlogApiError(400, `invalid ${field}`);
-        }
-        
+    private checkIsInputValid(field: string, value: unknown) {
+        if (!value || value === "" || typeof value !== "string") throw new BlogApiError(400, `invalid ${field}`);
         return value;
     }
 
     private async executeDeletions(props: ExecuteDelete) {
-        const operations: Promise<any>[] = [];
-
-        const affectedIds = [
-            ...props.chatsToDeletePermanently.map(chat => chat._id.toString()),
-            ...props.chatsToDeleteTemporarily.map(chat => chat._id.toString())
-        ];
+        const operations: Promise<any>[] = [];;
 
         this.executeMediaDeletions({ 
             chats: props.chatsToDeletePermanently, 
@@ -51,7 +43,6 @@ class UserChatService {
         }
 
         if (operations.length > 0) await Promise.all(operations);
-        return affectedIds;
     }
 
     private executeMediaDeletions (props: ExecuteMediaDelete) {
@@ -78,7 +69,7 @@ class UserChatService {
         const messageId = this.checkIsIdValid("", data._id);
         const receiverId = this.checkIsIdValid("receiver id", data.receiver_id);
         const senderId = this.checkIsIdValid("sender id", data.sender_id);
-        const updatedMessage = this.checkIsInputValid("message", 1, data.message);
+        const updatedMessage = this.checkIsInputValid("message", data.message);
 
         const message = await userChatRepository.findOneMessage(messageId);
         if (!message) throw new BlogApiError(404, "message not found");
@@ -255,12 +246,17 @@ class UserChatService {
         return await userChatRepository.getAllMessages(data);
     }
 
+    async getAllMessagesMedia(receiver_id: string, sender_id: string) {
+        return await userChatRepository.getAllMessagesMedia(receiver_id, sender_id);
+    }
+
     async sendMessage(data: TUserChat["add_raw"]) {
         let selectedMedia: any[] = [];
         let newMessage = "";
+        const chosenFile = Array.isArray(data.media) ? data.media : (data.media ? [data.media] : []);
 
         if (data.message) {
-            newMessage = this.checkIsInputValid("message", 1, data.message);
+            newMessage = this.checkIsInputValid("message", data.message);
         } else if (!data.media || data.media.length === 0) {
             throw new BlogApiError(400, "message or media is required");
         }
@@ -268,9 +264,13 @@ class UserChatService {
         const receiverId = this.checkIsIdValid("receiver id", data.receiver_id);
         const senderId = this.checkIsIdValid("sender id", data.sender_id);
 
-        if (data.media && data.media.length > 0) {
-            const uploadPromises = data.media.map(async (file) => {
-                if (!file.type.includes("image") && !file.type.includes("video")) {
+        if (chosenFile.length > 14) {
+            throw new BlogApiError(400, "only accept 14 files or less");
+        }
+    
+        if (chosenFile.length > 0) {
+            const uploadPromises = chosenFile.map(async (file) => {
+                if (!file.type.includes("image") && !file.type.includes("video") && !file.type.includes("application")) {
                     throw new BlogApiError(400, `unsupported file type: ${file.name}`);
                 }
 
@@ -279,7 +279,7 @@ class UserChatService {
                 
                 return await uploadToCloudinary({
                     file_buffer: fileBuffer,
-                    foldername: "chat_media",
+                    foldername: "blog_chat_media",
                     mimetype: file.type,
                     original_name: file.name
                 });

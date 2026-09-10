@@ -4,10 +4,10 @@ export const userChatSchema = {
     add_raw: t.Object({
         media: t.Optional(
             t.Array(
-                t.File({ maxSize: 6 * 1024 * 1024, type: ["image/*", "video/*"], error: "unsupported file" })
+                t.File({ maxSize: 6 * 1024 * 1024, type: ["image/*", "video/*", "application/*"], error: "unsupported file" })
             )
         ),
-        message: t.Optional(t.String({ minLength: 1, error: "invalid message" })),
+        message: t.Optional(t.String({ error: "invalid message" })),
         sender_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid sender" }),
         receiver_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid receiver" })
     }),
@@ -24,14 +24,14 @@ export const userChatSchema = {
                 })
             )
         ),
-        message: t.Optional(t.String({ minLength: 1, error: "invalid message" })),
+        message: t.Optional(t.String({ error: "invalid message" })),
         sender_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid sender" }),
         receiver_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid receiver" })
     }),
 
     change_result: t.Object({
         _id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid chat" }),
-        message: t.Optional(t.String({ minLength: 1, error: "invalid message" })),
+        message: t.Optional(t.String({ error: "invalid message" })),
         receiver_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid message receiver" }),
         sender_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid message owner" })
     }),
