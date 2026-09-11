@@ -11,6 +11,8 @@ import { useStyleStore } from "../styles/store";
 import Alert from "../styles/Alert";
 import { useUserStore } from "../users/store";
 import useUserService from "../users/service";
+import Loading from "../styles/Loading";
+import { cn } from "../styles/utils";
 
 export default function Chats() {
     const navigate = useNavigate();
@@ -144,17 +146,35 @@ export default function Chats() {
                         </button>
                     </section>
                 </header>
-                <ChatList
-                    fetch_next_page={userChat.getAllUserMessages.fetchNextPage}
-                    set_chosen_message_ids={setChosenMessageIds}
-                    chosen_message_ids={chosenMessageIds}
-                    has_next_page={userChat.getAllUserMessages.hasNextPage}
-                    is_fetching_next_page={userChat.getAllUserMessages.isFetchingNextPage}
-                    is_processing={isProcessing}
-                    is_select_mode={selectMode}
-                    messages={userChat.getAllUserMessages.data?.pages.flatMap(data => data).reverse() ?? []}
-                />
-                <form className="border flex h-[20%] items-center gap-2 border-zinc-800 p-2 w-full" onSubmit={sendMessage}>
+                {userChat.getAllUserMessages.error ? (
+                    <section className="flex justify-center items-center h-full w-full md:w-3/4">
+                        <h3 className="text-center font-medium text-lg text-gray-600">
+                            {userChat.getAllUserMessages.error.message}
+                        </h3>
+                    </section>
+                ) : userChat.getAllUserMessages.isLoading ? (
+                    <section className="flex justify-center items-center h-full w-full md:w-3/4">
+                        <Loading/>
+                    </section>
+                ) : (
+                    <ChatList
+                        fetch_next_page={userChat.getAllUserMessages.fetchNextPage}
+                        set_chosen_message_ids={setChosenMessageIds}
+                        chosen_message_ids={chosenMessageIds}
+                        has_next_page={userChat.getAllUserMessages.hasNextPage}
+                        is_fetching_next_page={userChat.getAllUserMessages.isFetchingNextPage}
+                        is_processing={isProcessing}
+                        is_select_mode={selectMode}
+                        messages={
+                            userChat.getAllUserMessages.data ?
+                            userChat.getAllUserMessages.data.pages.flatMap(data => data).reverse() : []
+                        }
+                    />
+                )}
+                <form 
+                    className="border flex h-[20%] items-center gap-2 border-zinc-800 p-2 w-full" 
+                    onSubmit={sendMessage}
+                >
                     <textarea
                         className="resize-none h-full w-full outline-0 font-medium text-sm text-gray-800"
                         onChange={(event) => setMessageChat(event.target.value)}
@@ -162,14 +182,20 @@ export default function Chats() {
                     />
                     <section className="flex flex-col gap-1.5">
                         <button
-                            className="w-8 h-8 text-white rounded-full flex justify-center items-center cursor-pointer disabled:cursor-not-allowed bg-blue-700"
+                            className={cn(
+                                "w-8 h-8 text-white rounded-full flex justify-center items-center", 
+                                "cursor-pointer disabled:cursor-not-allowed bg-blue-700"
+                            )}
                             disabled={isProcessing}
                             type="submit"
                         >
                             <ArrowUp size={16}/>
                         </button>
                         <button
-                            className="w-8 h-8 text-white rounded-full flex justify-center items-center cursor-pointer disabled:cursor-not-allowed bg-blue-700"
+                            className={cn(
+                                "w-8 h-8 text-white rounded-full flex justify-center items-center", 
+                                "cursor-pointer disabled:cursor-not-allowed bg-blue-700"
+                            )}
                             disabled={isProcessing}
                             onClick={() => navigate(`/users/chats/${otherUserId}/media/preview`)}
                             type="button"

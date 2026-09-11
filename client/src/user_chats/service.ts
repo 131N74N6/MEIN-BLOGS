@@ -30,7 +30,6 @@ export default function useUserChatService() {
     const setMessageChat = useUserChatStore((state) => state.setMessageChat);
 
     const chosenMessageId = useUserChatStore((state) => state.chosenMessageId);
-    const setIsWebSocketConnected = useUserChatStore((state) => state.setIsWebSocketConnected);
 
     const getSessionToken = useQuery({
         enabled: !!currentUserId,
@@ -118,7 +117,7 @@ export default function useUserChatService() {
         }
 
         const handleDisconnected = () => {
-            setIsWebSocketConnected(false);
+            //
         }
         
         const handleError = (payload: any) => {
@@ -268,7 +267,7 @@ export default function useUserChatService() {
     const getAllUserMessages = useInfiniteQuery({
         enabled: !!currentUserId && !!otherUserId && currentUserId !== otherUserId,
         getNextPageParam: (lastPage, allPages) => {
-            if (lastPage.length < 52) return;
+            if (lastPage.length < 52) return undefined;
             return allPages.length + 1;
         },
         initialPageParam: 1,
@@ -287,7 +286,7 @@ export default function useUserChatService() {
             const request = await apiRequest<Pick<UserMessage, "media">>(endpoint, { method: "GET" });
             return request.data;
         },
-        queryKey: [`user-chats-media-${otherUserId}`]
+        queryKey: [`user-chats-media-${chosenMessageId}`]
     });
 
     const sendMessagesMt = useMutation({
@@ -311,6 +310,8 @@ export default function useUserChatService() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`user-chats-${otherUserId}`] });
             setMessageChat("");
+            resetChosenMessageIds();
+            setChosenMessage(null);
             setChatMedia([]);
         }
     });

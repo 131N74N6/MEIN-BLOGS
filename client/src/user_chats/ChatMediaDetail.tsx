@@ -9,6 +9,7 @@ import Alert from "../styles/Alert";
 import { useUserStore } from "../users/store";
 import useUserService from "../users/service";
 import MediaPreview from "./MediaPreview";
+import Loading from "../styles/Loading";
 
 export default function ChatMediaDetail() {
     const navigate = useNavigate();
@@ -36,6 +37,8 @@ export default function ChatMediaDetail() {
     }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
     const isProcessing = auth.isProcessing || userChat.isProcessing;
+
+    console.log(userChat.getChosenMessageFilesForUser.data);
 
     return (
         <section className="flex flex-col md:flex-row h-dvh relative z-10">
@@ -79,15 +82,25 @@ export default function ChatMediaDetail() {
                         </button>
                     </section>
                 </header>
-                <section className="border-x border-zinc-800 h-[80%] p-2 overflow-y-auto grid gap-2 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 grid-cols-2">
+                {userChat.getChosenMessageFilesForUser.isLoading ? (
+                    <section className="flex justify-center items-center h-full w-full md:w-3/4">
+                        <Loading/>
+                    </section>
+                ) : userChat.getChosenMessageFilesForUser.error ? (
+                    <section className="flex justify-center items-center h-full w-full md:w-3/4">
+                        <h3 className="text-center font-medium text-lg text-gray-600">
+                            {userChat.getChosenMessageFilesForUser.error.message}
+                        </h3>
+                    </section>
+                ): (                    
                     <MediaPreview 
                         is_processing={isProcessing} 
                         place={{ 
                             name: "media-result", 
-                            media: userChat.getAllUserMessagesMedia.data?.media ?? [] 
+                            media: userChat.getChosenMessageFilesForUser.data?.media ?? [] 
                         }}
                     />
-                </section>
+                )}
             </main>
         </section>
     );

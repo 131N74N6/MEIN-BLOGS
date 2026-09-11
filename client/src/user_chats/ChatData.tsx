@@ -10,6 +10,7 @@ export default function ChatData(props: UserMessageData) {
     const otherUserId = useUserStore((state) => state.otherUserId);
 
     const selectMode = useUserChatStore((state) => state.selectMode);
+    const setChosenMessageId = useUserChatStore((state) => state.setChosenMessageId);
 
     const setChosenMessage = useUserChatStore((state) => state.setChosenMessage);
     const setChosenMessageIds = useUserChatStore((state) => state.setChosenMessageIds);
@@ -19,6 +20,7 @@ export default function ChatData(props: UserMessageData) {
 
     const seeMedia = () => {
         navigate(`/users/chats/${otherUserId}/media/detail`);
+        setChosenMessageId(props.data._id);
     }
 
     const selectMessage = () => {
@@ -45,7 +47,7 @@ export default function ChatData(props: UserMessageData) {
             {props.data.media.length === 0 ? null : (
                 <button 
                     className={cn(
-                        "p-1.5 rounded-md",
+                        "p-1.5 rounded-md cursor-pointer disabled:cursor-not-allowed",
                         isSelected ? "bg-amber-200 ring-1 text-amber-950 ring-amber-700" : 
                         props.is_own ? "bg-zinc-100 text-zinc-800" : "bg-zinc-700 text-zinc-100"
                     )}

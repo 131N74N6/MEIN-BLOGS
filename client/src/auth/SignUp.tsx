@@ -47,29 +47,31 @@ export default function SignUp() {
     const passwordToggle = () => setShowPasswordForSignUp(!showPasswordForSignUp);
     
     return (
-        <section className="flex justify-center items-center h-dvh bg-background p-2.5">
-            <form className="flex w-82.5 flex-col gap-2.5 p-2.5 border border-gray-500 shadow" onSubmit={signUp}>
-                <h3 className="font-semibold text-xl text-gray-600">Sign Up</h3>
+        <section className="flex justify-center items-center h-dvh bg-background p-2.5 bg-orange-200">
+            <form className="flex rounded-lg w-84 flex-col bg-white gap-5 p-3 border border-gray-500 shadow" onSubmit={signUp}>
+                <h3 className="font-semibold text-center text-xl text-zinc-800">Sign Up</h3>
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-xs lg:text-lg md:text-base sm:text-sm font-medium text-gray-600" htmlFor="email">email</label>
+                    <label className="font-medium text-zinc-800" htmlFor="email">Email</label>
                     <input
-                        className="border border-gray-500 md:p-2 p-1.5 font-medium text-xs sm:text-sm md:text-base lg:text-lg mt-2 text-gray-600 outline-0"
+                        className="w-full ring-1 ring-zinc-800 bg-gray-100 rounded-lg p-1.5 font-medium text-zinc-800 outline-0"
                         id="email"
                         name="email"
                         onChange={(event) => setEmailForSignUp(event.target.value)}
+                        placeholder="email"
                         type="email"
                         value={emailForSignUp}
                     />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-xs lg:text-lg md:text-base sm:text-sm font-medium text-gray-600" htmlFor="password">password</label>
+                    <label className="font-medium text-zinc-800" htmlFor="password">Password</label>
                     <div className="relative">
                         <input
-                            className="border border-gray-500 md:p-2 p-1.5 font-medium text-xs sm:text-sm md:text-base lg:text-lg mt-2 text-gray-600 outline-0"
+                            className="w-full p-1.5 font-medium rounded-lg bg-gray-100 text-zinc-800 outline-none ring-1 ring-zinc-800 pr-10"
                             id="password"
                             name="password"
+                            placeholder="password"
                             onChange={(event) => setPasswordForSignUp(event.target.value)}
-                            type="password"
+                            type={showPasswordForSignUp ? "text" : "password"}
                             value={passwordForSignUp}
                         />
                         <button
@@ -86,11 +88,12 @@ export default function SignUp() {
                     </div>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-xs lg:text-lg md:text-base sm:text-sm font-medium text-gray-600" htmlFor="username">username</label>
+                    <label className="font-medium text-zinc-800" htmlFor="username">Username</label>
                     <input
-                        className="border border-gray-500 md:p-2 p-1.5 font-medium text-xs sm:text-sm md:text-base lg:text-lg mt-2 text-gray-600 outline-0"
+                        className="w-full ring-1 ring-zinc-800 bg-gray-100 rounded-lg p-1.5 font-medium text-zinc-800 outline-0"
                         id="username"
                         name="username"
+                        placeholder="username"
                         onChange={(event) => setUsernameForSignUp(event.target.value)}
                         type="text"
                         value={usernameForSignUp}
@@ -98,9 +101,9 @@ export default function SignUp() {
                 </div>
                 <div className="flex flex-col gap-2">
                     <div className="flex justify-center gap-2">
-                        <div className="text-gray-500 text-xs sm:text-sm md:text-md lg:text-lg font-medium">Already have account ?</div>
+                        <div className="text-blue-900 font-medium">Already have account ?</div>
                         <button 
-                            className="text-blue-500 text-xs sm:text-sm md:text-md lg:text-lg font-medium hover:underline cursor-pointer disabled:cursor-not-allowed"
+                            className="text-blue-900 font-medium hover:underline cursor-pointer disabled:cursor-not-allowed"
                             disabled={auth.isProcessing}
                             onClick={() => navigate("/sign-in")}
                             type="button"
@@ -109,7 +112,7 @@ export default function SignUp() {
                         </button>
                     </div>
                     <button 
-                        className="bg-blue-600 text-white font-medium sm:text-sm lg:text-lg md:text-md text-xs md:p-2 p-1.5 cursor-pointer disabled:cursor-not-allowed" 
+                        className="bg-blue-600 rounded-lg hover:bg-blue-800 transition-colors text-white font-medium p-1.5 cursor-pointer disabled:cursor-not-allowed" 
                         disabled={auth.isProcessing}
                         type="submit"
                     >
@@ -117,7 +120,7 @@ export default function SignUp() {
                     </button>
                 </div>
                 {message ? (
-                    <div className="text-red-600 text-center font-medium text-xs sm:text-sm md:text-md lg:text-lg">
+                    <div className="text-red-600 text-center font-medium">
                         {message}
                     </div>
                 ) : null}

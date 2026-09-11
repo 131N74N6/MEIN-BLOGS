@@ -259,8 +259,10 @@ class UserChatService {
         const chosenFile = Array.isArray(data.media) ? data.media : (data.media ? [data.media] : []);
 
         if (data.message) {
-            newMessage = this.checkIsInputValid("message", data.message);
-        } else if (!data.media || data.media.length === 0) {
+            newMessage = this.checkIsInputValid(data.message, "message"); 
+        }
+
+        if (!newMessage && chosenFile.length === 0) {
             throw new BlogApiError(400, "message or media is required");
         }
         

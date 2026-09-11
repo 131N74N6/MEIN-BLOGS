@@ -19,9 +19,6 @@ export type MessageChatState = {
     chosenMessageId: string;
     setChosenMessageId: (chosenMessageId: string) => void;
 
-    isWebSocketConnected: boolean;
-    setIsWebSocketConnected: (isWebSocketConnected: boolean) => void;
-
     openPopUpOption: boolean;
     setOpenPopUpOption: (openPopUpOption: boolean) => void;
 

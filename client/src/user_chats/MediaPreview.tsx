@@ -1,4 +1,4 @@
-import { AudioLines, Download, File, CircleSlash, X } from "lucide-react";
+import { AudioLines, Download, File, X, CircleOff } from "lucide-react";
 import type { ChatMediaViewer } from "./model";
 import { cn } from "../styles/utils";
 import { useUserChatStore } from "./store";
@@ -22,10 +22,10 @@ export default function MediaPreview(props: ChatMediaViewer) {
             );
         } else {
             return (
-                <div className="flex justify-center items-center w-full h-full border-dashed border-zinc-800">
+                <div className="flex justify-center items-center w-full h-full border-x border-b border-zinc-800">
                     <div className="flex justify-center flex-col gap-2">
-                        <div className="flex justify-center"><CircleSlash size={22}/></div>
-                        <div className="text-center text-base text-zinc-800 font-medium">
+                        <div className="flex justify-center"><CircleOff size={30}/></div>
+                        <div className="text-center text-lg text-zinc-800 font-medium">
                             This user has not sent any files
                         </div>
                     </div>
@@ -38,8 +38,8 @@ export default function MediaPreview(props: ChatMediaViewer) {
         return (
             <div 
                 className={cn(
-                    "border-x border-zinc-800 h-[80%] p-2 overflow-y-auto cursor-pointer",
-                    "grid gap-2 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 grid-cols-2"
+                    "border-x border-zinc-800 h-full p-2 overflow-y-auto",
+                    "grid gap-2 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 grid-cols-2",
                 )} 
                 onClick={props.place.openFileSelector}
             >
@@ -51,7 +51,7 @@ export default function MediaPreview(props: ChatMediaViewer) {
 
                     return (
                         media.filetype.startsWith("image/") ? (
-                            <div className="relative">
+                            <div className="relative" key={`previewed-media-${media.filename}`}>
                                 <button 
                                     className={cn(
                                         "flex justify-center items-center",
@@ -72,7 +72,7 @@ export default function MediaPreview(props: ChatMediaViewer) {
                                 />
                             </div>
                         ) : media.filetype.startsWith("video/") ? (
-                            <div className="relative">
+                            <div className="relative" key={`previewed-media-${media.filename}`}>
                                 <button 
                                     className={cn(
                                         "flex justify-center items-center",
@@ -92,7 +92,7 @@ export default function MediaPreview(props: ChatMediaViewer) {
                                 />
                             </div>
                         ) : media.filetype.startsWith("audio/") ? (
-                            <div className="relative">
+                            <div className="relative" key={`previewed-media-${media.filename}`}>
                                 <button 
                                     className={cn(
                                         "flex justify-center items-center",
@@ -121,7 +121,7 @@ export default function MediaPreview(props: ChatMediaViewer) {
                                 </div>
                             </div>
                         ) : (
-                            <div className="relative">
+                            <div className="relative" key={`previewed-media-${media.filename}`}>
                                 <button 
                                     className={cn(
                                         "flex justify-center items-center",
@@ -158,7 +158,7 @@ export default function MediaPreview(props: ChatMediaViewer) {
         return (
             <div
                 className={cn(
-                    "border-x border-zinc-800 h-[80%] p-2 overflow-y-auto",
+                    "border-x border-b border-zinc-800 h-full p-2 overflow-y-auto",
                     "grid gap-2 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 grid-cols-2"
                 )} 
             >
@@ -182,7 +182,7 @@ export default function MediaPreview(props: ChatMediaViewer) {
                     
                     return (
                         media.filetype.startsWith("image/") ? (
-                            <div className="relative">
+                            <div className="relative" key={`uploaded-media-${media.filename}`}>
                                 <img 
                                     src={media.url} 
                                     className="object-cover aspect-square rounded-lg" 
@@ -203,7 +203,7 @@ export default function MediaPreview(props: ChatMediaViewer) {
                                 </button>
                             </div>
                         ) : media.filetype.startsWith("video/") ? (
-                            <div className="relative">
+                            <div className="relative" key={`uploaded-media-${media.filename}`}>
                                 <button 
                                     className={cn(
                                         "flex justify-center items-center",
@@ -223,7 +223,7 @@ export default function MediaPreview(props: ChatMediaViewer) {
                                 />
                             </div>
                         ) : media.filetype.startsWith("audio/") ? (
-                            <div className="relative">
+                            <div className="relative" key={`uploaded-media-${media.filename}`}>
                                 <button 
                                     className={cn(
                                         "flex justify-center items-center",
@@ -252,7 +252,7 @@ export default function MediaPreview(props: ChatMediaViewer) {
                                 </div>
                             </div>
                         ) : (
-                            <div className="relative">
+                            <div className="relative" key={`uploaded-media-${media.filename}`}>
                                 <button 
                                     className={cn(
                                         "flex justify-center items-center",

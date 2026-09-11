@@ -2,11 +2,16 @@ import { t, UnwrapSchema } from "elysia";
 
 export const userChatSchema = {
     add_raw: t.Object({
-        media: t.Optional(
-            t.Array(
-                t.File({ maxSize: 6 * 1024 * 1024, type: ["image/*", "video/*", "application/*"], error: "unsupported file" })
-            )
-        ),
+        media: t.Optional(t.Union([
+            t.File({ 
+                maxSize: 6 * 1024 * 1024, 
+                type: ["image/*", "video/*", "application/*"], error: "unsupported file" 
+            }),
+            t.Array(t.File({ 
+                maxSize: 6 * 1024 * 1024, 
+                type: ["image/*", "video/*", "application/*"], error: "unsupported file" 
+            }))
+        ])),
         message: t.Optional(t.String({ error: "invalid message" })),
         sender_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid sender" }),
         receiver_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid receiver" })

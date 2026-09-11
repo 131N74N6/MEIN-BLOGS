@@ -28,9 +28,6 @@ export const useUserChatStore = create<MessageChatState>()(persist((set) => ({
     messageChat: undefined,
     setMessageChat: (messageChat?: string | undefined) => set({ messageChat }),
 
-    isWebSocketConnected: false,
-    setIsWebSocketConnected: (isWebSocketConnected) => set({ isWebSocketConnected }),
-
     openPopUpOption: false,
     setOpenPopUpOption: (openPopUpOption: boolean) => set({ openPopUpOption }),
 
@@ -43,9 +40,8 @@ export const useUserChatStore = create<MessageChatState>()(persist((set) => ({
         chosenMessageIds: [],
         media: [],
         messageChat: undefined,
-        isWebSocketConnected: false,
         openPopUpOption: false,
-        selectMode: false
+        selectMode: false,
     })
 }), {
     name: "user_chat",
