@@ -18,18 +18,16 @@ class UserChatWebSocket extends EventEmitter {
 
     connect (token: string, otherUserId: string, backendUrl: string) {
         if (this.isConnecting) {
-            console.log("⏳ Connection already in progress, skipping...");
             return;
         }
 
         if (this.ws && (this.ws.readyState === WebSocket.CONNECTING || this.ws.readyState === WebSocket.OPEN)) {
-            console.log("✅ WebSocket already connected or connecting");
             return;
         }
 
         const newWsUrl = this.buildWsUrl(token, otherUserId, backendUrl);
+        
         if (this.url && this.url !== newWsUrl) {
-            console.log("🔄 URL changed, reconnecting to new room");
             this.disconnect();
         }
 
@@ -43,10 +41,9 @@ class UserChatWebSocket extends EventEmitter {
     private bindEvents() {
         if (!this.ws) return;
         this.ws.onopen = () => {
-            console.log(" WebSocket connected to:", this.url);
             this.reconnectAttempts = 0;
             this.isConnecting = false;
-            this.emit("connected", { message: "WebSocket connection established" });
+            this.emit("connected", { type: "connected", message: "You're connected" });
 
             this.messageQueue.forEach(msg => this.ws?.send(msg));
             this.messageQueue = [];
@@ -55,33 +52,36 @@ class UserChatWebSocket extends EventEmitter {
         this.ws.onmessage = (event) => {
             try {
                 const payload = JSON.parse(event.data);
+                
+                if (payload.type === "error") {
+                    this.emit("error", { type: "error", message: payload.message });
+                    return;
+                }
+
                 this.emit("message", payload);
             } catch (err) {
-                console.error("WS parse error:", err);
-                this.emit("error", { message: "Failed to parse message" });
+                this.emit("error", { type: "error", message: "Failed to parse message" });
             }
         }
 
-        this.ws.onerror = (error) => {
-            console.error("❌ WebSocket error:", error);
-            this.emit('error', { message: "WebSocket connection error" });
+        this.ws.onerror = () => {
+            this.emit("error", { type: "error", message: "Connection failed" });
         }
 
         this.ws.onclose = () => {
-            console.log("❌ WebSocket disconnected");
             this.isConnecting = false;
             this.emit('disconnected');
 
             if (this.shouldReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
                 this.reconnectAttempts++;
                 const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
-                console.log(`🔄 Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
-                
+
+                this.emit("reconnecting", { message: "Reconnecting...", attempt: this.reconnectAttempts });
                 setTimeout(() => {
                     if (this.url) this.connectFromUrl();
                 }, delay);
             } else if (this.shouldReconnect) {
-                this.emit('error', { message: "Connection lost. Please refresh the page." });
+                this.emit("max_retries", { message: "Connection lost. Please refresh the page." });
             }
         };
     }
@@ -115,7 +115,7 @@ class UserChatWebSocket extends EventEmitter {
         this.shouldReconnect = true;
     }
 
-    isConnected(): boolean {
+    isConnected() {
         return this.ws?.readyState === WebSocket.OPEN;
     }
 

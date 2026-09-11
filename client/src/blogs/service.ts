@@ -4,7 +4,7 @@ import { useBlogStore } from "./store";
 import { useUserStore } from "../users/store";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
-import { apiRequest, apiUpload } from "../handler/api";
+import { apiRequest, apiUpload } from "../api";
 import type { BlogDetail } from "./model";
 import { useStyleStore } from "../styles/store";
 import { useNavigate } from "react-router-dom";

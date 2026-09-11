@@ -1,6 +1,6 @@
 import { useBlogStore } from "../blogs/store";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { apiRequest } from "../handler/api";
+import { apiRequest } from "../api";
 import { useStyleStore } from "../styles/store";
 import type { ViewerDetail } from "./model";
 

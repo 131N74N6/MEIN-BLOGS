@@ -26,16 +26,13 @@ async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
         result = await response.json();
     } catch {
         // Antisipasi jika server crash parah dan mengembalikan HTML/Teks kosong, bukan JSON
-        throw new ApiError(response.ok ? "Failed to parse response" : "internal server error");
+        throw new ApiError(response.ok ? "Failed to give response" : "internal server error");
     }
 
     // JIKA STATUS HTTP BUKAN 2xx ATAU BACKEND MENYATAKAN GAGAL
     if (!response.ok || !result.success) {
         // Lemparkan ApiError khusus dengan membawa message dan details asli dari backend
-        throw new ApiError(
-            result.message || "something went wrong", 
-            result.details
-        );
+        throw new ApiError(result.message || "something went wrong", result.details);
     }
 
     return result;

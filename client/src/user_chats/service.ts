@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUserStore } from "../users/store";
-import { apiRequest, apiUpload } from "../handler/api";
+import { apiRequest, apiUpload } from "../api";
 import { useStyleStore } from "../styles/store";
 import { useUserChatStore } from "./store";
 import { useEffect, useRef } from "react";
@@ -47,28 +47,23 @@ export default function useUserChatService() {
         if (!currentUserId || !otherUserId) return;
         if (getSessionToken.isLoading || !getSessionToken.data) return;
 
-        // Dapatkan token
         const token = getSessionToken.data;
         if (!token || typeof token !== 'string') {
-            console.error("❎ No valid auth token found");
-            setMessage("Authentication token not found");
+            setMessage("Authentication failed");
             return;
         }
 
-        const backendUrl = import.meta.env.VITE_BASE_API_URL || 'http://localhost:3000';
+        const backendUrl = import.meta.env.VITE_BASE_API_URL;
         
         userChatWebSocket.enableReconnect();
         userChatWebSocket.connect(token, otherUserId, backendUrl);
 
         const handleConnected = (payload: any) => {
-            console.log("✅", payload.message);
-            setIsWebSocketConnected(true);
             setMessage(payload.message);
         };
 
         const handleMessage = (payload: any) => {
             if (payload.type === "error") {
-                console.error("❎ WebSocket error:", payload.message);
                 setMessage(payload.message);
                 return;
             }
@@ -79,7 +74,7 @@ export default function useUserChatService() {
                 queryClient.setQueryData(queryKey, (old: any) => {
                     if (!old) return old;
                     const newPages = [...old.pages];
-                    // API mengurutkan berdasarkan created_at: -1 (terbaru di awal)
+                    
                     newPages[0] = [payload.data, ...newPages[0]];
                     return { ...old, pages: newPages };
                 });
@@ -103,7 +98,7 @@ export default function useUserChatService() {
                                     ...message,
                                     message: "This message has been deleted", 
                                     media: []
-                                };
+                                }
                             }
                             return message;
                         });
@@ -113,24 +108,42 @@ export default function useUserChatService() {
             }
         }
 
+        const handleReconnecting = (payload: any) => {
+            setMessage(payload.message);
+        }
+
+        const handleMaxRetries = (payload: any) => {
+            setMessage(payload.message);
+            userChatWebSocket.disconnect();
+        }
+
         const handleDisconnected = () => {
             setIsWebSocketConnected(false);
-        };
+        }
         
-        const handleError = (error: any) => {
-            setMessage(error.message);
-        };
+        const handleError = (payload: any) => {
+            const msg = payload.message;
+            setMessage(msg);
+
+            if (msg.includes("not allowed") || msg.includes("Invalid user")) {
+                userChatWebSocket.disconnect();
+            }
+        }
         
         userChatWebSocket.on("connected", handleConnected);
         userChatWebSocket.on("message", handleMessage);
         userChatWebSocket.on("disconnected", handleDisconnected);
         userChatWebSocket.on("error", handleError);
+        userChatWebSocket.on("reconnecting", handleReconnecting);
+        userChatWebSocket.on("max_retries", handleMaxRetries);
 
         return () => {
             userChatWebSocket.off("connected", handleConnected);
             userChatWebSocket.off("message", handleMessage);
             userChatWebSocket.off("disconnected", handleDisconnected);
             userChatWebSocket.off("error", handleError);
+            userChatWebSocket.off("reconnecting", handleReconnecting);
+            userChatWebSocket.off("max_retries", handleMaxRetries);
         }
     }, [
         currentUserId, 
@@ -138,7 +151,8 @@ export default function useUserChatService() {
         queryClient, 
         getSessionToken.data, 
         getSessionToken.isLoading,
-        getSessionToken.error
+        getSessionToken.error,
+        setMessage
     ]);
 
     const changeMessageMt = useMutation({

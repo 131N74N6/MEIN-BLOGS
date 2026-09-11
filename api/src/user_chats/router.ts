@@ -50,9 +50,8 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
     body: t.Omit(userChatSchema.change_result, ["sender_id"])
 })
 .ws("/ws/:receiver_id", {
-    query: t.Object({
-        token: t.String({ minLength: 1, error: "invalid token" })
-    }),
+    params: t.Pick(userChatSchema.ws_config, ["receiver_id"]),
+    query: t.Pick(userChatSchema.ws_config, ["token"]),
 
     async open(ws) {
         try {
@@ -61,44 +60,30 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
             const session = await validateSessionFromToken(token);
 
             if (!session || !session.user) {
-                console.error("❎ WebSocket: invalid or token expired");
-                ws.send(JSON.stringify({ type: "error", message: "Unauthorized" }));
-                ws.close(4001, "Unauthorized");
+                ws.send(JSON.stringify({ type: "error", message: "You are not allowed to access" }));
+                ws.close(4001, "You are not allowed to access");
                 return;
             }
 
             const userId = session.user.id;
 
-            if (!userId || !receiverId) {
-                console.error("❎ WebSocket: Missing userId or receiverId");
-                ws.send(JSON.stringify({ type: "error", message: "Missing parameters" }));
-                ws.close(4002, "Missing parameters");
+            if (!userId || !receiverId || typeof userId !== "string" || typeof receiverId !== "string") {
+                ws.send(JSON.stringify({ type: "error", message: "Invalid user" }));
+                ws.close(4002, "Invalid user");
                 return;
             }
 
             const roomId = [userId, receiverId].sort().join("_");
             
             const handler = (payload: any) => {
-                try {
-                    ws.send(JSON.stringify(payload));
-                } catch (error) {
-                    console.error("Error sending WebSocket message:", error);
-                }
+                ws.send(JSON.stringify(payload));
             }
             
             userChatsEvents.on(roomId, handler);
             wsContext.set(ws, { roomId, handler });
 
-            ws.send(JSON.stringify({ 
-                type: "connected", 
-                roomId,
-                userId,
-                message: "WebSocket connection established"
-            }));
-                
-            console.log(`✅ WebSocket connected: ${userId} joined room ${roomId}`);
+            ws.send(JSON.stringify({ type: "connected", message: "You're connected" }));
         } catch (error) {
-            console.error(" WebSocket open error:", error);
             ws.send(JSON.stringify({ type: "error", message: "Connection failed" }));
             ws.close(4003, "Internal error");
         }
@@ -109,7 +94,6 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
         if (ctx) {
             userChatsEvents.off(ctx.roomId, ctx.handler);
             wsContext.delete(ws);
-            console.log(`📶 WebSocket disconnected from room ${ctx.roomId}`);
         }
     }
 });

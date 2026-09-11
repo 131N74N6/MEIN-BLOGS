@@ -1,5 +1,5 @@
 import { useBlogStore } from "../blogs/store";
-import { apiRequest } from "../handler/api";
+import { apiRequest } from "../api";
 import { useStyleStore } from "../styles/store";
 import type { CommentDetail } from "./model";
 import { useCommentStore } from "./store";

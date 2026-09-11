@@ -1,5 +1,5 @@
 import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult, UseMutationResult } from "@tanstack/react-query";
-import type { ApiResponse } from "../handler/api";
+import type { ApiResponse } from "../api";
 
 export type MessageChatState = {
     media: FileViewerData[];

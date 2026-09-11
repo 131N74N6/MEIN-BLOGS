@@ -5,6 +5,9 @@ export type SignInInput = {
     passwordForSignIn: string;
     setPasswordForSignIn: (passwordForSignIn: string) => void;
 
+    showPasswordForSignIn: boolean;
+    setShowPasswordForSignIn: (showPasswordForSignIn: boolean) => void;
+
     resetSignInInput: () => void;
 }
 
@@ -14,6 +17,9 @@ export type SignUpInput = {
 
     passwordForSignUp: string;
     setPasswordForSignUp: (passwordForSignUp: string) => void;
+
+    showPasswordForSignUp: boolean;
+    setShowPasswordForSignUp: (showPasswordForSignUp: boolean) => void;
 
     usernameForSignUp: string;
     setUsernameForSignUp: (usernameForSignUp: string) => void;

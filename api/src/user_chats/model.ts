@@ -49,6 +49,11 @@ export const userChatSchema = {
         sender_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid sender" }),
         skip: t.Number({ default: 52, error: "invalid skip", maximum: 54 })
     }),
+
+    ws_config: t.Object({
+        receiver_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid receiver" }),
+        token: t.String({ minLength: 1, error: "invalid token" })
+    })
 }
 
 export type TUserChat = {

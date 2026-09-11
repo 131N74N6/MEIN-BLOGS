@@ -4,6 +4,8 @@ import { useAuthStore } from "./store";
 import useAuthService from "./service";
 import { useUserStore } from "../users/store";
 import { useStyleStore } from "../styles/store";
+import { Eye, EyeClosed } from "lucide-react";
+import { cn } from "../styles/utils";
 
 export default function SignUp() {
     const navigate = useNavigate();
@@ -17,6 +19,9 @@ export default function SignUp() {
 
     const passwordForSignUp = useAuthStore((state) => state.passwordForSignUp);
     const setPasswordForSignUp = useAuthStore((state) => state.setPasswordForSignUp);
+
+    const showPasswordForSignUp = useAuthStore((state) => state.showPasswordForSignUp);
+    const setShowPasswordForSignUp = useAuthStore((state) => state.setShowPasswordForSignUp);
 
     const usernameForSignUp = useAuthStore((state) => state.usernameForSignUp);
     const setUsernameForSignUp = useAuthStore((state) => state.setUsernameForSignUp);
@@ -39,6 +44,8 @@ export default function SignUp() {
         auth.signUpMt.mutate();
     }
     
+    const passwordToggle = () => setShowPasswordForSignUp(!showPasswordForSignUp);
+    
     return (
         <section className="flex justify-center items-center h-dvh bg-background p-2.5">
             <form className="flex w-82.5 flex-col gap-2.5 p-2.5 border border-gray-500 shadow" onSubmit={signUp}>
@@ -56,14 +63,27 @@ export default function SignUp() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs lg:text-lg md:text-base sm:text-sm font-medium text-gray-600" htmlFor="password">password</label>
-                    <input
-                        className="border border-gray-500 md:p-2 p-1.5 font-medium text-xs sm:text-sm md:text-base lg:text-lg mt-2 text-gray-600 outline-0"
-                        id="password"
-                        name="password"
-                        onChange={(event) => setPasswordForSignUp(event.target.value)}
-                        type="password"
-                        value={passwordForSignUp}
-                    />
+                    <div className="relative">
+                        <input
+                            className="border border-gray-500 md:p-2 p-1.5 font-medium text-xs sm:text-sm md:text-base lg:text-lg mt-2 text-gray-600 outline-0"
+                            id="password"
+                            name="password"
+                            onChange={(event) => setPasswordForSignUp(event.target.value)}
+                            type="password"
+                            value={passwordForSignUp}
+                        />
+                        <button
+                            className={cn(
+                                "text-black font-medium hover:text-zinc-700 transition-colors px-3",
+                                "absolute inset-y-0 right-0 disabled:cursor-not-allowed cursor-pointer"
+                            )}
+                            disabled={auth.signUpMt.isPending}
+                            onClick={passwordToggle}
+                            type="button"
+                        >
+                            {showPasswordForSignUp ? <Eye size={22}/> : <EyeClosed size={22}/>}
+                        </button>
+                    </div>
                 </div>
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs lg:text-lg md:text-base sm:text-sm font-medium text-gray-600" htmlFor="username">username</label>

@@ -5,7 +5,7 @@ import { useBlogStore } from "../blogs/store";
 import { useCommentStore } from "../comments/store";
 import { useUserStore } from "./store";
 import { useStyleStore } from "../styles/store";
-import { apiRequest, apiUpload } from "../handler/api";
+import { apiRequest, apiUpload } from "../api";
 import type { OtherUserData } from "./model";
 import { useRelationStore } from "../relations/store";
 import { useUserChatStore } from "../user_chats/store";

@@ -9,8 +9,11 @@ const signInStore: StateCreator<SignInInput> = (set) => ({
     passwordForSignIn: "",
     setPasswordForSignIn: (passwordForSignIn: string) => set({ passwordForSignIn }),
 
+    showPasswordForSignIn: false,
+    setShowPasswordForSignIn: (showPasswordForSignIn) => set({ showPasswordForSignIn }),
+
     resetSignInInput: () => set({
-        emailForSignIn: "", passwordForSignIn: ""
+        emailForSignIn: "", passwordForSignIn: "", showPasswordForSignIn: false
     })
 });
 
@@ -21,11 +24,14 @@ const signUpStore: StateCreator<SignUpInput> = (set) => ({
     passwordForSignUp: "",
     setPasswordForSignUp: (passwordForSignUp: string) => set({ passwordForSignUp }),
 
+    showPasswordForSignUp: false,
+    setShowPasswordForSignUp: (showPasswordForSignUp) => set({ showPasswordForSignUp }),
+
     usernameForSignUp: "",
     setUsernameForSignUp: (usernameForSignUp: string) => set({ usernameForSignUp }),
 
     resetSignUpInput: () => set({
-        emailForSignUp: "", passwordForSignUp: "", usernameForSignUp: ""
+        emailForSignUp: "", passwordForSignUp: "", usernameForSignUp: "", showPasswordForSignUp: false
     })
 });
 

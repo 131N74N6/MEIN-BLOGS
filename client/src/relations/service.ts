@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUserStore } from "../users/store";
-import { apiRequest } from "../handler/api";
+import { apiRequest } from "../api";
 import { useStyleStore } from "../styles/store";
 import type { RelationDetail } from "./model";
 import { useRelationStore } from "./store";
