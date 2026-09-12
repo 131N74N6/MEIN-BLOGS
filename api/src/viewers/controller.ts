@@ -19,8 +19,18 @@ class ViewerController {
         return { data: total, message: "viewers total retrieved successfully", success: true };
     }
 
+    async getReceivedBlogViewersTotalForCurrentUser(blog_owner_id: string) {
+        const total = await viewerService.getReceivedBlogViewersTotalForCurrentUser(blog_owner_id);
+        return { data: total, message: "received viewers total retrieved successfully", success: true };
+    }
+
     async seeOneBlog(props: Omit<TViewer["data"], "created_at" | "username" | "profile_picture">) {
-        await viewerService.seeOneBlog({ blog_id: props.blog_id, user_id: props.user_id });
+        await viewerService.seeOneBlog({ 
+            blog_id: props.blog_id, 
+            user_id: props.user_id, 
+            blog_owner_id: props.blog_owner_id 
+        });
+
         return { message: "successfully access blog", success: true };
     }
 }

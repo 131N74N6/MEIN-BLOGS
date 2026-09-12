@@ -30,6 +30,11 @@ class ViewerRepository {
         return viewer.length;
     }
 
+    async getReceivedBlogViewersTotalForCurrentUser(blog_owner_id: string) {
+        const viewer = await this.viewers.find({ blog_owner_id: new ObjectId(blog_owner_id) }).toArray();
+        return viewer.length;
+    }
+
     async seeOneBlog(props: Omit<TViewer["data"], "created_at" | "username" | "profile_picture">) {
         const blog = await this.blogs.find({ _id: new ObjectId(props.blog_id) }).toArray();
 
@@ -41,6 +46,7 @@ class ViewerRepository {
         return await this.viewers.insertOne({
             created_at: new Date(),
             blog_id: blog[0]._id, 
+            blog_owner_id: props.blog_owner_id,
             user_id: user[0]._id, 
             username: user[0].name,
             profile_picture: user[0].image || null

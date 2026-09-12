@@ -10,13 +10,18 @@ const commentRouters = new Elysia({ prefix: "/api/comments" })
         blog_id: params.blog_id, page: query.page, limit: query.limit
     })
 }, {
-    params: commentSchema.params,
+    params: t.Pick(commentSchema.params, ["blog_id"]),
     query: t.Omit(commentSchema.pagination, ["blog_id", "skip"])
 })
 .get("/show/total/:blog_id", async ({ params }) => {
     return await commentController.getCommentsTotalInOneBlog(params.blog_id)
 }, {
-    params: commentSchema.params
+    params: t.Pick(commentSchema.params, ["blog_id"])
+})
+.get("/users/show/total/:blog_owner_id", async ({ params }) => {
+    return await commentController.getReceivedCommentsTotalForCurrentUser(params.blog_owner_id)
+}, {
+    params: t.Pick(commentSchema.params, ["blog_owner_id"])
 })
 .post("/create/:blog_id", async ({ body, user, params }) => {
     return await commentController.createComment({
@@ -24,7 +29,7 @@ const commentRouters = new Elysia({ prefix: "/api/comments" })
     });
 }, {
     body: t.Omit(commentSchema.add, ["created_at", "blog_id", "user_id", "username"]),
-    params: commentSchema.params
+    params: t.Pick(commentSchema.params, ["blog_id"])
 });
 
 export default commentRouters;

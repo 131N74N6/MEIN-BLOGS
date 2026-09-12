@@ -3,10 +3,17 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tansta
 import { apiRequest } from "../api";
 import { useStyleStore } from "../styles/store";
 import type { ViewerDetail } from "./model";
+import { useUserStore } from "../users/store";
 
 export default function useViewerService() {
     const queryClient = useQueryClient();
+
     const blogId = useBlogStore((state) => state.blogId);
+    const blogOwnerId = useBlogStore((state) => state.blogOwnerId);
+
+    const currentUserId = useUserStore((state) => state.currentUserId);
+    const otherUserId = useUserStore((state) => state.otherUserId);
+
     const setMessage = useStyleStore((state) => state.setMessage);
 
     const getAllBlogViewers = useInfiniteQuery({
@@ -35,11 +42,31 @@ export default function useViewerService() {
         queryKey: [`blog-viewers-total-${blogId}`]
     });
 
+    const getTotalViewerForCurrentUser = useQuery({
+        enabled: !!currentUserId,
+        queryFn: async () => {
+            const endpoint = `/api/viewers/users/show/total/${currentUserId}`;
+            const request = await apiRequest<number>(endpoint, { method: "GET" });
+            return request.data ?? 0;
+        },
+        queryKey: [`current-user-viewers-total-${currentUserId}`]
+    });
+
+    const getTotalViewerForVisitedUser = useQuery({
+        enabled: !!otherUserId && currentUserId !== otherUserId,
+        queryFn: async () => {
+            const endpoint = `/api/viewers/users/show/total/${otherUserId}`;
+            const request = await apiRequest<number>(endpoint, { method: "GET" });
+            return request.data ?? 0;
+        },
+        queryKey: [`visited-user-viewers-total-${otherUserId}`]
+    });
+
     const seeOneBlogMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/api/viewers/see/${blogId}`, {
-                method: "POST"
-            });
+            const endpoint = `/api/viewers/start-see`;
+            const viewerData = JSON.stringify({ blog_id: blogId, blog_owner_id: blogOwnerId });
+            return await apiRequest(endpoint, { body: viewerData, method: "POST" });
         },
         onError: (error) => {
             setMessage(error.message);
@@ -47,12 +74,15 @@ export default function useViewerService() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`blog-viewers-${blogId}`] });
             queryClient.invalidateQueries({ queryKey: [`blog-viewers-total-${blogId}`] });
+            queryClient.invalidateQueries({ queryKey: [`current-user-viewers-total-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`visited-user-viewers-total-${currentUserId}`] })
         }
     });
 
     const isProcessing = seeOneBlogMt.isPending;
 
     return {
-        getAllBlogViewers, getAllBlogViewersTotal, isProcessing, seeOneBlogMt
+        getAllBlogViewers, getTotalViewerForCurrentUser, getTotalViewerForVisitedUser, getAllBlogViewersTotal, 
+        isProcessing, seeOneBlogMt
     }
 }

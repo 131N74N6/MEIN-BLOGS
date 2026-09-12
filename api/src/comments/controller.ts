@@ -29,6 +29,11 @@ class CommentController {
         const total = await commentService.getCommentsTotalInOneBlog(blog_id);
         return { data: total, message: "comments total retrieved successfully", success: true};
     }
+
+    async getReceivedCommentsTotalForCurrentUser(blog_owner_id: string) {
+        const total = await commentService.getReceivedCommentsTotalForCurrentUser(blog_owner_id);
+        return { data: total, message: "your received comments total retrieved successfully", success: true};
+    }
 }
 
 const commentController = new CommentController();

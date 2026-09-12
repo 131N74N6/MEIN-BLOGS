@@ -27,6 +27,9 @@ export default function CurrentUserBlog() {
     
     const selectMode = useBlogStore((state) => state.selectMode);
     const setSelectMode = useBlogStore((state) => state.setSelectMode);
+    
+    const searched = useBlogStore((state) => state.searched);
+    const setSearched = useBlogStore((state) => state.setSearched);
 
     const currentUserId = useUserStore((state) => state.currentUserId);
 
@@ -46,77 +49,86 @@ export default function CurrentUserBlog() {
     const isProcessing = blog.processing || user.isProcessing;
 
     return (
-        <section className="flex md:flex-row flex-col h-dvh relative">
+        <section className="flex md:flex-row flex-col h-dvh relative z-10">
             <Navbar is_processing={isProcessing} place="your blogs" sign_out={auth.signOutMt}/>
             {message ? <Alert message={message}/> : null}
-            {blog.getAllCurrentUserBlogs.error ? (
-                <section className="flex justify-center items-center h-full w-full md:w-3/4">
-                    <h3 className="text-center font-medium text-lg text-gray-600">
-                        {blog.getAllCurrentUserBlogs.error.message}
-                    </h3>
-                </section>
-            ) : blog.getAllCurrentUserBlogs.isLoading ? (
-                <section className="flex justify-center items-center h-full w-full md:w-3/4">
-                    <Loading/>
-                </section>
-            ) : (
-                <main className="h-full flex flex-col w-full md:w-3/4">
-                    <header className="">
-                        {selectMode ? (
-                            <header className="flex justify-end gap-2.5 px-2.5 pt-2.5">
-                                <button
-                                    className="cursor-pointer disabled:cursor-not-allowed bg-blue-700 text-white font-medium text-sm p-2 w-32 rounded-md hover:bg-blue-500 transition-colors"
-                                    disabled={isProcessing}
-                                    onClick={() => blog.deleteChosenCurrentUserBlogMt.mutate()}
-                                    type="button"
-                                >
-                                    <div className="flex items-center justify-center gap-1.5">
-                                        <Trash2 size={20}/>
-                                        <div>Delete blogs</div>
-                                    </div>
-                                </button>
-                                <button
-                                    className="cursor-pointer disabled:cursor-not-allowed bg-gray-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-gray-600 transition-colors"
-                                    disabled={isProcessing}
-                                    onClick={() => {
-                                        setSelectMode(false);
-                                        resetChosenBlogsIds();
-                                    }}
-                                    type="button"
-                                >
-                                    <div className="flex items-center justify-center gap-1.5">
-                                        <SquareX size={20}/>
-                                        <div>Cancel</div>
-                                    </div>
-                                </button>
-                            </header>
-                        ) : (
-                            <header className="flex justify-end gap-2.5 px-2.5 pt-2.5">
-                                <button
-                                    className="cursor-pointer disabled:cursor-not-allowed bg-blue-700 text-white font-medium text-sm p-2 w-32 rounded-md hover:bg-blue-500 transition-colors"
-                                    disabled={isProcessing}
-                                    onClick={() => setSelectMode(true)}
-                                    type="button"
-                                >
-                                    <div className="flex items-center justify-center gap-1.5">   
-                                        <SquareCheck size={20}/>
-                                        <div>Select blog</div>
-                                    </div>
-                                </button>
-                                <button
-                                    className="cursor-pointer disabled:cursor-not-allowed bg-gray-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-gray-600 transition-colors"
-                                    disabled={isProcessing}
-                                    onClick={() => blog.deleteAllCurrentUserBlogsMt.mutate()}
-                                    type="button"
-                                >
-                                    <div className="flex items-center justify-center gap-1.5">   
-                                        <Trash2 size={20}/>
-                                        <div>Delete all blogs</div>
-                                    </div>
-                                </button>
-                            </header>
-                        )}
+            <main className="h-full overflow-y-auto md:w-3/4 w-full flex flex-col gap-2.5">
+                {selectMode ? (
+                    <header className="flex justify-end gap-2.5 px-2.5 pt-2.5">
+                        <button
+                            className="cursor-pointer disabled:cursor-not-allowed bg-blue-700 text-white font-medium text-sm p-2 w-32 rounded-md hover:bg-blue-500 transition-colors"
+                            disabled={isProcessing}
+                            onClick={() => blog.deleteChosenCurrentUserBlogMt.mutate()}
+                            type="button"
+                        >
+                            <div className="flex items-center justify-center gap-1.5">
+                                <Trash2 size={20}/>
+                                <div>Delete blogs</div>
+                            </div>
+                        </button>
+                        <button
+                            className="cursor-pointer disabled:cursor-not-allowed bg-gray-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-gray-600 transition-colors"
+                            disabled={isProcessing}
+                            onClick={() => {
+                                setSelectMode(false);
+                                resetChosenBlogsIds();
+                            }}
+                            type="button"
+                        >
+                            <div className="flex items-center justify-center gap-1.5">
+                                <SquareX size={20}/>
+                                <div>Cancel</div>
+                            </div>
+                        </button>
                     </header>
+                ) : (
+                    <header className="flex flex-wrap gap-2.5 px-2.5 pt-2.5">
+                        <input
+                            className="outline-0 border w-full p-1.5 rounded-md border-zinc-700 text-zinc-700 text-base"
+                            id="search blog title"
+                            placeholder="find blog title here"
+                            onChange={(event) => setSearched(event.target.value)}
+                            type="text"
+                            value={searched}
+                        />
+                        <button
+                            className="cursor-pointer disabled:cursor-not-allowed bg-blue-700 text-white font-medium text-sm p-2 w-32 rounded-md hover:bg-blue-500 transition-colors"
+                            disabled={isProcessing}
+                            onClick={() => {
+                                setSelectMode(true);
+                                setSearched("");
+                            }}
+                            type="button"
+                        >
+                            <div className="flex items-center justify-center gap-1.5">   
+                                <SquareCheck size={20}/>
+                                <div>Select blog</div>
+                            </div>
+                        </button>
+                        <button
+                            className="cursor-pointer disabled:cursor-not-allowed bg-gray-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-gray-600 transition-colors"
+                            disabled={isProcessing}
+                            onClick={() => blog.deleteAllCurrentUserBlogsMt.mutate()}
+                            type="button"
+                        >
+                            <div className="flex items-center justify-center gap-1.5">   
+                                <Trash2 size={20}/>
+                                <div>Delete all blogs</div>
+                            </div>
+                        </button>
+                    </header>
+                )}
+                {blog.getAllCurrentUserBlogs.error ? (
+                    <section className="flex justify-center items-center h-full w-full md:w-3/4">
+                        <h3 className="text-center font-medium text-lg text-gray-600">
+                            {blog.getAllCurrentUserBlogs.error.message}
+                        </h3>
+                    </section>
+                ) : blog.getAllCurrentUserBlogs.isLoading ? (
+                    <section className="flex justify-center items-center h-full w-full md:w-3/4">
+                        <Loading/>
+                    </section>
+                ) : (
                     <BlogTable 
                         data={blog.getAllCurrentUserBlogs.data?.pages.flat() ?? []}
                         fetch_next_page={blog.getAllCurrentUserBlogs.fetchNextPage}
@@ -125,8 +137,8 @@ export default function CurrentUserBlog() {
                         is_processing={blog.processing}
                         see_one_blog_mt={viewers.seeOneBlogMt}
                     />
-                </main>
-            )}
+                )}
+            </main>
         </section>
     );
 }

@@ -12,7 +12,7 @@ class RelationService {
     }
 
     async getUserFollowers(props: Omit<TRelation["pagination"], "followed_user_id">) {
-        const userId = this.checkIsIdValid("user id", props.user_id);
+        const userId = this.checkIsIdValid("user", props.user_id);
 
         return await relationRepository.getUserFollowers({
             user_id: userId, limit: props.limit, skip: props.skip, username: props.username
@@ -20,7 +20,7 @@ class RelationService {
     }
 
     async getFollowedUser(props: Omit<TRelation["pagination"], "followed_user_id">) {
-        const userId = this.checkIsIdValid("user id", props.user_id);
+        const userId = this.checkIsIdValid("user", props.user_id);
 
         return await relationRepository.getFollowedUsers({
             user_id: userId, limit: props.limit, skip: props.skip, username: props.username
@@ -28,18 +28,18 @@ class RelationService {
     }
 
     async getFollowersTotal(props: Pick<TRelation["add"], "user_id">) {
-        const userId = this.checkIsIdValid("user id", props.user_id);
+        const userId = this.checkIsIdValid("user", props.user_id);
         return await relationRepository.getFollowersTotal({ user_id: userId });
     }
 
     async getFollowedUserTotal(props: Pick<TRelation["add"], "user_id">) {
-        const userId = this.checkIsIdValid("user id", props.user_id);
+        const userId = this.checkIsIdValid("user", props.user_id);
         return await relationRepository.getFollowedUserTotal({ user_id: userId });
     }
 
     async hasUserFollowed(props: Pick<TRelation["add"], "user_id" | "followed_user_id">) {
-        const userId = this.checkIsIdValid("user id", props.user_id);
-        const followedUserId = this.checkIsIdValid("followed user id", props.followed_user_id);
+        const userId = this.checkIsIdValid("user", props.user_id);
+        const followedUserId = this.checkIsIdValid("followed user", props.followed_user_id);
         
         return await relationRepository.hasUserFollowed({
             user_id: userId, followed_user_id: followedUserId
@@ -47,8 +47,8 @@ class RelationService {
     }
 
     async startFollowedOneUser(props: TRelation["add"]) {
-        const userId = this.checkIsIdValid("user id", props.user_id);
-        const followedUserId = this.checkIsIdValid("followed user id", props.followed_user_id);
+        const userId = this.checkIsIdValid("user", props.user_id);
+        const followedUserId = this.checkIsIdValid("followed user", props.followed_user_id);
 
         await relationRepository.startFollowedOneUser({
             user_id: userId, followed_user_id: followedUserId,
@@ -56,7 +56,7 @@ class RelationService {
     }
 
     async stopFollowingOneUser(props: Pick<TRelation["add"], "followed_user_id">) {
-        const followedUserId = this.checkIsIdValid("followed user id", props.followed_user_id);
+        const followedUserId = this.checkIsIdValid("followed user", props.followed_user_id);
         await relationRepository.stopFollowingOneUser({ followed_user_id: followedUserId });
     }
 }

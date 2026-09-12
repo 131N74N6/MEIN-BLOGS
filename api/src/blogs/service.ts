@@ -38,7 +38,7 @@ class BlogService {
         const blogContent = props.content !== undefined ? 
         this.checkIsInputValid(props.content, "content", 1) : blog.content;
 
-        const currentUserId = this.checkIsIdValid(props.blog_owner_id, "blog owner id");
+        const currentUserId = this.checkIsIdValid(props.blog_owner_id, "blog owner");
 
         const blogLanguage = props.language !== undefined ? 
         this.checkIsInputValid(props.language, "language", 1) : blog.language;
@@ -106,7 +106,7 @@ class BlogService {
         }
 
         const blogContent = this.checkIsInputValid(props.content, "content", 1);
-        const currentUserId = this.checkIsIdValid(props.blog_owner_id, "blog owner id");
+        const currentUserId = this.checkIsIdValid(props.blog_owner_id, "blog owner");
         const blogLanguage = this.checkIsInputValid(props.language, "language", 1);
         const blogTitle = this.checkIsInputValid(props.title, "title", 1);
         
@@ -159,7 +159,7 @@ class BlogService {
 
     async deleteChosenBlogs(blogs_ids: string[], current_user_id: string, ) {
         const operations = [];
-        const currentUserId = this.checkIsIdValid(current_user_id, "blog owner id");
+        const currentUserId = this.checkIsIdValid(current_user_id, "blog owner");
         const blogs = await blogRepository.getChosenCurrentUserBlogs(blogs_ids);
 
         if (blogs.length === 0) return;
@@ -210,7 +210,7 @@ class BlogService {
     }
 
     async getAllCurrentUserBlogsWithPagination(page: Omit<TBlogs["pagination"], "page">) {
-        const currentUserId = this.checkIsIdValid(page.blog_owner_id, "blog owner id");
+        const currentUserId = this.checkIsIdValid(page.blog_owner_id, "blog owner");
 
         if (page.title === undefined || page.title === "") {
             return await blogRepository.getAllCurrentUserBlogsWithPagination({
@@ -229,12 +229,12 @@ class BlogService {
     }
 
     async getAllCurrentUserBlogsTotal(current_user_id: string) {
-        const currentUserId = this.checkIsIdValid(current_user_id, "user id");
+        const currentUserId = this.checkIsIdValid(current_user_id, "user");
         return await blogRepository.getAllCurrentUserBlogsTotal(currentUserId);
     }
 
     async getBlogContentById(id: string) {
-        const blogId = this.checkIsIdValid(id, "blog id");
+        const blogId = this.checkIsIdValid(id, "blog");
         const blogContent = await blogRepository.getBlogContentById(blogId);
 
         if (!blogContent) return;

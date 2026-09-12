@@ -4,9 +4,14 @@ import { useStyleStore } from "../styles/store";
 import type { CommentDetail } from "./model";
 import { useCommentStore } from "./store";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useUserStore } from "../users/store";
 
 export default function useCommentSevice() {
     const queryClient = useQueryClient();
+
+    const currentUserId = useUserStore((state) => state.currentUserId);
+    const otherUserId = useUserStore((state) => state.otherUserId);
+
     const blogId = useBlogStore((state) => state.blogId);
     const blogOwnerId = useBlogStore((state) => state.blogOwnerId);
 
@@ -31,6 +36,8 @@ export default function useCommentSevice() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`blog-comments-${blogId}`] });
             queryClient.invalidateQueries({ queryKey: [`blog-comments-total-${blogId}`] });
+            queryClient.invalidateQueries({ queryKey: [`current-user-comment-total-received-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`visited-user-comment-total-received-${currentUserId}`] });
             setCommentText("");
         }
     });
@@ -56,13 +63,31 @@ export default function useCommentSevice() {
         enabled: !!blogId,
         queryKey: [`blog-comments-total-${blogId}`],
         queryFn: async () => {
-            const request = await apiRequest<number>(`/api/comments/show/total/${blogId}`, {
-                method: "GET"
-            });
-
+            const endpoint = `/api/comments/show/total/${blogId}`;
+            const request = await apiRequest<number>(endpoint, { method: "GET" });
             return request.data ?? 0;
         },
         staleTime: Infinity
+    });
+
+    const getTotalCommentForCurrentUser = useQuery({
+        enabled: !!currentUserId,
+        queryFn: async () => {
+            const endpoint = `/api/comments/users/show/total/${currentUserId}`;
+            const request = await apiRequest<number>(endpoint, { method: "GET" });
+            return request.data ?? 0;
+        },
+        queryKey: [`current-user-comment-total-received-${currentUserId}`]
+    });
+
+    const getTotalCommentForVisitedUser = useQuery({
+        enabled: !!otherUserId && currentUserId !== otherUserId,
+        queryFn: async () => {
+            const endpoint = `/api/comments/users/show/total/${otherUserId}`;
+            const request = await apiRequest<number>(endpoint, { method: "GET" });
+            return request.data ?? 0;
+        },
+        queryKey: [`visited-user-comment-total-received-${otherUserId}`]
     });
 
     const isProcessing = createNewCommentMt.isPending;
@@ -71,6 +96,8 @@ export default function useCommentSevice() {
         createNewCommentMt,
         getAllCommentsInABlog,
         getTotalCommentInABlog,
-        isProcessing,
+        getTotalCommentForCurrentUser,
+        getTotalCommentForVisitedUser,
+        isProcessing
     }
 }

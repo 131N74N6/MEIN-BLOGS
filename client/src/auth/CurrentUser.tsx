@@ -6,12 +6,16 @@ import useAuthService from "./service";
 import useBlogService from "../blogs/service";
 import { useEffect } from "react";
 import { useUserStore } from "../users/store";
+import useCommentSevice from "../comments/service";
+import useViewerService from "../viewers/service";
 
 export default function CurrentUser() {
     const navigate = useNavigate();
     const auth = useAuthService();
     const blog = useBlogService();
+    const comment = useCommentSevice();
     const relation = useRelationService();
+    const viewer = useViewerService();
         
     const currentUserId = useUserStore((state) => state.currentUserId);
             
@@ -112,7 +116,7 @@ export default function CurrentUser() {
                         <div>
                             <h3 className="text-gray-700 text-base font-medium">Comment received total</h3>
                             <h2 className="text-gray-700 text-lg font-medium">
-                                0
+                                {comment.getTotalCommentForCurrentUser.data ?? 0}
                             </h2>
                         </div>
                     </div>
@@ -121,7 +125,7 @@ export default function CurrentUser() {
                         <div>
                             <h3 className="text-gray-700 text-base font-medium">Viewers total</h3>
                             <h2 className="text-gray-700 text-lg font-medium">
-                                0
+                                {viewer.getTotalViewerForCurrentUser.data ?? 0}
                             </h2>
                         </div>
                     </div>

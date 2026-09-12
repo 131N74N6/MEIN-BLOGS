@@ -30,7 +30,7 @@ export default function Home() {
     const isProcessing = auth.isProcessing || blog.processing || viewer.isProcessing;
 
     return (
-        <section className="flex md:flex-row flex-col h-dvh">
+        <section className="flex md:flex-row flex-col relative z-10 h-dvh">
             <Navbar place="home" sign_out={auth.signOutMt} is_processing={blog.processing}/>
             <main className="h-full overflow-y-auto md:w-3/4 w-full flex flex-col gap-2.5">
                 <header className="px-2.5 pt-2.5">
@@ -41,7 +41,7 @@ export default function Home() {
                         onChange={(event) => setSearched(event.target.value)}
                         type="text"
                         value={searched}
-                        />
+                    />
                 </header>
                 {blog.getAllBlogs.error ? (
                     <section className="flex justify-center items-center h-full w-full md:w-3/4">

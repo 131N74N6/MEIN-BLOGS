@@ -21,11 +21,11 @@ export const userChatSchema = {
         media: t.Optional(
             t.Array(
                 t.Object({ 
-                    filename: t.String({ error: "invalid filename" }),
-                    filetype: t.String({ error: "invalid filename" }),
-                    public_id: t.String({ error: "invalid filename" }),
-                    resource_type: t.String({ error: "invalid filename" }),
-                    url: t.String({ error: "invalid filename" })
+                    filename: t.String({ error: "invalid file name" }),
+                    filetype: t.String({ error: "invalid file type" }),
+                    public_id: t.String({ error: "invalid file" }),
+                    resource_type: t.String({ error: "failed to get file" }),
+                    url: t.String({ error: "unable to access file" })
                 })
             )
         ),
@@ -48,11 +48,11 @@ export const userChatSchema = {
     }),
 
     pagination: t.Object({
-        limit: t.Number({ default: 52, error: "invalid limit", maximum: 54 }),
-        page: t.Number({ default: 1, error: "invalid first page", minimum: 1 }),
+        limit: t.Number({ default: 52, error: "maximum message each page is 54 and the minimum is 52", maximum: 54 }),
+        page: t.Number({ default: 1, error: "minimum message page is only 1", minimum: 1 }),
         receiver_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid receiver" }),
         sender_id: t.String({ pattern: "^[0-9a-fA-F]{24}$", error: "invalid sender" }),
-        skip: t.Number({ default: 52, error: "invalid skip", maximum: 54 })
+        skip: t.Number({ default: 52, error: "The maximum number of messages data passed is 54 and the minimum is 52", maximum: 54 })
     }),
 
     ws_config: t.Object({

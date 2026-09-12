@@ -12,7 +12,7 @@ class ViewerService {
     }
 
     async getAllBlogViewers(query: Omit<TViewer["pagination"], "page">) {
-        const blogId = this.checkIsIdValid("blog id", query.blog_id);
+        const blogId = this.checkIsIdValid("blog", query.blog_id);
 
         return await viewerRepository.getAllBlogViewers({
             blog_id: blogId, limit: query.limit, skip: query.skip
@@ -20,18 +20,25 @@ class ViewerService {
     }
 
     async getAllBlogViewersTotal(params: Pick<TViewer["data"], "blog_id">) {
-        const blogId = this.checkIsIdValid("blog id", params.blog_id);
+        const blogId = this.checkIsIdValid("blog", params.blog_id);
         return viewerRepository.getAllBlogViewersTotal({ blog_id: blogId });
     }
 
-    async seeOneBlog(props: Omit<TViewer["data"], "created_at" | "username" | "profile_picture">) {
-        const blog_id = this.checkIsIdValid("blog id", props.blog_id);
-        const user_id = this.checkIsIdValid("current user id", props.user_id);
+    async getReceivedBlogViewersTotalForCurrentUser(blog_owner_id: string) {
+        const blogOwnerId = this.checkIsIdValid("blog owner", blog_owner_id);
+        const total = await viewerRepository.getReceivedBlogViewersTotalForCurrentUser(blogOwnerId);
+        return total;
+    }
 
-        const hasSeen = await viewerRepository.hasUserSeenThisBlog({ blog_id: blog_id, user_id: user_id });
+    async seeOneBlog(props: Omit<TViewer["data"], "created_at" | "username" | "profile_picture">) {
+        const blogId = this.checkIsIdValid("blog", props.blog_id);
+        const blogOwnerId = this.checkIsIdValid("blog owner", props.blog_owner_id);
+        const userId = this.checkIsIdValid("current user", props.user_id);
+
+        const hasSeen = await viewerRepository.hasUserSeenThisBlog({ blog_id: blogId, user_id: userId });
         
         if (hasSeen === false) {
-            await viewerRepository.seeOneBlog({ blog_id: blog_id, user_id: user_id });
+            await viewerRepository.seeOneBlog({ blog_id: blogId, user_id: userId, blog_owner_id: blogOwnerId });
         }
     }
 }

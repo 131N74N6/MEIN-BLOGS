@@ -7,12 +7,16 @@ import { useNavigate } from "react-router-dom";
 import { useUserStore } from "./store";
 import useBlogService from "../blogs/service";
 import { useEffect } from "react";
+import useCommentSevice from "../comments/service";
+import useViewerService from "../viewers/service";
 
 export default function OtherUser() {
     const navigate = useNavigate();
     const auth = useAuthService();
     const blog = useBlogService();
+    const comment = useCommentSevice();
     const relation = useRelationService();
+    const viewer = useViewerService();
     const user = useUserService();
     
     const currentUserId = useUserStore((state) => state.currentUserId);
@@ -144,7 +148,7 @@ export default function OtherUser() {
                         <div>
                             <h3 className="text-gray-700 text-base font-medium">Comment received total</h3>
                             <h2 className="text-gray-700 text-lg font-medium">
-                                0
+                                {comment.getTotalCommentForVisitedUser.data ?? 0}
                             </h2>
                         </div>
                     </div>
@@ -153,7 +157,7 @@ export default function OtherUser() {
                         <div>
                             <h3 className="text-gray-700 text-base font-medium">Viewers total</h3>
                             <h2 className="text-gray-700 text-lg font-medium">
-                                0
+                                {viewer.getTotalViewerForVisitedUser.data ?? 0}
                             </h2>
                         </div>
                     </div>

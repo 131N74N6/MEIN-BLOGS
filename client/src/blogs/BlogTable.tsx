@@ -5,7 +5,7 @@ import type { BlogTableData } from "./model";
 
 export default function BlogTable(blogs: BlogTableData) {
     return (
-        <section className="overflow-x-auto px-2.5 pt-2.5 h-full w-full">
+        <section className="overflow-x-auto overflow-y-auto px-2.5 pb-2.5 h-full w-full">
             <table className="w-full text-sm text-gray-500 min-w-150">
                 <thead className="text-base text-gray-700 bg-gray-50 border-b border-gray-200">
                     <tr>

@@ -10,18 +10,23 @@ const viewerRouters = new Elysia({ prefix: "/api/viewers"})
         blog_id: params.blog_id, page: query.page, limit: query.limit
     })
 }, {
-    params: viewerSchema.params,
+    params: t.Pick(viewerSchema.params, ["blog_id"]),
     query: t.Omit(viewerSchema.pagination, ["blog_id", "skip"])
 })
 .get("/show/total/:blog_id", async ({ params }) => {
     return await viewerController.getAllBlogViewersTotal({ blog_id: params.blog_id });
 }, {
-    params: viewerSchema.params
+    params: t.Pick(viewerSchema.params, ["blog_id"])
 })
-.post("/see/:blog_id", async ({ params, user }) => await viewerController.seeOneBlog({
-    blog_id: params.blog_id, user_id: user.id
-}), {
-    params: viewerSchema.params
+.get("/users/show/total/:blog_owner_id", async ({ params }) => {
+    return await viewerController.getReceivedBlogViewersTotalForCurrentUser(params.blog_owner_id);
+}, {
+    params: t.Pick(viewerSchema.params, ["blog_owner_id"])
+})
+.post("/start-see", async ({ body, user }) => {
+    return await viewerController.seeOneBlog({ ...body, user_id: user.id });
+}, {
+    body: viewerSchema.params
 });
 
 export default viewerRouters;

@@ -39,6 +39,12 @@ class CommentRepository {
         const total = comments.length;
         return total;
     }
+
+    async getReceivedCommentsTotalForCurrentUser(blog_owner_id: string) {
+        const comments = await this.comments.find({ blog_owner_id: new ObjectId(blog_owner_id) }).toArray();
+        const total = comments.length;
+        return total;
+    }
 }
 
 const commentRepository = new CommentRepository();

@@ -21,8 +21,8 @@ class CommentService {
     }
 
     async createComment(new_comment: TComment["add"]) {
-        const blogId = this.checkIsIdValid(new_comment.blog_id, "blog id");
-        const blogOwnerId = this.checkIsIdValid(new_comment.blog_owner_id, "blog owner id");
+        const blogId = this.checkIsIdValid(new_comment.blog_id, "blog");
+        const blogOwnerId = this.checkIsIdValid(new_comment.blog_owner_id, "blog owner");
         const commentText = this.checkIsInputValid(new_comment.text, 1);
 
         await commentRepository.createComment({
@@ -34,7 +34,7 @@ class CommentService {
     }
 
     async getAllCommentsInOneBlog(config: Omit<TComment["pagination"], "page">) {
-        const blogId = this.checkIsIdValid(config.blog_id, "blog id");
+        const blogId = this.checkIsIdValid(config.blog_id, "blog");
         
         return await commentRepository.getAllCommentsInOneBlog({
             blog_id: blogId, limit: config.limit, skip: config.skip
@@ -42,8 +42,14 @@ class CommentService {
     }
 
     async getCommentsTotalInOneBlog(blog_id: string) {
-        const blogId = this.checkIsIdValid(blog_id, "blog id");
+        const blogId = this.checkIsIdValid(blog_id, "blog");
         return await commentRepository.getCommentsTotalInOneBlog(blogId);
+    }
+
+    async getReceivedCommentsTotalForCurrentUser(blog_owner_id: string) {
+        const owner_id = this.checkIsIdValid(blog_owner_id, "blog owner")
+        const total = await commentRepository.getReceivedCommentsTotalForCurrentUser(owner_id);
+        return total;
     }
 }
 
