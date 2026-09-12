@@ -16,7 +16,7 @@ export function setupErrorHandler(app: Elysia) {
 
         if (code === 'BlogApiError' || error instanceof BlogApiError) {
             const apiError = error as BlogApiError;
-            set.status = apiError.statusCode || 400;
+            set.status = apiError.statusCode || 500;
             return { 
                 success: false, 
                 message: apiError.message 
