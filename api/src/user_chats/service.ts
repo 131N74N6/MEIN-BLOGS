@@ -258,13 +258,8 @@ class UserChatService {
         let newMessage = "";
         const chosenFile = Array.isArray(data.media) ? data.media : (data.media ? [data.media] : []);
 
-        if (data.message) {
-            newMessage = this.checkIsInputValid(data.message, "message"); 
-        }
-
-        if (!newMessage && chosenFile.length === 0) {
-            throw new BlogApiError(400, "message or media is required");
-        }
+        if (data.message) newMessage = this.checkIsInputValid("message", data.message); 
+        if (!newMessage && chosenFile.length === 0) throw new BlogApiError(400, "message or media is required");
         
         const receiverId = this.checkIsIdValid("receiver id", data.receiver_id);
         const senderId = this.checkIsIdValid("sender id", data.sender_id);

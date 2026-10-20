@@ -294,6 +294,7 @@ export default function useUserChatService() {
             const message = messageChat?.trim() ?? "";
             const newMessage = new FormData();
             newMessage.append("message", message);
+            console.log(message);
             if (otherUserId) newMessage.append("receiver_id", otherUserId);
             if (chatMedia && chatMedia.length > 0) {
                 for (let w = 0; w < chatMedia.length; w++) {
