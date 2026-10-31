@@ -71,11 +71,19 @@ export default function useUserChatService() {
             
             if (payload.type === "message:created") {
                 queryClient.setQueryData(queryKey, (old: any) => {
-                    if (!old) return old;
+                    if (!old) return { pageParams: [1], pages: [[payload.data]] };
+
+                    const alreadyExists = old.pages.some((page: any[]) => {
+                        return page.some((message: any) => message._id === payload.data._id);
+                    });
+                    
+                    if (alreadyExists) return old;
+                    
                     const newPages = [...old.pages];
+                    if (!newPages[0]) newPages[0] = [];
                     
                     newPages[0] = [payload.data, ...newPages[0]];
-                    return { ...old, pages: newPages };
+                    return { ...old, pages: newPages }
                 });
             } else if (payload.type === "message:updated") {
                 queryClient.setQueryData(queryKey, (old: any) => {
