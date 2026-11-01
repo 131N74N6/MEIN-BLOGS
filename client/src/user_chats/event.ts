@@ -9,7 +9,7 @@ class UserChatWebSocket extends EventEmitter {
     private reconnectDelay = 1000;
 
     private messageQueue: any[] = [];
-    private isConnecting = false;
+    protected isConnecting = false;
     private shouldReconnect = true;
 
     private token: string = "";
@@ -17,22 +17,27 @@ class UserChatWebSocket extends EventEmitter {
     private otherUserId: string = "";
 
     connect (token: string, otherUserId: string, backendUrl: string) {
-        if (this.isConnecting) {
-            return;
-        }
-
-        if (this.ws && (this.ws.readyState === WebSocket.CONNECTING || this.ws.readyState === WebSocket.OPEN)) {
-            return;
-        }
-
         const newWsUrl = this.buildWsUrl(token, otherUserId, backendUrl);
-        
-        if (this.url && this.url !== newWsUrl) {
-            this.disconnect();
+
+        if (this.url === newWsUrl && this.ws?.readyState === WebSocket.OPEN) return;
+
+        if (this.url !== newWsUrl) {
+            this.shouldReconnect = false; 
+            
+            if (this.ws) {
+                this.ws.close();
+                this.ws = null;
+            }
         }
 
         this.url = newWsUrl;
+        this.token = token;
+        this.otherUserId = otherUserId;
+        this.backendUrl = backendUrl;
         this.isConnecting = true;
+        this.shouldReconnect = true;
+        this.reconnectAttempts = 0;
+        this.messageQueue = [];
         this.ws = new WebSocket(this.url);
         
         this.bindEvents();
@@ -60,7 +65,7 @@ class UserChatWebSocket extends EventEmitter {
 
                 this.emit("message", payload);
             } catch (err) {
-                this.emit("error", { type: "error", message: "Failed to parse message" });
+                this.emit("error", { type: "error", message: "Failed to get message" });
             }
         }
 
