@@ -10,27 +10,27 @@ const wsContext = new WeakMap<any, { roomId: string; handler: (payload: any) => 
 const userChatRouters = new Elysia({ prefix: "/api/chats" })
 .use(authMiddleware)
 .delete("/clear-all/:receiver_id", async ({ params, user }) => {
-    return await userChatController.clearAllMessages({ receiver_id: params.receiver_id, sender_id: user.id });
+    return await userChatController.clearAllMessages({ receiver_id: params.receiver_id, sender_id: user._id });
 }, {
     params: t.Pick(userChatSchema.delete_chat, ["receiver_id"])
 })
 .delete("/clear-chosen", async ({ body, user }) => {
-    return await userChatController.clearChosenMessages({ sender_id: user.id, ...body });
+    return await userChatController.clearChosenMessages({ sender_id: user._id, ...body });
 }, {
     body: t.Omit(userChatSchema.delete_chat, ["sender_id"])
 })
 .delete("/rm-all/:receiver_id", async ({ params, user }) => {
-    return await userChatController.deleteAllMessages({ receiver_id: params.receiver_id, sender_id: user.id });
+    return await userChatController.deleteAllMessages({ receiver_id: params.receiver_id, sender_id: user._id });
 }, {
     params: t.Pick(userChatSchema.delete_chat, ["receiver_id"])
 })
 .delete("/rm-chosen", async ({ body, user }) => {
-    return await userChatController.deleteChosenMessages({ sender_id: user.id, ...body });
+    return await userChatController.deleteChosenMessages({ sender_id: user._id, ...body });
 }, {
     body: t.Omit(userChatSchema.delete_chat, ["sender_id"])
 })
 .get("/show", async ({ query, user }) => {
-    return await userChatController.getAllMessages({ sender_id: user.id, ...query });
+    return await userChatController.getAllMessages({ sender_id: user._id, ...query });
 }, {
     query: t.Omit(userChatSchema.pagination, ["sender_id", "skip"])
 })
@@ -40,12 +40,12 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
     query: t.Pick(userChatSchema.change_result, ["_id"])
 })
 .post("/send", async ({ body, user }) => {
-    return await userChatController.sendMessage({ sender_id: user.id, ...body });
+    return await userChatController.sendMessage({ sender_id: user._id, ...body });
 }, {
     body: t.Omit(userChatSchema.add_raw, ["sender_id"])
 })
 .put("/remake", async ({ body, user }) => {
-    return await userChatController.changeMessage({ ...body, sender_id: user.id });
+    return await userChatController.changeMessage({ ...body, sender_id: user._id });
 }, {
     body: t.Omit(userChatSchema.change_result, ["sender_id"])
 })
@@ -65,7 +65,7 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
                 return;
             }
 
-            const userId = session.user.id;
+            const userId = session.user._id;
 
             if (!userId || !receiverId || typeof userId !== "string" || typeof receiverId !== "string") {
                 ws.send(JSON.stringify({ type: "error", message: "Invalid user" }));

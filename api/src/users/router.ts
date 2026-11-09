@@ -2,34 +2,30 @@ import Elysia, { t } from "elysia";
 import { authMiddleware } from "../auth/middleware";
 import userController from "./controller";
 import { userSchema } from "./model";
-import { authService } from "../auth/service";
 import { userSSE } from "./event";
+
+const ALLOWED_ORIGINS = ["http://localhost:5173", "http://localhost:3000"];
 
 const userRouters = new Elysia({ prefix: "/api/users" })
 .use(authMiddleware)
 .delete("/rm", async ({ user }) => {
-    return await userController.deleteUser(user.id)
+    return await userController.deleteUser(user._id)
 })
 .delete("/rm/profile-picture", async ({ user }) => {
-    return await userController.deleteOldProfile(user.id)
+    return await userController.deleteOldProfile(user._id)
 })
 .get("/show/:user_id", async ({ params }) => {
     return await userController.getCurrentUser(params.user_id);
 }, {
     params: userSchema["other_user"]
 })
-.get("/sse", async ({ cookie }) => {
-    const sessionToken = cookie?.session_token?.value;
-    if (!sessionToken) return;
+.get("/sse", async ({ user, set }) => {
+    if (!user || !user._id) {
+        set.status = 401;
+        return { success: false, message: "Unauthorized" };
+    }
 
-    const headers = new Headers();
-    headers.set("cookie", `better-auth.session_token=${sessionToken}`);
-
-    const session = await authService.api.getSession({ headers });
-    if (!session) return;
-
-    const userId = session.user.id;
-    if (!userId || typeof userId !== "string") return;
+    const userId = user._id;
 
     const stream = new ReadableStream({
         start(controller) {
@@ -46,6 +42,8 @@ const userRouters = new Elysia({ prefix: "/api/users" })
             "Content-Type": "text/event-stream",
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
+            "Access-Control-Allow-Origin": "http://localhost:5173", // Ganti dengan URL frontend Anda
+            "Access-Control-Allow-Credentials": "true"
         }
     });
 })
@@ -54,7 +52,7 @@ const userRouters = new Elysia({ prefix: "/api/users" })
     return { data: sessionToken || null, success: true, message: "Session retrieved successfully" };
 })
 .put("/remake", async ({ body, user }) => {
-    return await userController.changeUser({ id: user.id, ...body });
+    return await userController.changeUser({ id: user._id, ...body });
 }, {
     body: t.Pick(userSchema["change_raw"], ["description", "image", "name"])
 });

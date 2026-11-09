@@ -7,8 +7,8 @@
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.2",
+    "@elysiajs/jwt": "^1.4.2",
     "@google/genai": "^2.18.0",
-    "better-auth": "^1.7.1",
     "cloudinary": "^2.10.1",
     "elysia": "latest",
     "mongodb": "^7.5.0"

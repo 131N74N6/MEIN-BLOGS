@@ -1,91 +1,55 @@
-import { betterAuth } from "better-auth";
-import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { db } from "../mongodb/service";
+import { BlogApiError } from "../error/service";
+import { TAuths } from "./model";
+import authRepository from "./repository";
 
-export const authService = betterAuth({
-    database: mongodbAdapter(db()),
-    secret: import.meta.env.BETTER_AUTH_SECRET,
-    baseURL: import.meta.env.BETTER_AUTH_URL,
-    trustedOrigins: ["http://localhost:5173", "http://localhost:3000"],
-
-    // Enable email/password authentication
-    emailAndPassword: {
-        enabled: true,
-        minPasswordLength: 8,
-        maxPasswordLength: 128
-    },
-
-    // Session configuration
-    session: {
-        expiresIn: 60 * 60 * 24 * 7,    // 7 days
-        updateAge: 60 * 60 * 24,         // Update every 24 hours
-        cookieCache: {
-            enabled: true,
-            maxAge: 60 * 5                  // Cache 5 minutes
+class AuthService {
+    private checkIsInputValid(field: string, value: unknown) {
+        if (typeof value !== "string" || !value || value === "") {
+            throw new BlogApiError(400, `invalid ${field}`);
         }
-    },
 
-    // Custom user fields
-    user: {
-        additionalFields: {
-            description: {
-                type: "string",
-                required: false
-            },
-            image_public_id: {
-                type: "string",
-                required: false
-            },
-            image_filename: {
-                type: "string",
-                required: false
-            },
-            image_filetype: {
-                type: "string",
-                required: false
-            },
-            image_resource_type: {
-                type: "string",
-                required: false
-            }
-        }
-    },
-
-    databaseHooks: {
-        session: {
-            delete: {
-                after: async (session) => {
-                    if (session?.id) {
-                        const database = db();
-                        await database.collection("session").deleteOne({ id: session.id });
-                    }
-                }
-            }
-        }
-    },
-
-    advanced: {
-        database: {
-            generateId: false
-        },
-        cookies: {
-            session_token: {
-                attributes: {
-                    secure: process.env.NODE_ENV === "production", // only send HTTPS only in production
-                    httpOnly: true,  //  XSS protection
-                    sameSite: "lax", // CSRF protection
-                }
-            }
-        }
+        const trimmed = value.trim();
+        return trimmed;
     }
-});
 
-export async function validateSessionFromToken(token: string) {
-    if (!token) return null;
+    async signIn(jwtSign: (payload: TAuths["jwt_payload"]) => Promise<string>, userInput: TAuths["sign_in"]) {
+        const email = this.checkIsInputValid("email", userInput.email);
+        const password = this.checkIsInputValid("password", userInput.password);
 
-    const headers = new Headers();
-    headers.set('cookie', `better-auth.session_token=${token}`);
-        
-    const session = await authService.api.getSession({ headers });
-    return session;
+        const user = await authRepository.findUserByEmail(email);
+        if (!user) throw new BlogApiError(401, "Invalid email or password");
+
+        const isPasswordMatch = await Bun.password.verify(userInput.password, user.password);
+        if (!isPasswordMatch) throw new BlogApiError(401, "Invalid email or password");
+
+        const payload: TAuths["jwt_payload"] = { _id: user._id.toString() }
+        const token = await jwtSign(payload);
+
+        return token;
+    }
+    
+    async signUp(jwtSign: (payload: TAuths["jwt_payload"]) => Promise<string>, userInput: TAuths["sign_up"]) {
+        const email = this.checkIsInputValid("email", userInput.email);
+        const password = this.checkIsInputValid("password", userInput.password);
+        const username = this.checkIsInputValid("username", userInput.username);
+
+        const usernameExist = await authRepository.findUserByUserName(username);
+        if (usernameExist) throw new BlogApiError(409, "invalid username");
+
+        const emailExist = await authRepository.findUserByEmail(email);
+        if (emailExist) throw new BlogApiError(409, "invalid email");
+
+        const hashedPassword = await Bun.password.hash(password);
+        const newUser = { email: email, password: hashedPassword, username: username }
+        const insertedUser = await authRepository.addNewUser(newUser);
+
+        const payload: TAuths["jwt_payload"] = { _id: insertedUser._id }
+        const token = await jwtSign(payload);
+
+        return token;
+    }
 }
+
+const authService = new AuthService();
+
+export default authService;

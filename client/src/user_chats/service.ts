@@ -5,7 +5,7 @@ import { useStyleStore } from "../styles/store";
 import { useUserChatStore } from "./store";
 import { useEffect, useRef } from "react";
 import type { FileViewerData, UserMessage } from "./model";
-import { userChatWebSocket } from './event';
+import { userChatWebSocket } from './websocket';
 
 export default function useUserChatService() {
     const queryClient = useQueryClient();

@@ -1,6 +1,5 @@
 import { Elysia } from "elysia";
 import cors from "@elysiajs/cors";
-import { authService } from "./auth/service";
 import blogRouters from "./blogs/router";
 import commentRouters from "./comments/router";
 import relationsRouters from "./relations/router";
@@ -9,6 +8,7 @@ import userRouters from "./users/router";
 import { setupErrorHandler } from "./error/service";
 import { v2 } from "cloudinary";
 import userChatRouters from "./user_chats/router";
+import authRouters from "./auth/router";
 
 const port = import.meta.env.PORT || 3000;
 
@@ -24,7 +24,7 @@ const app = new Elysia()
     credentials: true,
     origin: ["http://localhost:5173", "http://localhost:3000"]
 }))
-.all("/api/auth/*", async (ctx) => { return await authService.handler(ctx.request); })
+.use(authRouters)
 .use(blogRouters)
 .use(commentRouters)
 .use(relationsRouters)

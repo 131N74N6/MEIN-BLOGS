@@ -1,12 +1,26 @@
 import { Elysia } from "elysia";
-import { authService } from "./service";
 import { BlogApiError } from "../error/service";
+import { jwtPlugin } from "./jwt";
+import { TAuths } from "./model";
 
-export const authMiddleware = (app: Elysia) => {
-    return app.derive(async ({ request }) => {
-        const session = await authService.api.getSession({ headers: request.headers });
+export const authMiddleware = new Elysia({ name: "auth-middleware" })
+    .use(jwtPlugin)
+    .cookie(TAuth["cookie"]) 
+    .derive(async ({ cookie, jwt, set }) => {
+        const currentToken = cookie['jwt_auth_token']?.value;
 
-        if (!session) throw new BlogApiError(401, 'Unauthorized');
-        return { user: session.user };
+        if (!currentToken) {
+            set.status = 401;
+            throw new BlogApiError(401, "unauthorized");
+        }
+
+        const user = (await jwt.verify(currentToken)) as TAuths["jwt_payload"] | false;
+
+        if (!user || typeof user._id !== "string") {
+            set.status = 401;
+            throw new BlogApiError(401, "invalid or expired token");
+        }
+
+        return { user };
     });
 }
