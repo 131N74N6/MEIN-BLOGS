@@ -4,9 +4,7 @@ import { BlogApiError } from "../error/service";
 
 export const authMiddleware = (app: Elysia) => {
     return app.derive(async ({ request }) => {
-        const session = await authService.api.getSession({
-            headers: request.headers
-        });
+        const session = await authService.api.getSession({ headers: request.headers });
 
         if (!session) throw new BlogApiError(401, 'Unauthorized');
         return { user: session.user };

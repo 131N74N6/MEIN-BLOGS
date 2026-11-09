@@ -4,6 +4,7 @@ import { v2 } from "cloudinary";
 import { ObjectId } from "mongodb";
 import { TUser } from "./model";
 import { BlogApiError } from "../error/service";
+import { userSSE } from "./event";
 
 const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const maxFileSize = 6 * 1024 * 1024;
@@ -27,6 +28,7 @@ class UserService {
     
     async changeUserService(user_data: Partial<TUser["change_raw"]>) {
         const currentUserId = this.checkIsUserIdValid(user_data.id);
+        const sse = userSSE.get(currentUserId);
 
         const user = await userRepository.getCurrentUserForEdit(currentUserId);
         if (!user) throw new BlogApiError(404, "user not found");
@@ -72,6 +74,23 @@ class UserService {
                 image_resource_type: newProfileImage.resource_type,
                 name: user_data.name
             });
+
+            if (sse) {
+                const payload = {
+                    type: "user:updated",
+                    data: {
+                        user_id: user_data.id,
+                        user_name: user_data.name,
+                        description: user_data.description,
+                        profile_picture: {
+                            url: newProfileImage.url,
+                            public_id: newProfileImage.public_id,
+                        }
+                    }
+                };
+                
+                sse.enqueue(`data: ${JSON.stringify(payload)}\n\n`);
+            }
         } else {
             await userRepository.changeUser({
                 id: user_data.id,
@@ -83,6 +102,23 @@ class UserService {
                 image_resource_type: user.image_resource_type || null,
                 name: user_data.name
             });
+
+            if (sse) {
+                const payload = {
+                    type: "user:updated",
+                    data: {
+                        user_id: user_data.id,
+                        user_name: user_data.name,
+                        description: user.description || user_data.description || null,
+                        profile_picture: {
+                            url: user.image || null,
+                            public_id: user.image_public_id || null,
+                        }
+                    }
+                };
+                
+                sse.enqueue(`data: ${JSON.stringify(payload)}\n\n`);
+            }
         }
     }
 
@@ -120,6 +156,7 @@ class UserService {
     async deleteCurrentUserOldProfile(current_user_id: string) {
         const currentUserId = this.checkIsUserIdValid(current_user_id);
         const user = await userRepository.getCurrentUserForEdit(currentUserId);
+        const sse = userSSE.get(currentUserId);
 
         if (!user) throw new BlogApiError(404, "user not found");
         if (!user.image || !user.image_public_id) throw new BlogApiError(404, "image not found");
@@ -130,6 +167,20 @@ class UserService {
             }),
             userRepository.deleteCurrentUserOldProfile(currentUserId)
         ]);
+
+        if (sse) {
+            const payload = {
+                type: "user-profile-picture:deleted",
+                data: {
+                    profile_picture: {
+                        url: null,
+                        public_id: null,
+                    }
+                }
+            };
+            
+            sse.enqueue(`data: ${JSON.stringify(payload)}\n\n`);
+        }
     }
 
     async getCurrentUser(current_user_id: string) {

@@ -39,10 +39,10 @@ export default function useUserService() {
     const resetBlogWindowState = useBlogStore((state) => state.resetBlogWindowState);
 
     const resetCommentState = useCommentStore((state) => state.resetCommentState);
+    const resetMessageChatState = useUserChatStore((state) => state.resetMessageChatState);
     const resetRelationState = useRelationStore((state) => state.resetRelationState);
 
     const resetNavbarState = useStyleStore((state) => state.resetNavbarState);
-    const resetMessageChatState = useUserChatStore((state) => state.resetMessageChatState);
     
     const changeUserMt = useMutation({
         mutationFn: async () => {
@@ -69,9 +69,7 @@ export default function useUserService() {
 
     const deleteUserMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/api/users/rm`, {
-                method: "DELETE"
-            });
+            return await apiRequest(`/api/users/rm`, { method: "DELETE" });
         },
         onError: (error) => {
             setMessage(error.message);
@@ -87,10 +85,10 @@ export default function useUserService() {
             resetUserProfileState();
             resetUserIdState();
             resetNavbarState();
+            resetMessageChatState();
             useBlogStore.persist.clearStorage();
             useUserStore.persist.clearStorage();
             useUserChatStore.persist.clearStorage();
-            resetMessageChatState();
             navigate("/sign-in");
         }
     });
