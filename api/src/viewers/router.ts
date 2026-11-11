@@ -24,7 +24,7 @@ const viewerRouters = new Elysia({ prefix: "/api/viewers"})
     params: t.Pick(viewerSchema.params, ["blog_owner_id"])
 })
 .post("/start-see", async ({ body, user }) => {
-    return await viewerController.seeOneBlog({ ...body, user_id: user._id });
+    return await viewerController.seeOneBlog({ ...body, user_id: user.id });
 }, {
     body: viewerSchema.params
 });

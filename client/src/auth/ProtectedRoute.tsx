@@ -17,6 +17,6 @@ export default function ProtectedRoute(props: ProtectedRouteIntrf) {
         );
     }
 
-    return auth.getCurrentUser.data && auth.getCurrentUser.data.user_id ? <>{props.children}</> : 
-    <Navigate to={"/sign-in"} replace/>;
+    return auth.getCurrentUser.data && auth.getCurrentUser.data.user_id ? 
+    <>{props.children}</> : <Navigate to={"/sign-in"} replace/>;
 }

@@ -6,9 +6,9 @@
     "dev": "bun run --preload ./src/bypass.ts --watch src/index.ts"
   },
   "dependencies": {
-    "@elysiajs/cors": "^1.4.2",
-    "@elysiajs/jwt": "^1.4.2",
+    "@elysiajs/cors": "^1.4.3",
     "@google/genai": "^2.18.0",
+    "better-auth": "^1.7.21",
     "cloudinary": "^2.10.1",
     "elysia": "latest",
     "mongodb": "^7.5.0"

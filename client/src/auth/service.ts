@@ -11,6 +11,7 @@ import { inferAdditionalFields } from "better-auth/client/plugins";
 import { useEffect, useRef } from "react";
 import { useRelationStore } from "../relations/store";
 import { useUserChatStore } from "../user_chats/store";
+import { apiRequest } from "../api";
 
 export default function useAuthService() {
     const navigate = useNavigate();
@@ -45,28 +46,30 @@ export default function useAuthService() {
     const authClient = createAuthClient({
         baseURL: import.meta.env.VITE_BASE_API_URL,
         plugins: [inferAdditionalFields<AuthServiceApi>()],
-        fetchOptions: {
-            credentials: "include"
-        }
+        fetchOptions: { credentials: "include" }
     });
 
     const getCurrentUser = useQuery({
         queryKey: ["current-user"],
         queryFn: async () => {
-            const request = await authClient.getSession();
-            if (request.error || !request.data) return null;
+            const [sessionResponse, meResponse] = await Promise.all([
+                authClient.getSession(),
+                apiRequest<any>("/api/users/show/me", { method: "GET" }),
+            ]);
+            
+            if (sessionResponse.error || !meResponse.data) return null;
 
             return { 
-                created_at: request.data.user.createdAt,
-                description: request.data.user.description,
-                email: request.data.user.email, 
+                created_at: meResponse.data.created_at,
+                description: meResponse.data.description,
+                email: meResponse.data.email, 
                 profile_picture: {
-                    public_id: request.data.user.image_public_id,
-                    url: request.data.user.image,
+                    public_id: meResponse.data.image_public_id,
+                    url: meResponse.data.image,
                 },
-                user_id: request.data.user.id,
-                user_name: request.data.user.name,
-                user_session: request.data.session
+                user_id: meResponse.data.user_id,
+                user_name: meResponse.data.user_name,
+                user_session: sessionResponse.data?.session ?? null
             }
         },
         
@@ -74,7 +77,7 @@ export default function useAuthService() {
     });
 
     useEffect(() => {
-        if (getCurrentUser.data?.user_id) {
+        if (getCurrentUser.data && getCurrentUser.data.user_id) {
             setCurrentUserId(getCurrentUser.data.user_id);
         }
     }, [getCurrentUser.data?.user_id, setCurrentUserId]);
@@ -166,10 +169,10 @@ export default function useAuthService() {
             resetUserProfileState();
             resetUserIdState();
             resetNavbarState();
+            resetMessageChatState();
             useBlogStore.persist.clearStorage();
             useUserStore.persist.clearStorage();
             useUserChatStore.persist.clearStorage();
-            resetMessageChatState();
             navigate("/sign-in");
         }
     });

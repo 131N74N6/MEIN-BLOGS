@@ -95,9 +95,7 @@ export default function EditBlog() {
     }, [blogId, blog.getOneBlogContent.data]);
 
     useEffect(() => {
-        return () => {
-            resetEditBlogState(); 
-        };
+        return () => resetEditBlogState(); 
     }, []);
 
     const isProcessing = blog.processing || auth.isProcessing;

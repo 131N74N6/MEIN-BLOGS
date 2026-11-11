@@ -46,23 +46,32 @@ export default function useUserService() {
     
     const changeUserMt = useMutation({
         mutationFn: async () => {
+            const endpoint = `/api/users/remake`;
             const changeUserForm = new FormData();
             changeUserForm.append("name", newUserName.trim());
             if (newDescription) changeUserForm.append("description", newDescription.trim())
             if (newProfilePcture) changeUserForm.append("image", newProfilePcture);
 
-            return await apiUpload(`/api/users/remake`, changeUserForm, "PUT");
+            return await apiUpload(endpoint, changeUserForm, "PUT");
         },
         onError: (error) => {
             setMessage(error.message);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
             queryClient.invalidateQueries({ queryKey: ["current-user"] });
-            queryClient.invalidateQueries({ queryKey: [`blog-comments-${blogId}`] });
+            queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
+
+            if (profilePictureRef.current) profilePictureRef.current.value = "";
+
+            if (blogId) {
+                queryClient.invalidateQueries({ queryKey: [`blog-comments-${blogId}`] });
+                queryClient.invalidateQueries({ queryKey: [`blog-viewers-${blogId}`] });
+            }
+            
             resetUserProfileState();
             setNewUserName("");
             setNewDescription("");
-            if (profilePictureRef.current) profilePictureRef.current.value = "";
             navigate("/users");
         }
     });
@@ -75,9 +84,9 @@ export default function useUserService() {
             setMessage(error.message);
         },
         onSuccess: () => {
+            if (profilePictureRef.current) profilePictureRef.current.value = "";
             queryClient.setQueryData(['current-user'], null);
             queryClient.clear();
-            if (profilePictureRef.current) profilePictureRef.current.value = "";
             resetBlogInfoState();
             resetBlogWindowState();
             resetCommentState();
@@ -95,15 +104,23 @@ export default function useUserService() {
 
     const deleteOldProfilePictureMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/api/users/rm/profile-picture`, {
-                method: "DELETE"
-            });
+            const endpoint = `/api/users/rm/profile-picture`;
+            return await apiRequest(endpoint, { method: "DELETE" });
         },
         onError: (error) => {
             setMessage(error.message);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
             queryClient.invalidateQueries({ queryKey: ["current-user"] });
+            
+            if (profilePictureRef.current) profilePictureRef.current.value = "";
+
+            if (blogId) {
+                queryClient.invalidateQueries({ queryKey: [`blog-comments-${blogId}`] });
+                queryClient.invalidateQueries({ queryKey: [`blog-viewers-${blogId}`] });
+            }
+
             navigate("/users");
         }
     });
@@ -111,7 +128,8 @@ export default function useUserService() {
     const getCurrentUser = useQuery({
         enabled: !!otherUserId && otherUserId !== currentUserId,
         queryFn: async () => {
-            const request = await apiRequest<OtherUserData>(`/api/users/show/${otherUserId}`, { method: "GET" });
+            const endpoint = `/api/users/show/${otherUserId}`;
+            const request = await apiRequest<OtherUserData>(endpoint, { method: "GET" });
             return request.data;
         },
         queryKey: [`other-user-${otherUserId}`]

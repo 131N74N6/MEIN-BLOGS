@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuthStore } from "./store";
 import useAuthService from "./service";
-import { useUserStore } from "../users/store";
 import { useStyleStore } from "../styles/store";
 import { Eye, EyeClosed } from "lucide-react";
 import { cn } from "../styles/utils";
@@ -25,12 +24,12 @@ export default function SignUp() {
 
     const usernameForSignUp = useAuthStore((state) => state.usernameForSignUp);
     const setUsernameForSignUp = useAuthStore((state) => state.setUsernameForSignUp);
-    
-    const currentUserId = useUserStore((state) => state.currentUserId);
 
     useEffect(() => {
-        if (currentUserId && !auth.getCurrentUser.isLoading) navigate("/home", { replace: true });
-    }, [currentUserId, auth.getCurrentUser.data, auth.getCurrentUser.isLoading, navigate]);
+        if (auth.getCurrentUser.data && !auth.getCurrentUser.isLoading) {
+            navigate("/home", { replace: true });
+        }
+    }, [auth.getCurrentUser.data, auth.getCurrentUser.isLoading, navigate]);
     
     useEffect(() => {
         if (message) {

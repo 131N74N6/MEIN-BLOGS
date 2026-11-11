@@ -4,28 +4,29 @@ import userController from "./controller";
 import { userSchema } from "./model";
 import { userSSE } from "./event";
 
-const ALLOWED_ORIGINS = ["http://localhost:5173", "http://localhost:3000"];
-
 const userRouters = new Elysia({ prefix: "/api/users" })
 .use(authMiddleware)
 .delete("/rm", async ({ user }) => {
-    return await userController.deleteUser(user._id)
+    return await userController.deleteUser(user.id);
 })
 .delete("/rm/profile-picture", async ({ user }) => {
-    return await userController.deleteOldProfile(user._id)
+    return await userController.deleteOldProfile(user.id);
+})
+.get("/show/me", async ({ user }) => {
+    return await userController.getCurrentUser(user.id);
 })
 .get("/show/:user_id", async ({ params }) => {
     return await userController.getCurrentUser(params.user_id);
 }, {
     params: userSchema["other_user"]
 })
-.get("/sse", async ({ user, set }) => {
-    if (!user || !user._id) {
+.get("/sse", async ({ set, user }) => {
+    if (!user || !user.id) {
         set.status = 401;
         return { success: false, message: "Unauthorized" };
     }
 
-    const userId = user._id;
+    const userId = user.id;
 
     const stream = new ReadableStream({
         start(controller) {
@@ -52,7 +53,7 @@ const userRouters = new Elysia({ prefix: "/api/users" })
     return { data: sessionToken || null, success: true, message: "Session retrieved successfully" };
 })
 .put("/remake", async ({ body, user }) => {
-    return await userController.changeUser({ id: user._id, ...body });
+    return await userController.changeUser({ id: user.id, ...body });
 }, {
     body: t.Pick(userSchema["change_raw"], ["description", "image", "name"])
 });

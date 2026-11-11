@@ -41,10 +41,7 @@ async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
 export async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const response = await fetch(`${BASE_URL}${endpoint}`, {
         credentials: "include",
-        headers: { 
-            "Content-Type": "application/json", 
-            ...options.headers 
-        },
+        headers: { "Content-Type": "application/json", ...options.headers },
         ...options
     });
 

@@ -45,9 +45,11 @@ const relationsRouters = new Elysia({ prefix: "/api/relations" })
 }, {
     params: relationSchema.params
 })
-.post("/follow/:followed_user_id", async ({ params, user }) => await relationController.startFollowedOneUser({
-    followed_user_id: params.followed_user_id, user_id: user._id
-}), {
+.post("/follow/:followed_user_id", async ({ params, user }) => {
+    return await relationController.startFollowedOneUser({
+        followed_user_id: params.followed_user_id, user_id: user.id
+    });
+}, {
     params: t.Pick(relationSchema.params, ["followed_user_id"])
 });
 

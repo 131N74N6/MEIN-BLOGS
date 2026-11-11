@@ -5,23 +5,21 @@ import { authMiddleware } from "../auth/middleware";
 
 const blogRouters = new Elysia({ prefix: "/api/blogs" })
 .use(authMiddleware)
-.post("/create", async ({ body, user }) => await blogController.createNewBlog({
-    blog_owner_id: user._id, ...body
-}), {
+.post("/create", async ({ body, user }) => {
+    return blogController.createNewBlog({ blog_owner_id: user.id, ...body });
+}, {
     body: t.Omit(blogSchema.add_raw, ["blog_owner_id"])
 })
 .post("/generate", async ({ body }) => {
-    return await blogController.generateNewBlog({
-        language: body.language, title: body.title
-    });
+    return await blogController.generateNewBlog({ language: body.language, title: body.title });
 }, {
     body: blogSchema.generate
 })
 .delete("/rm-all", async ({ user }) => {
-    return await blogController.deleteAllBlogs(user._id)
+    return await blogController.deleteAllBlogs(user.id);
 })
 .delete("/rm-chosen", async({ body, user }) => {
-    return await blogController.deleteChosenBlogs(body.blogs_ids, user._id);
+    return await blogController.deleteChosenBlogs(body.blogs_ids, user.id);
 }, {
     body: blogSchema.bulkDelete
 })
@@ -50,9 +48,9 @@ const blogRouters = new Elysia({ prefix: "/api/blogs" })
 }, {
     params: t.Pick(blogSchema.params, ["user_id"])
 })
-.put("/remake/:_id", async ({ body, params, user }) => await blogController.changeOneBlog({
-    _id: params._id, blog_owner_id: user._id, ...body
-}), {
+.put("/remake/:_id", async ({ body, params, user }) => {
+    return await blogController.changeOneBlog({ _id: params._id, blog_owner_id: user.id, ...body });
+}, {
     body: t.Omit(blogSchema.change_raw, ["_id", "blog_owner_id"]),
     params: t.Pick(blogSchema.params, ["_id"])
 });
