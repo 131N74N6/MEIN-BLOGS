@@ -13,7 +13,7 @@ export default function RelationList(relations: RelationListData) {
     }
 
     return (
-        <section className="flex flex-col overflow-y-auto px-2.5 pb-2.5 gap-2.5">
+        <section className="flex flex-col overflow-y-auto p-2.5 gap-2.5">
             <section className="flex flex-col gap-2.5">
                 {relations.data.map((relation) => (<RelationData {...relation}/>))}
             </section>

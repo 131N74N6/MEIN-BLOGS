@@ -4,7 +4,7 @@ import { v2 } from "cloudinary";
 import { ObjectId } from "mongodb";
 import { TUser } from "./model";
 import { BlogApiError } from "../error/service";
-import { userSSE } from "./event";
+import { userSSE } from "./sse";
 
 const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const maxFileSize = 6 * 1024 * 1024;

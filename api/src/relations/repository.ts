@@ -57,7 +57,9 @@ class RelationRepository {
     }
 
     async getFollowersTotal(props: Pick<TRelation["add"], "user_id">) {
-        const followers = await this.relations.find({ followed_user_id: new ObjectId(props.user_id) }).toArray();
+        const followers = await this.relations.find({ followed_user_id: new ObjectId(props.user_id) })
+        .toArray();
+        
         return followers.length;
     }
 

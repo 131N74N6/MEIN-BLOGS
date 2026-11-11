@@ -2,7 +2,7 @@ import Elysia, { t } from "elysia";
 import { authMiddleware } from "../auth/middleware";
 import userController from "./controller";
 import { userSchema } from "./model";
-import { userSSE } from "./event";
+import { userSSE } from "./sse";
 
 const userRouters = new Elysia({ prefix: "/api/users" })
 .use(authMiddleware)
