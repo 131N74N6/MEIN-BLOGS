@@ -4,7 +4,7 @@ import { v2 } from "cloudinary";
 import { ObjectId } from "mongodb";
 import { TUser } from "./model";
 import { BlogApiError } from "../error/service";
-import { userSSE } from "./sse";
+import { userEvents } from "./sse";
 
 const allowedFileType = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const maxFileSize = 6 * 1024 * 1024;
@@ -28,7 +28,7 @@ class UserService {
     
     async changeUserService(user_data: Partial<TUser["change_raw"]>) {
         const currentUserId = this.checkIsUserIdValid(user_data.id);
-        const sse = userSSE.get(currentUserId);
+        const sse = userEvents.get(currentUserId);
 
         const user = await userRepository.getCurrentUserForEdit(currentUserId);
         if (!user) throw new BlogApiError(404, "user not found");
@@ -156,7 +156,7 @@ class UserService {
     async deleteCurrentUserOldProfile(current_user_id: string) {
         const currentUserId = this.checkIsUserIdValid(current_user_id);
         const user = await userRepository.getCurrentUserForEdit(currentUserId);
-        const sse = userSSE.get(currentUserId);
+        const sse = userEvents.get(currentUserId);
 
         if (!user) throw new BlogApiError(404, "user not found");
         if (!user.image || !user.image_public_id) throw new BlogApiError(404, "image not found");

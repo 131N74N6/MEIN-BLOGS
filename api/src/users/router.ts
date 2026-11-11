@@ -2,7 +2,7 @@ import Elysia, { t } from "elysia";
 import { authMiddleware } from "../auth/middleware";
 import userController from "./controller";
 import { userSchema } from "./model";
-import { userSSE } from "./sse";
+import { userEvents } from "./sse";
 
 const userRouters = new Elysia({ prefix: "/api/users" })
 .use(authMiddleware)
@@ -30,11 +30,11 @@ const userRouters = new Elysia({ prefix: "/api/users" })
 
     const stream = new ReadableStream({
         start(controller) {
-            userSSE.set(userId, controller);
+            userEvents.set(userId, controller);
             controller.enqueue(`data: ${JSON.stringify({ type: "Connected", userId })}\n\n`);
         },
         cancel() {
-            userSSE.delete(userId);
+            userEvents.delete(userId);
         }
     });
 

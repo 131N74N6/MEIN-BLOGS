@@ -1,1 +1,1 @@
-export const userSSE = new Map<string, ReadableStreamDefaultController>();
+export const userEvents = new Map<string, ReadableStreamDefaultController>();
