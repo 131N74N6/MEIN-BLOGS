@@ -2,7 +2,7 @@ import Elysia, { t } from "elysia";
 import { authMiddleware } from "../auth/middleware";
 import userController from "./controller";
 import { userSchema } from "./model";
-import { userEvents } from "./sse";
+import { addTunnel, removeTunnel } from "./websocket";
 
 const userRouters = new Elysia({ prefix: "/api/users" })
 .use(authMiddleware)
@@ -20,34 +20,6 @@ const userRouters = new Elysia({ prefix: "/api/users" })
 }, {
     params: userSchema["other_user"]
 })
-.get("/sse", async ({ set, user }) => {
-    if (!user || !user.id) {
-        set.status = 401;
-        return { success: false, message: "Unauthorized" };
-    }
-
-    const userId = user.id;
-
-    const stream = new ReadableStream({
-        start(controller) {
-            userEvents.set(userId, controller);
-            controller.enqueue(`data: ${JSON.stringify({ type: "Connected", userId })}\n\n`);
-        },
-        cancel() {
-            userEvents.delete(userId);
-        }
-    });
-
-    return new Response(stream, {
-        headers: {
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "Access-Control-Allow-Origin": "http://localhost:5173", // Ganti dengan URL frontend Anda
-            "Access-Control-Allow-Credentials": "true"
-        }
-    });
-})
 .get("/session", async ({ cookie }) => {
     const sessionToken = cookie['better-auth.session_token']?.value;
     return { data: sessionToken || null, success: true, message: "Session retrieved successfully" };
@@ -56,6 +28,39 @@ const userRouters = new Elysia({ prefix: "/api/users" })
     return await userController.changeUser({ id: user.id, ...body });
 }, {
     body: t.Pick(userSchema["change_raw"], ["description", "image", "name"])
+})
+.ws("/ws", {
+    query: userSchema["other_user"],
+
+    async beforeHandle({ cookie, query, set }) {
+        const sessionToken = cookie['better-auth.session_token']?.value;
+        if (!sessionToken) {
+            set.status = 401;
+            return false;
+        }
+        return true;
+    },
+
+    open(ws) {
+        const userId = ws.data.user.id;
+        if (userId) {
+            addTunnel(userId, ws);
+            console.log(`[WS] User ${userId} connected`);
+        }
+    },
+
+    message(ws, message) {
+        const data = JSON.parse(message as string);
+        if (data.type === "ping") ws.send(JSON.stringify({ type: "pong" }));
+    },
+
+    close(ws) {
+        const userId = ws.data.user.id;
+        if (userId) {
+            removeTunnel(userId, ws);
+            console.log(`[WS] User ${userId} disconnected`);
+        }
+    }
 });
 
 export default userRouters;

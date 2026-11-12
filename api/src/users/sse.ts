@@ -1,1 +1,0 @@
-export const userEvents = new Map<string, ReadableStreamDefaultController>();

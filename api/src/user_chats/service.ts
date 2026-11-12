@@ -4,7 +4,7 @@ import userChatRepository from "./repository";
 import { BlogApiError } from "../error/service";
 import { uploadToCloudinary } from "../cloudinary/service";
 import { v2 } from "cloudinary";
-import { userChatsEvents } from "./event";
+import { userChatsEvents } from "./websocket";
 
 class UserChatService {
     private checkIsIdValid(field: string, value: unknown) {

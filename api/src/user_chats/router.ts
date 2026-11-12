@@ -2,10 +2,8 @@ import Elysia, { t } from "elysia";
 import { authMiddleware } from "../auth/middleware";
 import userChatController from "./controller";
 import { userChatSchema } from "./model";
-import { userChatsEvents } from "./event";
+import { userChatsEvents, wsContext } from "./websocket";
 import { validateSessionFromToken } from "../auth/service";
-
-const wsContext = new WeakMap<any, { roomId: string; handler: (payload: any) => void }>();
 
 const userChatRouters = new Elysia({ prefix: "/api/chats" })
 .use(authMiddleware)
@@ -79,9 +77,7 @@ const userChatRouters = new Elysia({ prefix: "/api/chats" })
 
             const roomId = [userId, receiverId].sort().join("_");
             
-            const handler = (payload: any) => {
-                ws.send(JSON.stringify(payload));
-            }
+            const handler = (payload: any) => ws.send(JSON.stringify(payload));
             
             userChatsEvents.on(roomId, handler);
             wsContext.set(ws, { roomId, handler });

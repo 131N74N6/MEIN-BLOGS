@@ -64,13 +64,14 @@ export default function useBlogService() {
 
     const changeOneBlogMt = useMutation({
         mutationFn: async (id: string) => {
+            const endpoint = `/api/blogs/remake/${id}`;
             const updateBlogForm = new FormData();
             updateBlogForm.append("language", newLanguage.trim().toLowerCase());
             updateBlogForm.append("title", newTitle.trim());
             updateBlogForm.append("content", newContent.trim());
             if (newMedia) updateBlogForm.append("media", newMedia);
 
-            return await apiUpload(`/api/blogs/remake/${id}`, updateBlogForm, "PUT");
+            return await apiUpload(endpoint, updateBlogForm, "PUT");
         },
         onError: (error) => {
             setMessage(error.message || "failed to edit and save blog. try again later");
@@ -92,13 +93,14 @@ export default function useBlogService() {
 
     const createNewBlogMt = useMutation({
         mutationFn: async () => {
+            const endpoint = `/api/blogs/create`;
             const newBlogForm = new FormData();
             newBlogForm.append("language", language.trim().toLowerCase());
             newBlogForm.append("title", title.trim());
             newBlogForm.append("content", content.trim());
             if (media) newBlogForm.append("media", media);
 
-            return await apiUpload(`/api/blogs/create`, newBlogForm, "POST");
+            return await apiUpload(endpoint, newBlogForm, "POST");
         },
         onError: (error) => {
             setMessage(error.message || "failed to upload blog. try again later");
@@ -120,7 +122,8 @@ export default function useBlogService() {
 
     const deleteAllCurrentUserBlogsMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/api/blogs/rm-all`, { method: "DELETE" });
+            const endpoint = `/api/blogs/rm-all`;
+            return await apiRequest(endpoint, { method: "DELETE" });
         },
         onError: (error) => {
             setMessage(error.message);
@@ -141,19 +144,18 @@ export default function useBlogService() {
 
     const deleteChosenCurrentUserBlogMt = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/api/blogs/rm-chosen`, {
-                body: JSON.stringify({ blogs_ids: chosenBlogsIds }),
-                method: "DELETE"
-            });
+            const endpoint = `/api/blogs/rm-chosen`;
+            const data = JSON.stringify({ blogs_ids: chosenBlogsIds });
+            return await apiRequest(endpoint, { body: data, method: "DELETE" });
         },
         onError: (error) => {
             setMessage(error.message);
         },
         onSuccess: () => {
+            if (titleSearch !== "") queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: ["all-blogs"] });
             queryClient.invalidateQueries({ queryKey: [`all-blogs-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}`] });
-            if (titleSearch !== "") queryClient.invalidateQueries({ queryKey: [`user-blogs-${currentUserId}-${titleSearch}`] });
             queryClient.invalidateQueries({ queryKey: [`user-blogs-total-${currentUserId}`] });
             setContent("");
             setMedia(null);
@@ -188,12 +190,11 @@ export default function useBlogService() {
         initialPageParam: 1,
         queryKey: titleSearch ? [`all-blogs-${titleSearch}`] : ["all-blogs"],
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
-            const url = titleSearch ? 
+            const endpoint = titleSearch ? 
             `/api/blogs/show-all?page=${pageParam}&limit=${16}&title=${titleSearch}` : 
             `/api/blogs/show-all?page=${pageParam}&limit=${16}`;
             
-            const request = await apiRequest<BlogDetail[]>(url, { method: "GET" });
-
+            const request = await apiRequest<BlogDetail[]>(endpoint, { method: "GET" });
             return request.data ?? [];
         }
     });
@@ -206,14 +207,16 @@ export default function useBlogService() {
         },
         initialPageParam: 1,
 
-        queryKey: titleSearch ? [`user-blogs-${currentUserId}-${titleSearch}`] : [`user-blogs-${currentUserId}`],
+        queryKey: titleSearch ? 
+        [`user-blogs-${currentUserId}-${titleSearch}`] : 
+        [`user-blogs-${currentUserId}`],
 
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
-            const url = titleSearch ? 
+            const endpoint = titleSearch ? 
             `/api/blogs/user/${currentUserId}?page=${pageParam}&limit=${16}&title=${titleSearch}` :
             `/api/blogs/user/${currentUserId}?page=${pageParam}&limit=${16}`;
 
-            const request = await apiRequest<BlogDetail[]>(url, { method: "GET" });
+            const request = await apiRequest<BlogDetail[]>(endpoint, { method: "GET" });
             return request.data ?? [];
         }
     });
@@ -226,14 +229,16 @@ export default function useBlogService() {
         },
         initialPageParam: 1,
 
-        queryKey: titleSearch ? [`user-blogs-${otherUserId}-${titleSearch}`] : [`user-blogs-${otherUserId}`],
+        queryKey: titleSearch ? 
+        [`user-blogs-${otherUserId}-${titleSearch}`] : 
+        [`user-blogs-${otherUserId}`],
 
         queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
-            const url = titleSearch ? 
+            const endpoint = titleSearch ? 
             `/api/blogs/user/${otherUserId}?page=${pageParam}&limit=${16}&title=${titleSearch}` :
             `/api/blogs/user/${otherUserId}?page=${pageParam}&limit=${16}`;
 
-            const request = await apiRequest<BlogDetail[]>(url, { method: "GET" });
+            const request = await apiRequest<BlogDetail[]>(endpoint, { method: "GET" });
             return request.data ?? [];
         }
     });
@@ -243,7 +248,6 @@ export default function useBlogService() {
         queryFn: async () => {
             const endpoint = `/api/blogs/user/total/${currentUserId}`;
             const request = await apiRequest<number>(endpoint, { method: "GET" });
-
             return request.data ?? 0;
         },
         queryKey: [`user-blogs-total-${currentUserId}`]
@@ -263,14 +267,18 @@ export default function useBlogService() {
     const getOneBlogContent = useQuery({
         enabled: !!blogId,
         queryFn: async () => {
-            const request = await apiRequest<BlogDetail>(`/api/blogs/show/${blogId}`, { method: "GET" });
+            const endpoint = `/api/blogs/show/${blogId}`;
+            const request = await apiRequest<BlogDetail>(endpoint, { method: "GET" });
             return request.data;
         },
         queryKey: [`blog-content-${blogId}`]
     });
 
-    const processing = deleteAllCurrentUserBlogsMt.isPending || deleteChosenCurrentUserBlogMt.isPending ||
-    createNewBlogMt.isPending || generateNewBlogMt.isPending || changeOneBlogMt.isPending;
+    const processing = deleteAllCurrentUserBlogsMt.isPending || 
+    deleteChosenCurrentUserBlogMt.isPending ||
+    createNewBlogMt.isPending || 
+    generateNewBlogMt.isPending || 
+    changeOneBlogMt.isPending;
 
     function sanitizedContent(response: string) {
         const htmlResponse = marked.parse(response) as string;

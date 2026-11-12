@@ -44,7 +44,6 @@ export default function useRelationService() {
         queryFn: async ({ pageParam = 1}: { pageParam: number }) => {
             const endpoint = `/api/relations/followed/${otherUserId}?page=${pageParam}&limit=${16}`;
             const request = await apiRequest<RelationDetail[]>(endpoint, { method: "GET" });
-
             return request.data ?? [];
         },
         queryKey: [`followed-${otherUserId}`]
@@ -111,7 +110,6 @@ export default function useRelationService() {
         queryFn: async () => {
             const endpoint = `/api/relations/followers/${currentUserId}/total`;
             const request = await apiRequest<number>(endpoint, { method: "GET" });
-            
             return request.data ?? 0;
         },
         queryKey: [`followers-total-${currentUserId}`]
@@ -122,7 +120,6 @@ export default function useRelationService() {
         queryFn: async () => {
             const endpoint = `/api/relations/followers/${otherUserId}/total`;
             const request = await apiRequest<number>(endpoint, { method: "GET" });
-            
             return request.data ?? 0;
         },
         queryKey: [`followers-total-${otherUserId}`]
@@ -133,7 +130,6 @@ export default function useRelationService() {
         queryFn: async () => {
             const endpoint = `/api/relations/has-followed/${currentUserId}/${otherUserId}`;
             const request = await apiRequest<boolean>(endpoint, { method: "GET" });
-            
             return request.data ?? false;
         },
         queryKey: [`has-followed-${currentUserId}-${otherUserId}`]

@@ -22,15 +22,11 @@ export default function useCommentSevice() {
 
     const createNewCommentMt = useMutation({
         mutationFn: async () => {
-            const newComment = { blog_owner_id: blogOwnerId, text: commentText.trim() };
-
-            return await apiRequest(`/api/comments/create/${blogId}`, {
-                body: JSON.stringify(newComment),
-                method: "POST"
-            });
+            const endpoint = `/api/comments/create/${blogId}`;
+            const newComment = JSON.stringify({ blog_owner_id: blogOwnerId, text: commentText.trim() });
+            return await apiRequest(endpoint, { body: newComment, method: "POST" });
         },
         onError: (error) => {
-            console.error(error);
             setMessage(error.message);
         },
         onSuccess: () => {
@@ -51,10 +47,8 @@ export default function useCommentSevice() {
         initialPageParam: 1,
         queryKey: [`blog-comments-${blogId}`],
         queryFn: async ({ pageParam = 1}: { pageParam?: number}) => {
-            const request = await apiRequest<CommentDetail[]>(`/api/comments/show/${blogId}?page=${pageParam}&limit=${16}`, {
-                method: "GET"
-            });
-
+            const endpoint = `/api/comments/show/${blogId}?page=${pageParam}&limit=${16}`;
+            const request = await apiRequest<CommentDetail[]>(endpoint, { method: "GET" });
             return request.data ?? [];
         }
     });
