@@ -26,8 +26,6 @@ export default function CurrentUser() {
     }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
     const isProcessing = auth.isProcessing || blog.processing || relation.isProcessing;
-    const hasPicture = auth.getCurrentUser.data && auth.getCurrentUser.data.profile_picture.public_id &&
-    auth.getCurrentUser.data.profile_picture.url;
 
     return (
         <section className="flex flex-col md:flex-row z-10 relative h-dvh">
@@ -35,12 +33,14 @@ export default function CurrentUser() {
             <main className="h-full w-full md:w-3/4 flex flex-col gap-2.5 p-2.5">
                 <section className="grid md:grid-cols-2 grid-cols-1 gap-2.5">
                     <div className="flex bg-blue-100 flex-row gap-2 rounded-md bg-bg-blue-100 p-2">
-                        {hasPicture ? (
+                        {auth.getCurrentUser.data && 
+                        auth.getCurrentUser.data.profile_picture.public_id &&
+                        auth.getCurrentUser.data.profile_picture.url ? (
                             <div className="w-8 h-8 rounded-full bg-purple-600 text-white font-medium text-sm">
                                 <img 
                                     className="w-full h-full object-cover rounded-full" 
-                                    alt={`profile-picture-${auth.getCurrentUser.data?.user_id}`}
-                                    src={auth.getCurrentUser.data?.profile_picture.url!}
+                                    alt={`profile-picture-${auth.getCurrentUser.data.user_id}`}
+                                    src={auth.getCurrentUser.data.profile_picture.url}
                                 />
                             </div>
                         ) : (
@@ -49,20 +49,26 @@ export default function CurrentUser() {
                             </div>
                         )}
                         <div className="flex flex-col gap-2">
-                            <p className="font-medium text-base text-gray-700">
-                                Username: {auth.getCurrentUser.data?.user_name}
-                            </p>
-                            <p className="font-medium text-base text-gray-700">
-                                Email: {auth.getCurrentUser.data?.email}
-                            </p>
-                            <p className="font-medium text-base text-gray-700">
-                                Joined at: {new Date(auth.getCurrentUser.data?.created_at!).toLocaleString()}
-                            </p>
+                            {auth.getCurrentUser.data && auth.getCurrentUser.data.user_name ? (
+                                <p className="font-medium text-base text-gray-700">
+                                    Username: {auth.getCurrentUser.data.user_name}
+                                </p>
+                            ) : "-"}
+                            {auth.getCurrentUser.data && auth.getCurrentUser.data.email ? (
+                                <p className="font-medium text-base text-gray-700">
+                                    Email: {auth.getCurrentUser.data.email}
+                                </p>
+                            ) : "-"}
+                            {auth.getCurrentUser.data && auth.getCurrentUser.data.created_at ? (
+                                <p className="font-medium text-base text-gray-700">
+                                    Joined at: {new Date(auth.getCurrentUser.data.created_at).toLocaleString()}
+                                </p>
+                            ) : "-"}
                             {auth.getCurrentUser.data && auth.getCurrentUser.data.description ? (
                                 <p className="font-medium text-base text-gray-700">
                                     {auth.getCurrentUser.data.description}
                                 </p>
-                            ) : null}
+                            ) : "-"}
                         </div>
                     </div>
                     <div className="flex flex-col gap-2">

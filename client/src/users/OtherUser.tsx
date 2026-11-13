@@ -52,20 +52,26 @@ export default function OtherUser() {
                             </div>
                         )}
                         <div className="flex flex-col gap-2">
-                            <p className="font-medium text-base text-gray-700">
-                                Username: {user.getCurrentUser.data?.user_name}
-                            </p>
-                            <p className="font-medium text-base text-gray-700">
-                                Email: {user.getCurrentUser.data?.email}
-                            </p>
-                            <p className="font-medium text-base text-gray-700">
-                                Joined at: {new Date(user.getCurrentUser.data?.created_at!).toLocaleString()}
-                            </p>
+                            {user.getCurrentUser.data && user.getCurrentUser.data.user_name ? (
+                                <p className="font-medium text-base text-gray-700">
+                                    Username: {user.getCurrentUser.data.user_name}
+                                </p>
+                            ) : "-"}
+                            {user.getCurrentUser.data && user.getCurrentUser.data.email ? (
+                                <p className="font-medium text-base text-gray-700">
+                                    Email: {user.getCurrentUser.data.email}
+                                </p>
+                            ) : "-"}
+                            {user.getCurrentUser.data && user.getCurrentUser.data.created_at ? (
+                                <p className="font-medium text-base text-gray-700">
+                                    Joined at: {new Date(user.getCurrentUser.data.created_at).toLocaleString()}
+                                </p>
+                            ) : "-"}
                             {user.getCurrentUser.data && user.getCurrentUser.data.description ? (
                                 <p className="font-medium text-base text-gray-700">
                                     {user.getCurrentUser.data.description}
                                 </p>
-                            ) : null}
+                            ) : "-"}
                             <div className="flex gap-2.5">
                                 <button
                                     className="cursor-pointer disabled:cursor-not-allowed bg-olive-800 text-white font-medium text-sm p-2 w-40 rounded-md hover:bg-olive-600 transition-colors"

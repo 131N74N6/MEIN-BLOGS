@@ -91,11 +91,27 @@ class UserRepository {
         ]);
     }
 
+    async findAllMessages(id: string) {
+        return await this.user_chats.find({ 
+            $or: [
+                { receiver_id: new ObjectId(id), sender_id: new ObjectId(id) },
+                { receiver_id: new ObjectId(id), sender_id: new ObjectId(id) }
+            ], 
+            hidden_for: { $nin: [new ObjectId(id)] } 
+        })
+        .toArray();
+    }
+
+    async findCurrentUserBlogs(userId: string) {
+        return await this.blogs.find({ blog_owner_id: userId }).toArray();
+    }
+
     async getCurrentUser(current_user_id: string) {
         const user = await this.users.findOne(
             { _id: new ObjectId(current_user_id) }, 
             { projection: { 
                 createdAt: 1, 
+                description: 1,
                 email: 1, 
                 image:1, 
                 image_public_id: 1, 
@@ -111,6 +127,7 @@ class UserRepository {
             { _id: new ObjectId(current_user_id) }, 
             { projection: { 
                 createdAt: 1, 
+                description: 1,
                 email: 1, 
                 image:1, 
                 image_filename: 1, 
@@ -122,10 +139,6 @@ class UserRepository {
         );
 
         return user;
-    }
-
-    async getCurrentUserBlogs(userId: string) {
-        return await this.blogs.find({ blog_owner_id: userId }).toArray();
     }
 }
 

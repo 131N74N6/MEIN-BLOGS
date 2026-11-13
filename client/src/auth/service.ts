@@ -8,15 +8,15 @@ import { useStyleStore } from "../styles/store";
 import { useUserStore } from "../users/store";
 import type { AuthServiceApi } from "../../../api/src/auth/model";
 import { inferAdditionalFields } from "better-auth/client/plugins";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useRelationStore } from "../relations/store";
 import { useUserChatStore } from "../user_chats/store";
 import { apiRequest } from "../api";
+import useUserWebSocket from "../users/websocket";
 
 export default function useAuthService() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const sseRef = useRef<EventSource | null>(null);
 
     const emailForSignUp = useAuthStore((state) => state.emailForSignUp);
     const passwordForSignUp = useAuthStore((state) => state.passwordForSignUp);
@@ -42,6 +42,8 @@ export default function useAuthService() {
     
     const setCurrentUserId = useUserStore((state) => state.setCurrentUserId);
     const resetMessageChatState = useUserChatStore((state) => state.resetMessageChatState);
+
+    useUserWebSocket();
     
     const authClient = createAuthClient({
         baseURL: import.meta.env.VITE_BASE_API_URL,
@@ -64,8 +66,8 @@ export default function useAuthService() {
                 description: meResponse.data.description,
                 email: meResponse.data.email, 
                 profile_picture: {
-                    public_id: meResponse.data.image_public_id,
-                    url: meResponse.data.image,
+                    public_id: meResponse.data.profile_picture.public_id,
+                    url: meResponse.data.profile_picture.url,
                 },
                 user_id: meResponse.data.user_id,
                 user_name: meResponse.data.user_name,
@@ -81,50 +83,6 @@ export default function useAuthService() {
             setCurrentUserId(getCurrentUser.data.user_id);
         }
     }, [getCurrentUser.data?.user_id, setCurrentUserId]);
-
-    useEffect(() => {
-        if (getCurrentUser.data?.user_id) {
-            const eventSource = new EventSource(`${import.meta.env.VITE_BASE_API_URL}/api/users/sse`, {
-                withCredentials: true
-            });
-
-            eventSource.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    if (data.type === "user:updated" || data.type === "user-profile-picture:deleted") {
-                        // Invalidasi query yang menampilkan data profil user secara realtime
-                        queryClient.invalidateQueries({
-                            predicate: (query) => {
-                                const key = query.queryKey[0];
-                                if (typeof key !== 'string') return false;
-                                
-                                return (
-                                    key === 'current-user' ||
-                                    key.startsWith("all-blogs") ||
-                                    key.startsWith("user-blogs-") ||
-                                    key.startsWith("blog-comments-") ||
-                                    key.startsWith("blog-viewers-") ||
-                                    key.startsWith("blog-content-")
-                                );
-                            }
-                        });
-                    }
-                } catch (err) {
-                    console.error("SSE parse error", err);
-                }
-            };
-
-            eventSource.onerror = (err) => {
-                console.error("SSE connection error", err);
-            };
-
-            sseRef.current = eventSource;
-
-            return () => {
-                eventSource.close();
-            };
-        }
-    }, [getCurrentUser.data?.user_id, queryClient]);
 
     const signInMt = useMutation({
         mutationFn: async () => {

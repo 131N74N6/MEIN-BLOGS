@@ -30,23 +30,9 @@ const userRouters = new Elysia({ prefix: "/api/users" })
     body: t.Pick(userSchema["change_raw"], ["description", "image", "name"])
 })
 .ws("/ws", {
-    query: userSchema["other_user"],
-
-    async beforeHandle({ cookie, query, set }) {
-        const sessionToken = cookie['better-auth.session_token']?.value;
-        if (!sessionToken) {
-            set.status = 401;
-            return false;
-        }
-        return true;
-    },
-
     open(ws) {
         const userId = ws.data.user.id;
-        if (userId) {
-            addTunnel(userId, ws);
-            console.log(`[WS] User ${userId} connected`);
-        }
+        if (userId) addTunnel(userId, ws);
     },
 
     message(ws, message) {
@@ -56,10 +42,7 @@ const userRouters = new Elysia({ prefix: "/api/users" })
 
     close(ws) {
         const userId = ws.data.user.id;
-        if (userId) {
-            removeTunnel(userId, ws);
-            console.log(`[WS] User ${userId} disconnected`);
-        }
+        if (userId) removeTunnel(userId, ws);
     }
 });
 

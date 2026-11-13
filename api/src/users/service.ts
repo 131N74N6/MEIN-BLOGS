@@ -114,11 +114,24 @@ class UserService {
         if (!user) throw new BlogApiError(404, "user not found");
         
         const operations: Promise<unknown>[] = [];
-        const userBlogs = await userRepository.getCurrentUserBlogs(currentUserId);
+        const userChats = await userRepository.findAllMessages(currentUserId);
+        const userBlogs = await userRepository.findCurrentUserBlogs(currentUserId);
+        
         const userBlogsMedia = userBlogs.map(userBlog => userBlog.media);
+        const userChatsMedia = userChats.map(userChat => userChat.media);
 
         if (userBlogsMedia.length > 0) {
             const deleteFromCloudinary = userBlogsMedia.map(media => {
+                return v2.uploader.destroy(media.public_id, { 
+                    resource_type: media.resource_type 
+                });
+            });
+            
+            operations.push(...deleteFromCloudinary);
+        }
+
+        if (userChatsMedia.length > 0) {
+            const deleteFromCloudinary = userChatsMedia.map(media => {
                 return v2.uploader.destroy(media.public_id, { 
                     resource_type: media.resource_type 
                 });
