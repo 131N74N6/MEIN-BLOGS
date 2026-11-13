@@ -13,7 +13,7 @@ export default function ViewerList(viewers: ViewerListData) {
     return (
         <section className="overflow-y-auto p-2.5 flex flex-col gap-2.5">
             <div className="flex flex-col gap-2.5">
-                {viewers.data.map((viewer) => <ViewerData {...viewer}/>)}
+                {viewers.data.map((viewer) => <ViewerData key={`viewer-${viewer._id}`} {...viewer}/>)}
             </div>
             {viewers.data.length <= 16 ? null : viewers.has_next_page ? (
                 <section className="flex justify-center">

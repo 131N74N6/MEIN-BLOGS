@@ -8,6 +8,7 @@ export const userSchema = {
         name: t.Optional(t.String({ minLength: 1, error: "invalid username" })),
         image: t.Optional(t.File({ type: "image/*", maxSize: 6 * 1024 * 1024, error: "invalid file" }))
     }),
+    
     change_result: t.Object({
         id: t.String({ error: "invalid data", pattern: "^[0-9a-fA-F]{24}$" }),
         description: t.Optional(t.Union([t.String({ error: "invalid data" }), t.Null(), t.Undefined()])),
@@ -18,9 +19,15 @@ export const userSchema = {
         image_filetype: t.Optional(t.Union([t.String({ error: "invalid file type" }), t.Null(), t.Undefined()])),
         image_resource_type: t.Optional(t.Union([t.String({ error: "failed to get file" }), t.Null(), t.Undefined()]))
     }),
+
     data: t.Unsafe<User>({ error: "invalid data" }),
+
     other_user: t.Object({
         user_id: t.String({ error: "invalid data", pattern: "^[0-9a-fA-F]{24}$" })
+    }),
+
+    ws_config: t.Object({
+        token: t.String({ minLength: 1, error: "invalid token" })
     })
 }
 

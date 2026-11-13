@@ -47,6 +47,7 @@ export default function useUserChatService() {
         if (getSessionToken.isLoading || !getSessionToken.data) return;
 
         const token = getSessionToken.data;
+        
         if (!token || typeof token !== 'string') {
             setMessage("Authentication failed");
             return;

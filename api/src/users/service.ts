@@ -65,7 +65,7 @@ class UserService {
     
             await userRepository.changeUser({
                 id: user_data.id,
-                description: user_data.description,
+                description: user.description || user_data.description || null,
                 image: newProfileImage.url,
                 image_filename: newProfileImage.filename,
                 image_filetype: newProfileImage.filetype,
@@ -77,7 +77,7 @@ class UserService {
             broadcast("user:updated", {
                 user_id: user_data.id,
                 user_name: user_data.name,
-                description: user_data.description,
+                description: user.description || user_data.description || null,
                 profile_picture: {
                     url: newProfileImage.url,
                     public_id: newProfileImage.public_id,
