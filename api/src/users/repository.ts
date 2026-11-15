@@ -123,21 +123,7 @@ class UserRepository {
     }
 
     async getCurrentUserForEdit(current_user_id: string) {
-        const user = await this.users.findOne(
-            { _id: new ObjectId(current_user_id) }, 
-            { projection: { 
-                createdAt: 1, 
-                description: 1,
-                email: 1, 
-                image:1, 
-                image_filename: 1, 
-                image_filetype: 1, 
-                image_public_id: 1, 
-                image_resource_type: 1, 
-                name: 1 
-            }}
-        );
-
+        const user = await this.users.findOne({ _id: new ObjectId(current_user_id) });
         return user;
     }
 }

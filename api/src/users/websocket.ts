@@ -18,8 +18,8 @@ export function removeTunnel(user_id: string, ws: UserWebSocketData) {
     }
 }
 
-export function broadcast(eventType: string, data: any) {
-    const payload = JSON.stringify({ type: eventType, data });
+export function broadcast(event_name: string) {
+    const payload = JSON.stringify({ type: event_name });
 
     for (const userWebSocketTunnel of userWebSocketTunnels.values()) {
         for (const ws of userWebSocketTunnel) {

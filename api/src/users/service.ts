@@ -31,6 +31,7 @@ class UserService {
 
         const user = await userRepository.getCurrentUserForEdit(currentUserId);
         if (!user) throw new BlogApiError(404, "user not found");
+        if (user._id.toString() !== currentUserId) throw new BlogApiError(403, "You are not allowed");
         
         let newUsername = user.name;
         
@@ -74,15 +75,7 @@ class UserService {
                 name: user_data.name
             });
                 
-            broadcast("user:updated", {
-                user_id: user_data.id,
-                user_name: user_data.name,
-                description: user.description || user_data.description || null,
-                profile_picture: {
-                    url: newProfileImage.url,
-                    public_id: newProfileImage.public_id,
-                }
-            });
+            broadcast("user:updated");
         } else {
             await userRepository.changeUser({
                 id: user_data.id,
@@ -95,15 +88,7 @@ class UserService {
                 name: user_data.name
             });
 
-            broadcast("user:updated", {
-                user_id: user_data.id,
-                user_name: user_data.name,
-                description: user.description || user_data.description || null,
-                profile_picture: {
-                    url: user.image || null,
-                    public_id: user.image_public_id || null,
-                }
-            });
+            broadcast("user:updated");
         }
     }
 
@@ -150,7 +135,7 @@ class UserService {
 
         await userRepository.deleteUser(user._id.toString());
 
-        broadcast("user:deleted", { user_id: currentUserId });
+        broadcast("user:deleted");
     }
 
     async deleteCurrentUserOldProfile(current_user_id: string) {
@@ -167,9 +152,7 @@ class UserService {
             userRepository.deleteCurrentUserOldProfile(currentUserId)
         ]);
 
-        broadcast("user:profile-picture-deleted", {
-            profile_picture: { url: null, public_id: null }
-        });
+        broadcast("user:profile-picture-deleted");
     }
 
     async getCurrentUser(current_user_id: string) {
