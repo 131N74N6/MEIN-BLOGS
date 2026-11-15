@@ -2,8 +2,9 @@
   "name": "api",
   "version": "1.0.50",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --preload ./src/bypass.ts --watch src/index.ts"
+    "dev": "bun run --preload ./src/bypass.ts --watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.3",
