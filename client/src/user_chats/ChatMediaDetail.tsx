@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import useAuthService from "../auth/service";
 import Navbar from "../styles/Navbar";
 import useUserChatService from "./service";
 import { MessageCircle } from "lucide-react";
@@ -13,14 +12,12 @@ import Loading from "../styles/Loading";
 
 export default function ChatMediaDetail() {
     const navigate = useNavigate();
-    const auth = useAuthService();
     const user = useUserService();
     const userChat = useUserChatService();
 
     const message = useStyleStore((state) => state.message);
     const setMessage = useStyleStore((state) => state.setMessage);
 
-    const currentUserId = useUserStore((state) => state.currentUserId);
     const otherUserId = useUserStore((state) => state.otherUserId);
 
     useEffect(() => {
@@ -30,19 +27,11 @@ export default function ChatMediaDetail() {
         }
     }, [message]);
 
-    useEffect(() => {
-        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
-            navigate("/sign-in", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
-
-    const isProcessing = auth.isProcessing || userChat.isProcessing;
-
-    console.log(userChat.getChosenMessageFilesForUser.data);
+    const isProcessing = userChat.isProcessing;
 
     return (
         <section className="flex flex-col md:flex-row h-dvh relative z-10">
-            <Navbar is_processing={isProcessing} place="" sign_out={auth.signOutMt}/>
+            <Navbar is_processing={isProcessing} place=""/>
             {message ? <Alert message={message}/> : null}
             <main className="h-full overflow-y-auto p-2.5 flex flex-col w-full md:w-3/4">
                 <header className="bg-zinc-800 flex justify-between p-2.5">

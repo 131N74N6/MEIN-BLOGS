@@ -1,31 +1,17 @@
 import { ArrowUp } from "lucide-react";
-import useAuthService from "../auth/service";
 import Navbar from "../styles/Navbar";
 import useCommentSevice from "./service";
 import CommentList from "./CommentList";
 import { useCommentStore } from "./store";
 import Loading from "../styles/Loading";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useUserStore } from "../users/store";
 
 export default function Comments() {
-    const navigate = useNavigate();
-    const auth = useAuthService();
     const comment = useCommentSevice();
 
     const text = useCommentStore((state) => state.text);
     const setText = useCommentStore((state) => state.setText);
-    
-    const currentUserId = useUserStore((state) => state.currentUserId);
-    
-    useEffect(() => {
-        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
-            navigate("/sign-in", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
-    const isProcessing = auth.isProcessing || comment.isProcessing;
+    const isProcessing = comment.isProcessing;
 
     const sendComment = (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -34,7 +20,7 @@ export default function Comments() {
 
     return (
         <section className="flex flex-col h-dvh md:flex-row z-10 relative">
-            <Navbar is_processing={isProcessing} place="" sign_out={auth.signOutMt}/>
+            <Navbar is_processing={isProcessing} place=""/>
             {comment.getAllCommentsInABlog.isLoading ? (
                 <section className="flex justify-center items-center h-full w-full md:w-3/4">
                     <Loading/>

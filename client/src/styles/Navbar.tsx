@@ -1,13 +1,12 @@
 import { useNavigate } from "react-router-dom"
 import { useStyleStore } from "./store";
-import type { UseMutationResult } from "@tanstack/react-query";
 import { Settings, File, Home, Menu, PlusSquare, Power, User } from "lucide-react";
 import { cn } from "./utils";
+import useAuthService from "../auth/service";
 
 type NavbarIntrf = {
-    is_processing: boolean;
+    is_processing?: boolean;
     place: string;
-    sign_out: UseMutationResult<any, Error, void, unknown>
 }
 
 const asideItems = [
@@ -24,6 +23,7 @@ export default function Navbar(info: NavbarIntrf) {
     const isOpen = useStyleStore((state) => state.isOpen);
     const setIsOpen = useStyleStore((state) => state.setIsOpen);
 
+    const { signOutMt } = useAuthService();
     const navbarToggle = () => setIsOpen(!isOpen);
     
     return (
@@ -58,7 +58,7 @@ export default function Navbar(info: NavbarIntrf) {
                         "disabled:cursor-not-allowed transition-colors cursor-pointer", 
                     )}
                     disabled={info.is_processing}
-                    onClick={() => info.sign_out.mutate()}
+                    onClick={() => signOutMt.mutate()}
                     type="button"
                 >
                     <Power size={22}/>
@@ -116,7 +116,7 @@ export default function Navbar(info: NavbarIntrf) {
                     )}
                     disabled={info.is_processing}
                     onClick={() => {
-                        info.sign_out.mutate();
+                        signOutMt.mutate();
                         setIsOpen(false);
                     }}
                     type="button"

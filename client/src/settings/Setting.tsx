@@ -1,29 +1,17 @@
 import { ImageMinus, UserMinus, UserPen } from "lucide-react";
-import useAuthService from "../auth/service";
 import Navbar from "../styles/Navbar";
 import useUserService from "../users/service";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { useUserStore } from "../users/store";
 
 export default function Setting() {
     const navigate = useNavigate();
-    const auth = useAuthService();
     const user = useUserService();
-        
-    const currentUserId = useUserStore((state) => state.currentUserId);
 
-    useEffect(() => {
-        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
-            navigate("/sign-in", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
-
-    const isProcessing = auth.isProcessing || user.isProcessing;
+    const isProcessing = user.isProcessing;
 
     return (
         <section className="flex-col md:flex-row relative z-10 flex h-dvh">
-            <Navbar is_processing={isProcessing} place="your settings" sign_out={auth.signOutMt}/>
+            <Navbar is_processing={isProcessing} place="your settings"/>
             <main className="flex flex-col gap-2.5 p-2.5 w-full md:w-3/4 h-full overflow-y-auto">
                 <button
                     className="cursor-pointer disabled:cursor-not-allowed flex flex-col gap-3 p-3 rounded-md bg-amber-200"

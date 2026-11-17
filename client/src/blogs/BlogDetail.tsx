@@ -1,5 +1,4 @@
 import ReactMarkdown from "react-markdown";
-import useAuthService from "../auth/service";
 import Navbar from "../styles/Navbar";
 import useBlogService from "./service";
 import DOMPurify from "dompurify";
@@ -10,25 +9,19 @@ import { useNavigate } from "react-router-dom";
 import { Eye } from "lucide-react";
 import useViewerService from "../viewers/service";
 import { useUserStore } from "../users/store";
-import { useEffect } from "react";
 
 export default function BlogDetail() {
     const navigate = useNavigate();
-    const auth = useAuthService();
     const blog = useBlogService();
     const viewer = useViewerService();
 
     const currentUserId = useUserStore((state) => state.currentUserId);
     const setOtherUserId = useUserStore((state) => state.setOtherUserId);
-
-    useEffect(() => {
-        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
-            navigate("/sign-in", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
     
-    const isProcessing = auth.isProcessing || blog.processing || blog.getOneBlogContent.isLoading;
-    const isOwner = blog.getOneBlogContent.data && blog.getOneBlogContent.data.blog_owner_id === currentUserId;
+    const isProcessing = blog.processing || blog.getOneBlogContent.isLoading;
+
+    const isOwner = blog.getOneBlogContent.data && 
+    blog.getOneBlogContent.data.blog_owner_id === currentUserId;
 
     const sanitizedAnswer = () => {
         if (!blog.getOneBlogContent.data?.content) return;
@@ -58,7 +51,7 @@ export default function BlogDetail() {
 
     return (
         <section className="h-dvh flex flex-col md:flex-row z-10 relative">
-            <Navbar is_processing={isProcessing} place="" sign_out={auth.signOutMt}/>
+            <Navbar is_processing={isProcessing} place=""/>
             {blog.getOneBlogContent.error ? (
                 <section className="flex justify-center h-full items-center w-full md:w-3/4">
                     <h3 className="text-center font-medium text-lg text-gray-600">

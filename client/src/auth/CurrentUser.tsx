@@ -4,8 +4,6 @@ import Navbar from "../styles/Navbar";
 import useRelationService from "../relations/service";
 import useAuthService from "./service";
 import useBlogService from "../blogs/service";
-import { useEffect } from "react";
-import { useUserStore } from "../users/store";
 import useCommentSevice from "../comments/service";
 import useViewerService from "../viewers/service";
 
@@ -16,20 +14,12 @@ export default function CurrentUser() {
     const comment = useCommentSevice();
     const relation = useRelationService();
     const viewer = useViewerService();
-        
-    const currentUserId = useUserStore((state) => state.currentUserId);
-            
-    useEffect(() => {
-        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
-            navigate("/sign-in", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
     const isProcessing = auth.isProcessing || blog.processing || relation.isProcessing;
 
     return (
         <section className="flex flex-col md:flex-row z-10 relative h-dvh">
-            <Navbar is_processing={isProcessing} place="your profile" sign_out={auth.signOutMt}/>
+            <Navbar is_processing={isProcessing} place="your profile"/>
             <main className="h-full w-full md:w-3/4 flex flex-col gap-2.5 p-2.5">
                 <section className="grid md:grid-cols-2 grid-cols-1 gap-2.5">
                     <div className="flex bg-blue-100 flex-row gap-2 rounded-md bg-bg-blue-100 p-2">

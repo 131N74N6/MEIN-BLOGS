@@ -40,7 +40,9 @@ export default function useAuthService() {
     const resetUserProfileState = useUserStore((state) => state.resetUserProfileState);
     const resetUserIdState = useUserStore((state) => state.resetUserIdState);
     
+    const currentUserId = useUserStore((state) => state.currentUserId);
     const setCurrentUserId = useUserStore((state) => state.setCurrentUserId);
+
     const resetMessageChatState = useUserChatStore((state) => state.resetMessageChatState);
 
     useUserWebSocket();
@@ -117,6 +119,7 @@ export default function useAuthService() {
         },
         onSuccess: () => {
             queryClient.setQueryData(['current-user'], null);
+            queryClient.removeQueries({ queryKey: [`user-session-token-${currentUserId}`] });
             queryClient.clear();
             resetSignInInput();
             resetSignUpInput();

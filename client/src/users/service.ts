@@ -86,6 +86,7 @@ export default function useUserService() {
         onSuccess: () => {
             if (profilePictureRef.current) profilePictureRef.current.value = "";
             queryClient.setQueryData(['current-user'], null);
+            queryClient.removeQueries({ queryKey: [`user-session-token-${currentUserId}`] });
             queryClient.clear();
             resetBlogInfoState();
             resetBlogWindowState();

@@ -1,37 +1,22 @@
-import { useNavigate } from "react-router-dom";
-import useAuthService from "../auth/service";
 import Navbar from "../styles/Navbar";
 import BlogGrid from "./BlogGrid";
 import useBlogService from "./service";
-import { useEffect } from "react";
-import { useUserStore } from "../users/store";
 import useViewerService from "../viewers/service";
 import { useBlogStore } from "./store";
 import Loading from "../styles/Loading";
 
 export default function Home() {
-    const navigate = useNavigate();
-
-    const auth = useAuthService();
     const blog = useBlogService();
     const viewer = useViewerService();
     
     const searched = useBlogStore((state) => state.searched);
     const setSearched = useBlogStore((state) => state.setSearched);
 
-    const currentUserId = useUserStore((state) => state.currentUserId);
-
-    useEffect(() => {
-        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
-            navigate("/sign-in", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
-
-    const isProcessing = auth.isProcessing || blog.processing || viewer.isProcessing;
+    const isProcessing = blog.processing || viewer.isProcessing;
 
     return (
         <section className="flex md:flex-row flex-col relative z-10 h-dvh">
-            <Navbar place="home" sign_out={auth.signOutMt} is_processing={blog.processing}/>
+            <Navbar place="home" is_processing={blog.processing}/>
             <main className="h-full overflow-y-auto md:w-3/4 w-full flex flex-col gap-2.5">
                 <header className="px-2.5 pt-2.5">
                     <input

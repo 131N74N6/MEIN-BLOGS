@@ -1,19 +1,14 @@
 import { useEffect, useRef } from "react";
-import useAuthService from "../auth/service";
 import Navbar from "../styles/Navbar";
 import useBlogService from "./service";
 import Quill from "quill";
 import { useBlogStore } from "./store";
 import { Image, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useUserStore } from "../users/store";
 import { useStyleStore } from "../styles/store";
 import Alert from "../styles/Alert";
 
 export default function CreateBlog() {
-    const auth = useAuthService();
     const blog = useBlogService();
-    const navigate = useNavigate();
     
     const content = useBlogStore((state) => state.content);
     const setContent = useBlogStore((state) => state.setContent);
@@ -31,17 +26,9 @@ export default function CreateBlog() {
 
     const message = useStyleStore((state) => state.message);
     const setMessage = useStyleStore((state) => state.setMessage);
-    
-    const currentUserId = useUserStore((state) => state.currentUserId);
 
     const editorTextRef = useRef(null);
     const quillRef = useRef<Quill | null>(null);
-
-    useEffect(() => {
-        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
-            navigate("/sign-in", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
     useEffect(() => {
         if (message) {
@@ -77,7 +64,7 @@ export default function CreateBlog() {
         }
     }, [content]);
 
-    const isProcessing = blog.processing || auth.isProcessing;
+    const isProcessing = blog.processing;
 
     function removeThumbnailPreview(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
         event.stopPropagation();
@@ -93,7 +80,7 @@ export default function CreateBlog() {
 
     return (
         <section className="flex md:flex-row flex-col h-dvh relative z-10">
-            <Navbar place="create blog" sign_out={auth.signOutMt} is_processing={blog.processing}/>
+            <Navbar place="create blog" is_processing={isProcessing}/>
             {message ? <Alert message={message}/> : null}
             <form className="h-full md:w-3/4 w-full flex flex-col overflow-y-auto" onSubmit={publishBlog}>
                 <section className="flex flex-col overflow-y-auto h-full px-2.5 pt-2.5 gap-2.5">

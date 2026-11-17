@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import useAuthService from "../auth/service";
 import Navbar from "../styles/Navbar";
 import useUserChatService from "./service";
 import { ArrowUp, Settings2, File } from "lucide-react";
@@ -16,14 +15,12 @@ import { cn } from "../styles/utils";
 
 export default function Chats() {
     const navigate = useNavigate();
-    const auth = useAuthService();
     const user = useUserService();
     const userChat = useUserChatService();
 
     const message = useStyleStore((state) => state.message);
     const setMessage = useStyleStore((state) => state.setMessage);
 
-    const currentUserId = useUserStore((state) => state.currentUserId);
     const otherUserId = useUserStore((state) => state.otherUserId);
 
     const chosenMessage = useUserChatStore((state) => state.chosenMessage);
@@ -50,12 +47,6 @@ export default function Chats() {
     }, [message]);
 
     useEffect(() => {
-        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
-            navigate("/sign-in", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
-
-    useEffect(() => {
         const canEdit = selectMode && 
         chosenMessageIds.length === 1 && 
         chosenMessage && 
@@ -68,7 +59,7 @@ export default function Chats() {
         }
     }, [selectMode, chosenMessageIds, chosenMessage, setMessageChat]);
 
-    const isProcessing = auth.isProcessing || userChat.isProcessing;
+    const isProcessing = userChat.isProcessing;
 
     const cancelSelectMode = () => {
         setChosenMessage(null);
@@ -96,7 +87,7 @@ export default function Chats() {
 
     return (
         <section className="flex flex-col md:flex-row h-dvh relative z-10">
-            <Navbar is_processing={isProcessing} place="" sign_out={auth.signOutMt}/>
+            <Navbar is_processing={isProcessing} place=""/>
             {message ? <Alert message={message}/> : null}
             {!openPopUpOption ? null : (
                 <PopUpOption

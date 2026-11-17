@@ -25,12 +25,6 @@ export default function EditProfile() {
     const setNewProfilePctureUrl = useUserStore((state) => state.setNewProfilePctureUrl);
 
     useEffect(() => {
-        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
-            navigate("/sign-in", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
-
-    useEffect(() => {
         if (auth.getCurrentUser && auth.getCurrentUser.data && currentUserId) {
             setNewUserName(auth.getCurrentUser.data.user_name);
             
@@ -68,7 +62,7 @@ export default function EditProfile() {
 
     return (
         <section className="flex flex-col md:flex-row h-dvh relative z-10">
-            <Navbar is_processing={isProcessing} place="your settings" sign_out={auth.signOutMt}/>
+            <Navbar is_processing={isProcessing} place="your settings"/>
             <form className="flex flex-col w-full md:w-3/4 h-full overflow-y-auto p-2.5 gap-3" onSubmit={saveChanges}>
                 <section className="flex flex-col justify-center gap-1.5">
                     <label className="text-base font-medium text-gray-600" htmlFor="profile_picture">Profile Picture</label>

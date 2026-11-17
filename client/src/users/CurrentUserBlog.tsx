@@ -7,15 +7,10 @@ import useBlogService from "../blogs/service";
 import { useBlogStore } from "../blogs/store";
 import { useEffect } from "react";
 import Alert from "../styles/Alert";
-import { useUserStore } from "./store";
-import useAuthService from "../auth/service";
-import { useNavigate } from "react-router-dom";
 import useViewerService from "../viewers/service";
 import Loading from "../styles/Loading";
 
 export default function CurrentUserBlog() {
-    const navigate = useNavigate();
-    const auth = useAuthService();
     const user = useUserService();
     const blog = useBlogService();
     const viewers = useViewerService();
@@ -31,8 +26,6 @@ export default function CurrentUserBlog() {
     const searched = useBlogStore((state) => state.searched);
     const setSearched = useBlogStore((state) => state.setSearched);
 
-    const currentUserId = useUserStore((state) => state.currentUserId);
-
     useEffect(() => {
         if (message) {
             const timer = setTimeout(() => setMessage(null), 1800);
@@ -40,17 +33,11 @@ export default function CurrentUserBlog() {
         }
     }, [message, setMessage]);
 
-    useEffect(() => {
-        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
-            navigate("/sign-in", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
-
     const isProcessing = blog.processing || user.isProcessing;
 
     return (
         <section className="flex md:flex-row flex-col h-dvh relative z-10">
-            <Navbar is_processing={isProcessing} place="your blogs" sign_out={auth.signOutMt}/>
+            <Navbar is_processing={isProcessing} place="your blogs"/>
             {message ? <Alert message={message}/> : null}
             <main className="h-full overflow-y-auto md:w-3/4 w-full flex flex-col gap-2.5">
                 {selectMode ? (

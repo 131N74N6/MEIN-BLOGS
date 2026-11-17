@@ -5,16 +5,11 @@ import BlogTable from "../blogs/BlogTable";
 import useBlogService from "../blogs/service";
 import { useEffect } from "react";
 import Alert from "../styles/Alert";
-import { useUserStore } from "./store";
-import useAuthService from "../auth/service";
-import { useNavigate } from "react-router-dom";
 import useViewerService from "../viewers/service";
 import Loading from "../styles/Loading";
 import { useBlogStore } from "../blogs/store";
 
 export default function OtherUserBlogs() {
-    const navigate = useNavigate();
-    const auth = useAuthService();
     const user = useUserService();
     const blog = useBlogService();
     const viewers = useViewerService();
@@ -25,8 +20,6 @@ export default function OtherUserBlogs() {
     const searched = useBlogStore((state) => state.searched);
     const setSearched = useBlogStore((state) => state.setSearched);
 
-    const currentUserId = useUserStore((state) => state.currentUserId);
-
     useEffect(() => {
         if (message) {
             const timer = setTimeout(() => setMessage(null), 1800);
@@ -34,17 +27,11 @@ export default function OtherUserBlogs() {
         }
     }, [message, setMessage]);
 
-    useEffect(() => {
-        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
-            navigate("/sign-in", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
-
-    const isProcessing = auth.isProcessing || blog.processing || viewers.isProcessing || user.isProcessing;
+    const isProcessing = blog.processing || viewers.isProcessing || user.isProcessing;
 
     return (
         <section className="flex md:flex-row flex-col h-dvh relative z-10">
-            <Navbar is_processing={isProcessing} place="" sign_out={auth.signOutMt}/>
+            <Navbar is_processing={isProcessing} place=""/>
             {message ? <Alert message={message}/> : null}
             <main className="h-full overflow-y-auto md:w-3/4 w-full flex flex-col gap-2.5">
                 <header className="flex flex-wrap gap-2.5 px-2.5 pt-2.5">

@@ -1,34 +1,20 @@
-import { useNavigate } from "react-router-dom";
-import useAuthService from "../auth/service";
 import Loading from "../styles/Loading";
 import Navbar from "../styles/Navbar";
 import RelationList from "./RelationList";
 import useRelationService from "./service";
 import { useRelationStore } from "./store";
-import { useUserStore } from "../users/store";
-import { useEffect } from "react";
 
 export default function YourFollowed() {
-    const auth = useAuthService();
     const relation = useRelationService();
-    const navigate = useNavigate();
     
     const searchUser = useRelationStore((state) => state.searchUser);
     const setSearchUser = useRelationStore((state) => state.setSearchUser);
-    
-    const currentUserId = useUserStore((state) => state.currentUserId);
 
-    useEffect(() => {
-        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
-            navigate("/sign-in", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
-
-    const isProcessing = auth.isProcessing || relation.isProcessing;
+    const isProcessing = relation.isProcessing;
 
     return (
         <section className="h-dvh flex md:flex-row flex-col relative z-10">
-            <Navbar is_processing={isProcessing} place="" sign_out={auth.signOutMt}/>
+            <Navbar is_processing={isProcessing} place=""/>
             {relation.getAllYourFollowed.isLoading ? (
                 <section className="flex justify-center items-center h-full w-full md:w-3/4">
                     <Loading/>

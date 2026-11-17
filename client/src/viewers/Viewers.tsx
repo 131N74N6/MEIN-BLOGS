@@ -1,30 +1,16 @@
-import { useEffect } from "react";
-import useAuthService from "../auth/service";
 import Loading from "../styles/Loading";
 import Navbar from "../styles/Navbar";
 import useViewerService from "./service";
 import ViewerList from "./ViewerList";
-import { useUserStore } from "../users/store";
-import { useNavigate } from "react-router-dom";
 
 export default function Viewers() {
-    const navigate = useNavigate();
-    const auth = useAuthService();
     const viewer = useViewerService();
-        
-    const currentUserId = useUserStore((state) => state.currentUserId);
     
-    useEffect(() => {
-        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
-            navigate("/sign-in", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
-    
-    const isProcessing = auth.isProcessing;
+    const isProcessing = viewer.isProcessing;
 
     return (
         <section className="h-dvh flex flex-col md:flex-row relative z-10">
-            <Navbar place="" is_processing={isProcessing} sign_out={auth.signOutMt}/>
+            <Navbar place="" is_processing={isProcessing}/>
             {viewer.getAllBlogViewers.isLoading ? (
                 <section className="flex justify-center items-center h-full w-full md:w-3/4">
                     <Loading/>

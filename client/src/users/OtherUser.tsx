@@ -1,38 +1,28 @@
 import { Eye, File, MessageCircle, UserCheck, UserPlus } from "lucide-react";
-import useAuthService from "../auth/service";
 import useRelationService from "../relations/service";
 import Navbar from "../styles/Navbar";
 import useUserService from "./service";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "./store";
 import useBlogService from "../blogs/service";
-import { useEffect } from "react";
 import useCommentSevice from "../comments/service";
 import useViewerService from "../viewers/service";
 
 export default function OtherUser() {
     const navigate = useNavigate();
-    const auth = useAuthService();
     const blog = useBlogService();
     const comment = useCommentSevice();
     const relation = useRelationService();
     const viewer = useViewerService();
     const user = useUserService();
-    
-    const currentUserId = useUserStore((state) => state.currentUserId);
-    const otherUserId = useUserStore((state) => state.otherUserId);
-    
-    useEffect(() => {
-        if (!auth.getCurrentUser.isPending && !currentUserId && !auth.getCurrentUser.data?.user_id) {
-            navigate("/sign-in", { replace: true });
-        }
-    }, [currentUserId, auth.getCurrentUser.isPending, auth.getCurrentUser.data, navigate]);
 
-    const isProcessing = auth.isProcessing || blog.processing || relation.isProcessing || user.isProcessing;
+    const otherUserId = useUserStore((state) => state.otherUserId);
+
+    const isProcessing = blog.processing || relation.isProcessing || user.isProcessing;
 
     return (
         <section className="flex flex-col md:flex-row z-10 relative h-dvh">
-            <Navbar is_processing={isProcessing} place="" sign_out={auth.signOutMt}/>
+            <Navbar is_processing={isProcessing} place=""/>
             <main className="h-full w-full md:w-3/4 flex flex-col gap-2.5 p-2.5">
                 <section className="grid md:grid-cols-2 grid-cols-1 gap-2.5">
                     <div className="flex flex-row gap-2 rounded-md bg-amber-100 p-2">
