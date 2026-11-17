@@ -136,9 +136,9 @@ export default function useUserWebSocket() {
                 ) {
                     wsRef.current.close(1000, "Unmounted");
                 }
-            }
 
-            wsRef.current = null;
+                wsRef.current = null;
+            }
         }
     }, [currentUserId, getSessionToken.data, getSessionToken.isLoading, queryClient, setMessage]);
 
