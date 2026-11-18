@@ -15,10 +15,10 @@ function buildWsUrl(backendUrl: string, token: string) {
 export default function useUserWebSocket() {
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isConnectingRef = useRef<boolean>(false);
+
     const queryClient = useQueryClient();
-
     const setMessage = useStyleStore((state) => state.setMessage);
-
     const currentUserId = useUserStore((state) => state.currentUserId);
 
     const getSessionToken = useQuery({
@@ -45,15 +45,29 @@ export default function useUserWebSocket() {
                 return;
             }
             
+            isConnectingRef.current = true;
             const wsUrl = buildWsUrl(`${import.meta.env.VITE_BASE_API_URL}`, token);
 
-            if (wsRef.current?.readyState === WebSocket.OPEN && wsRef.current.url === wsUrl) return;
-            if (wsRef.current) wsRef.current.close(1000, "Reconnecting...");
+            if (wsRef.current?.readyState === WebSocket.OPEN && wsRef.current.url === wsUrl) {
+                isConnectingRef.current = false;
+                return;
+            }
+
+            if (wsRef.current) {
+                if (wsRef.current.readyState === WebSocket.OPEN) {
+                    wsRef.current.close(1000, "Reconnecting...");
+                } else {
+                    wsRef.current = null;
+                }
+            }
 
             const ws = new WebSocket(wsUrl);
             wsRef.current = ws;
     
             ws.onopen = () => {
+                if (!isMounted) return;
+                isConnectingRef.current = false;
+
                 const heartbeat = setInterval(() => {
                     if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: "ping" }));
                 }, 30000);
@@ -62,6 +76,8 @@ export default function useUserWebSocket() {
             }
     
             ws.onmessage = (event) => {
+                if (!isMounted) return;
+
                 const data = JSON.parse(event.data);
                 
                 if (data.type === "pong") return;
@@ -101,6 +117,9 @@ export default function useUserWebSocket() {
             ws.onclose = (event) => {
                 if (!isMounted) return;
                 if (!currentUserId) return;
+
+                isConnectingRef.current = false;
+
                 if ((ws as any).heartbeatInterval) clearInterval((ws as any).heartbeatInterval);
                 if (event.code === 4001 || event.code === 4002) return;
 
@@ -111,7 +130,6 @@ export default function useUserWebSocket() {
     
             ws.onerror = () => {
                 if (!isMounted) return;
-                ws.close();
             }
         }
 
@@ -119,6 +137,7 @@ export default function useUserWebSocket() {
 
         return () => {
             isMounted = false;
+            isConnectingRef.current = false;
 
             if (reconnectTimeoutRef.current) {
                 clearTimeout(reconnectTimeoutRef.current);
@@ -130,10 +149,7 @@ export default function useUserWebSocket() {
                     clearInterval((wsRef.current as any).heartbeatInterval);
                 }
 
-                if (
-                    wsRef.current.readyState === WebSocket.OPEN ||
-                    wsRef.current.readyState === WebSocket.CONNECTING
-                ) {
+                if (wsRef.current.readyState === WebSocket.OPEN) {
                     wsRef.current.close(1000, "Unmounted");
                 }
 
